@@ -23,6 +23,7 @@
 
 # firebase
 /Config
+Config/
 
 #flask
 .venv/
