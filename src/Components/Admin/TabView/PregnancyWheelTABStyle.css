@@ -1,0 +1,62 @@
+/* Container for the tab buttons */
+.Tabs {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* margin-top: 100%; */
+  gap: 0px;
+  z-index: 1;
+  position: absolute;
+  top: 18%;
+  left: 50%;
+  right: 50%;
+}
+
+
+.TabButtons {
+  margin-left: 11rem;
+  /* margin-bottom: 55%; */
+  align-items: center;
+  position: relative;
+}
+
+/* Tab button styles */
+.tabBtn {
+  background-color: #f0f0f0;
+  border: none;
+  padding: 10px 90px;
+  font-size: 26px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* Active tab button style */
+.Tabs button.active {
+  background-color: rgba(248, 205, 255, 0.8);
+  color: #575757;
+}
+
+/* Child component container (adjust as needed) */
+.ChildComponentContainer {
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* .preg-bkg{
+  height: 100vh;
+  background: rgb(245,173,207);
+  background: linear-gradient(162deg,
+   rgba(245,173,207,1) 29%, rgba(196,255,159,1) 73%, rgba(253,176,255,1) 92%);
+} */
+
+.TabButtons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0px;
+  margin-top: 10%;
+}

@@ -1,0 +1,12 @@
+.main-container-patientrecord{
+  /* background-color: aqua; */
+}
+
+.record-patients-style{
+  display: flex;
+  flex-direction: column;
+  margin-left: 5rem;
+  width: 100rem;
+  margin-top: 10rem;
+  margin-left: 18rem;
+}
