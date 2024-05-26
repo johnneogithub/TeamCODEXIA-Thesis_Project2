@@ -21,6 +21,9 @@
 #api-keys
 .env
 
+# firebase
+/Config
+
 #flask
 .venv/
 *.pyd
