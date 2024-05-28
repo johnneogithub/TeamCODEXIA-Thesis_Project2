@@ -30,8 +30,8 @@ Config/
 *.pyd
 *dll
 /venv
-
 flask-server/
+/flask-server
 
 
 npm-debug.log*

@@ -85,11 +85,6 @@ function LoginForm() {
                     <FaFacebookF style={{color: 'white'}} />
                 </button> {/*Facebook Login*/}
 
-
-                <button  type="button" data-mdb-button-init data-mdb-ripple-init className="btn btn-floating mx-1" style={{backgroundColor: '#c825da'}}>
-                  <FaTwitter style={{color: 'white'}} />
-                </button>
-
                 <button  type="button" onClick={GoogleAuthBtnClicked} data-mdb-button-init data-mdb-ripple-init className="btn btn-floating mx-1" style={{backgroundColor: '#c825da'}}>
                   <FaGoogle style={{color: 'white'}} />
                 </button>
@@ -148,10 +143,6 @@ function LoginForm() {
           </div>
 
           <div>
-
-            <a href="#!" className="text-white me-4">
-              <FaFacebookF/>
-            </a>
             <a href="#!" className="text-white me-4">
               <FaTwitter/>
             </a>

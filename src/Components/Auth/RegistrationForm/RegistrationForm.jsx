@@ -158,11 +158,11 @@ function RegistrationForm() {
                     <div className="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
                       <p className="lead fw-normal mb-0 me-3">Register with</p>
                       <button type="button" data-mdb-button-init data-mdb-ripple-init className="btn btn-floating mx-1" style={{backgroundColor: '#c825da'}}>
-                          <FaFacebookF style={{color: 'white'}} />
+                        <FaFacebookF style={{color: 'white'}} />
                       </button>
 
                       <button  type="button" data-mdb-button-init data-mdb-ripple-init className="btn btn-floating mx-1" style={{backgroundColor: '#c825da'}}>
-                        <FaTwitter style={{color: 'white'}} />
+                        <FaGoogle style={{color: 'white'}} />
                       </button>
                     </div>
 
@@ -236,9 +236,6 @@ function RegistrationForm() {
               <div>
                 <a href="#!" className="text-white me-4">
                   <FaFacebookF/>
-                </a>
-                <a href="#!" className="text-white me-4">
-                  <FaTwitter/>
                 </a>
                 <a href="#!" className="text-white me-4">
                   <FaGoogle />
