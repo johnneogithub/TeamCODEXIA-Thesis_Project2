@@ -23,6 +23,9 @@ import UserProfile from './pages/UserProfile';
 import OvulationTracker from './pages/OvulationTracker.jsx';
 import Error404 from '../src/Components/Global/Error404.jsx';
 
+//Testing
+import OTDesign from './pages/OTDesign.jsx';
+
 function App() {
   //const [data, setData] = useState([]);
 
@@ -67,6 +70,7 @@ function App() {
           <Route path='/PregnancyWheel' component={PregnancyWheel} exact />
           <Route path='/Dashboard' component={Dashboard} exact />
           <Route path='/PatientsRecord' component={PatientsRecord} exact />
+          <Route path='/OTDesign' component={OTDesign} exact />
           <Route component={Error404} />
         </Switch>
       </>
