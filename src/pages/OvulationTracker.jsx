@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { FaArrowLeft  } from "react-icons/fa";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../pages/OvulationTrackerStyle.css';
+import '../pages/OTDesignStyle.css';
 
 const OvulationTracker = () => {
   const [lastMenstrualPeriod, setLastMenstrualPeriod] = useState('');
@@ -73,99 +74,79 @@ const OvulationTracker = () => {
 
     move();
   }, []);
-
+  
   return (
     <>
-      <div className="app-container d-flex justify-content-center align-items-center vh-100 position-relative" style={{ maxWidth: '600px' }}>
-        <div className="circle rounded-circle"></div>
-        <div className="position-absolute d-flex flex-column w-100 align-items-center top-50 translate-middle-y">
-          <div className="d-flex w-100 justify-content-center align-items-center mb-4">
-            <div className="d-flex px-3">
-              <div className="h-2 w-2 rounded-circle mx-1 red"></div>
-              <div className="h-2 w-2 rounded-circle mx-1 yellow"></div>
-              <div className="h-2 w-2 rounded-circle mx-1 green"></div>
-            </div>
-            <div className="d-flex bg-white align-items-center w-50 px-3 py-2 rounded app-shadow mx-3">
-              <i className="fa-solid fa-star app-color-yellow text-xs"></i>
-              <span className="font-weight-bold app-color-black ml-2 mr-auto text-xs">wizzair.com</span>
-              <i className="fa-solid fa-ellipsis app-color-lavendar"></i>
-            </div>
-            <div className="d-flex app-bg-light-white rounded px-3 py-2 app-shadow mx-3">
-              <i className="fa-brands fa-dribbble app-color-dribbble mr-2"></i>
-              <span className="font-weight-bold app-color-black text-xs">Dribbble</span>
-            </div>
-            <div className="d-flex bg-white px-3 py-2 app-shadow rounded mx-3">
-              <span className="font-weight-bold app-color-black text-xs">Book now</span>
-              <div className="w-1 app-bg-light-white-2 mx-2"></div>
-              <i className="fa-regular fa-user mr-2 app-color-black"></i>
-              <i className="fa-solid fa-angle-down text-xs app-color-black"></i>
-            </div>
-          </div>
-          <div className="d-flex flex-column text-center my-5">
-            <span className="font-weight-semibold display-4 mb-4 app-title">Where would you like to go?</span>
-            <span className="app-color-black font-weight-semibold">Explore your travel opportunities with us!</span>
-          </div>
-          <div className="bg-white-50 w-75 px-3 pt-5 pb-5 app-shadow rounded-xl backdrop-blur-[200px]">
-            <div className="d-flex justify-content-center mb-4">
-              <span className="font-weight-semibold small app-color-gray mx-3">Flights</span>
-              <span className="font-weight-semibold small app-color-gray mx-3">Hotels</span>
-              <span className="font-weight-semibold small app-color-gray mx-3 active">Cars</span>
-              <label className="d-flex align-items-center cursor-pointer ml-3">
-                <span className="font-weight-semibold small app-color-black mr-3">One way</span>
-                <div className="switch">
-                  <input type="checkbox" className="switch-checkbox" />
-                  <div className="switch-bg"></div>
-                  <div className="switch-indicator"></div>
-                </div>
-              </label>
-            </div>
-            <div className="d-flex justify-content-center">
-              <div className="bg-white-80 mx-3 d-flex flex-column w-33 p-3 rounded border-2 border-white text-center">
-                <span className="font-weight-semibold small app-color-lavendar">Leaving from</span>
-                <span className="font-weight-semibold large app-color-black">Georgia, Tbilisi</span>
+        <div className="app-container d-flex justify-content-center align-items-center vh-100 position-relative">
+          <div className="circle rounded-circle"></div>
+          <div className="circle2 rounded-circle"></div>
+            <div className="position-absolute d-flex flex-column w-100 align-items-center top-10 translate-middle-y ot-header">
+              <div className="d-flex w-100 justify-content-center align-items-center mb-4">
+              <div className="d-flex bg-white align-items-center w-50 px-2 py-3 rounded app-shadow mx-3">
+                <span className="font-ovu app-color-black ml-2 mr-auto text-xs">Ovulation Tracker</span>
               </div>
-              <div className="bg-white-80 mx-3 d-flex flex-column w-33 p-3 rounded border-2 border-white text-center">
-                <span className="font-weight-semibold small app-color-lavendar">Destination</span>
-                <span className="font-weight-semibold large app-color-pink">France, Paris</span>
-              </div>
-              <div className="bg-white-80 mx-3 d-flex flex-column w-33 p-3 rounded border-2 border-white text-center">
-                <span className="font-weight-semibold small app-color-lavendar">Passengers</span>
-                <span className="font-weight-semibold large app-color-black">2 adults, 3 children, 1 pet</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div className="card text-center mx-auto my-4" style={{ maxWidth: '600px' }}>
-        <div className="card-header">Ovulation Tracker</div>
-        <div className="card-body">
-          <h5 className="card-title">Check your next ovulation!</h5>
-          <p className="card-text">Set your last menstrual period and let us predict the next ovulation day!</p>
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Last Menstrual Period:</label>
-              <input
-                type="date"
-                className="form-control"
-                value={lastMenstrualPeriod}
-                onChange={(e) => setLastMenstrualPeriod(e.target.value)}
-              />
+                  <div className="d-flex app-bg-light-white rounded px-4 py-3 app-shadow mx-3">
+                    <a href="/Chatbot" className="app-color-black" style={{textDecoration: 'none'}}>
+                    <span className="font-ovu app-color-black text-xs">PlanIt Assistant</span>
+                    </a>
+                  </div>
+                  <div className="d-flex app-bg-light-white rounded px-4 py-3 app-shadow mx-3">
+                    <a href="/Home" className="app-color-black" style={{textDecoration: 'none'}}>
+                    <span className="font-ovu app-color-black text-xs">Home</span>
+                    </a>
+                  </div>
             </div>
-            <button type="submit" className="btn btn-primary" data-mdb-ripple-init>Predict Ovulation Day</button>
-          </form>
-        </div>
-        <div className="card-footer text-muted">
-          {predictedDay && lastMenstrualPeriod ? (
-            <>
-              <div>{`Ovulation Date: ${predictedDay}`}</div>
-              <div>{`${calculateDaysBetween(lastMenstrualPeriod, predictedDay)} days until ovulation`}</div>
-            </>
-          ) : ''}
+
+                <div className="d-flex flex-column text-center my-5">
+                  <span className="font-weight-semibold display-4 mb-4 app-title">Know your next Ovulation Day!</span>
+                  <span className="app-color-black font-weight-semibold app-subtitle">Be protected and secured, let us track your next ovulation date.</span>
+                </div>
+                
+
+                <div className="bg-white-10 w-75 px-4 pt-5 pb-5 app-shadow">
+                  <div className="d-flex justify-content-center mb-3">
+                  
+                  <form onSubmit={handleSubmit}>
+                      <div className="form-group">
+                        <h2>Last Menstrual Period:</h2>
+                        <input
+                          type="date"
+                          className="form-control"
+                          value={lastMenstrualPeriod}
+                          onChange={(e) => setLastMenstrualPeriod(e.target.value)}
+                        />
+                      </div>
+                      <button type="submit" className="btn btn-primary" data-mdb-ripple-init>Predict Ovulation Day</button>
+                      </form>
+
+                      <div className="col-md-4 col-xl-3">
+                        <div className="card bg-c-yellow output-card">
+                            <div className="card-block">
+                                <div className="output_text">
+                                  <p>Your ovulation date</p>
+                                      {predictedDay && lastMenstrualPeriod ? (
+                                <>
+                                  <div className='outputOT'>{`Ovulation Date: ${predictedDay}`}</div>
+                                  <div className='outputOT'>{`${calculateDaysBetween(lastMenstrualPeriod, predictedDay)} days until ovulation`}</div>
+                                </>
+                              ) : ''}
+                              </div>
+                            </div>
+                        </div>
+                    </div>
+
+                  </div>
+
+                  <div className="d-flex justify-content-center">
+                  <div className="card text-center mx-auto my-4">
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </>
-  );
-};
+</>
+  )
+}
 
 export default OvulationTracker;
