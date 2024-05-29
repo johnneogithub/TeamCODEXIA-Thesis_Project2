@@ -88,6 +88,15 @@ body{
   padding-top: 0%;
 }
 
+.font-ovu{
+  background: linear-gradient(45deg, #ef2a6c, #ea8d23);
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  font-family: 'Poppins';
+  font-weight: 600;
+  font-size: .9rem;
+  padding-left: 10px;
+}
 
 .app-title { 
   background: linear-gradient(45deg, #fc466b, #3f5efb);
@@ -131,3 +140,63 @@ span.active::after {
   bottom: -20px;
 }
 
+
+/*Card for output*/
+.bg-c-yellow {
+  background: linear-gradient(90deg,#ffbc5e,#ff78ed);
+  margin-left: 20%;
+}
+.card {
+  border-radius: 10px;
+  -webkit-box-shadow: 0 1px 2.94px 0.06px rgba(4,26,55,0.16);
+  box-shadow: 0 1px 2.94px 0.06px rgba(4,26,55,0.16);
+  border: none;
+  margin-bottom: 0px;
+  -webkit-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+}
+
+.card .card-block {
+  padding: 10px;
+}
+
+.f-left {
+  float: left;
+}
+
+.f-right {
+  float: right;
+}
+
+.output_text p{
+  font-size: 20px;
+  padding: 0px;
+  text-align: center;
+  color: white;
+  font-family: 'Poppins';
+  font-weight: 400;
+}
+
+.outputOT{
+  font-size: 18px;
+  text-align: center;
+  font-family: 'Poppins';
+  font-weight: 400;
+  color: rgb(255, 255, 255);
+}
+/*end of card for output*/
+
+/*Predict button, calendar, h2-title*/
+.btn-primary {
+  padding: 10px 90px;
+  font-weight: 400;
+  font-family: 'Poppins';
+  color: #ffffff;
+}
+
+.form-group h2{
+  font-size: 2rem;
+  font-weight: 500;
+  font-family: 'Poppins';
+  color: #2a3039;
+}
