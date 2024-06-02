@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-body{
+body {
   padding: 0;
   margin: 0;
 }
@@ -15,8 +15,8 @@ body{
 .circle {
   width: 550px;
   height: 550px;
-  background: linear-gradient(to bottom, #fd9a44 40%, #f474da 50%) ;
-  filter: blur(130px);;
+  background: linear-gradient(to bottom, #fd9a44 40%, #f474da 50%);
+  filter: blur(130px);
   transform: translateY(30%);
 }
 
@@ -76,36 +76,36 @@ body{
   background: #ffffff;
 }
 
-
 .app-shadow {
   box-shadow: 0 10px 25px 0 rgba(0, 0, 0, 0.03);
-  background-color: rgba(255, 255, 255, 0.35); /* Set opacity to 80% */
-  backdrop-filter: blur(140px); /* Apply a backdrop filter with blur effect */
+  background-color: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(140px);
   border-radius: 15px;
+  margin-top: 4rem;
 }
 
-.ot-header{
-  padding-top: 0%;
+.ot-header {
+  margin-top: 30rem;
 }
 
-.font-ovu{
+.font-ovu {
   background: linear-gradient(45deg, #ef2a6c, #ea8d23);
   -webkit-text-fill-color: transparent;
   -webkit-background-clip: text;
   font-family: 'Poppins';
   font-weight: 600;
   font-size: .9rem;
-  padding-left: 10px;
+  padding-left: 5px;
 }
 
-.app-title { 
+.app-title {
   background: linear-gradient(45deg, #fc466b, #3f5efb);
   -webkit-text-fill-color: transparent;
   -webkit-background-clip: text;
   font-family: 'Poppins';
   font-weight: 600;
   letter-spacing: 1px;
-  padding-top: 10%;
+  padding-top: 5%;
 }
 
 .app-subtitle {
@@ -114,12 +114,12 @@ body{
   -webkit-text-fill-color: transparent;
   -webkit-background-clip: text;
   font-weight: 400;
-  font-size: 1.1rem;
+  font-size: .8rem;
   letter-spacing: 0px;
-  padding-bottom: 6rem;
+ /* Reduce this padding to move up the card */
 }
 
-.app-d-flex{
+.app-d-flex {
   display: flex;
 }
 
@@ -140,20 +140,27 @@ span.active::after {
   bottom: -20px;
 }
 
-
-/*Card for output*/
+/* Card for output */
 .bg-c-yellow {
-  background: linear-gradient(90deg,#ffbc5e,#ff78ed);
+  background: linear-gradient(90deg, #ffbc5e, #ff78ed);
   margin-left: 20%;
 }
+
+.src_ml {
+  font-size: 14px; /* Smaller font size */
+  color: rgb(255, 255, 255);
+}
+
 .card {
   border-radius: 10px;
-  -webkit-box-shadow: 0 1px 2.94px 0.06px rgba(4,26,55,0.16);
-  box-shadow: 0 1px 2.94px 0.06px rgba(4,26,55,0.16);
+  -webkit-box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
+  box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
   border: none;
   margin-bottom: 0px;
   -webkit-transition: all 0.3s ease-in-out;
   transition: all 0.3s ease-in-out;
+  width: 20rem;
+  height: 10rem;
 }
 
 .card .card-block {
@@ -168,7 +175,7 @@ span.active::after {
   float: right;
 }
 
-.output_text p{
+.output_text p {
   font-size: 20px;
   padding: 0px;
   text-align: center;
@@ -177,16 +184,31 @@ span.active::after {
   font-weight: 400;
 }
 
-.outputOT{
+.outputOT {
   font-size: 18px;
   text-align: center;
   font-family: 'Poppins';
   font-weight: 400;
   color: rgb(255, 255, 255);
 }
-/*end of card for output*/
 
-/*Predict button, calendar, h2-title*/
+.output_src p {
+  font-size: 12px;
+  text-align: center;
+  font-family: 'Poppins';
+  font-weight: 500;
+  color: rgb(0, 39, 83);
+}
+
+.output_src a {
+  font-size: 12px;
+  text-align: center;
+  font-family: 'Poppins';
+  font-weight: 100;
+  color: rgb(0, 34, 202);
+}
+
+/* Predict button, calendar, h2-title */
 .btn-primary {
   padding: 10px 90px;
   font-weight: 400;
@@ -194,7 +216,7 @@ span.active::after {
   color: #ffffff;
 }
 
-.form-group h2{
+.form-group h2 {
   font-size: 2rem;
   font-weight: 500;
   font-family: 'Poppins';
