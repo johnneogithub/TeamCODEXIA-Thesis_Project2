@@ -101,7 +101,7 @@ const OvulationTracker = () => {
             <span className="font-weight-semibold display-5 mb-3 app-title">Know your next Ovulation Day!</span>
             <span className="app-color-black font-weight-semibold app-subtitle">Be protected and secured, let us track your next ovulation date.</span>
           </div>
-
+          
           <div className="bg-white-10 w-75 px-3 pt-5 pb-5 app-shadow">
             <div className="d-flex justify-content-center mb-3">
               <form onSubmit={handleSubmit}>
@@ -127,7 +127,7 @@ const OvulationTracker = () => {
                           <div className='outputOT'>{`Ovulation Date: ${predictedDay}`}</div>
                           <div className='outputOT'>{`${calculateDaysBetween(lastMenstrualPeriod, predictedDay)} days until ovulation`}</div>
                           <div className='output_src'>
-                            <p>Find out more
+                            <p>Source
                               <a href="https://scholar.smu.edu/datasciencereview/vol1/iss1/2/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
                                 :  Forecasting Ovulation <br />for Family Planning
                               </a>
@@ -140,7 +140,7 @@ const OvulationTracker = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> 
         </div>
       </div>
     </>
