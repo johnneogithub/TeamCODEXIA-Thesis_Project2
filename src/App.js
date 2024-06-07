@@ -22,6 +22,7 @@ import PatientsRecord from './Components/Admin/PatientsRecord';
 import UserProfile from './pages/UserProfile';
 import OvulationTracker from './pages/OvulationTracker.jsx';
 import Error404 from '../src/Components/Global/Error404.jsx';
+import WelcomeLanding from './Components/Landing/WelcomeLanding.jsx';
 
 
 
@@ -54,6 +55,7 @@ function App() {
         {/* <Navbar/> */}
         <Switch>
           <Route path='/' component={LoginForm} exact />
+          <Route path='/Welcome' component={WelcomeLanding} exact/>
           <Route path='/Login' component={LoginForm} exact />
           <Route path='/About' component={About} exact />
           <Route path='/Register' component={RegistrationForm} exact />
