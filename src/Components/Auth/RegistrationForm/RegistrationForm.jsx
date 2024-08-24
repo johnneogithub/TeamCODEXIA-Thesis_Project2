@@ -17,6 +17,9 @@ function RegistrationForm() {
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [username, setUsername] = useState("");
+  const [age, setAge] = useState("");
+
 
   const openModal = (e) => {
     if (e) {
@@ -155,8 +158,11 @@ function RegistrationForm() {
                 
                 <div className="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
                 <form onSubmit={SignUp}>
+                  
                     <div className="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
-                      <p className="lead fw-normal mb-0 me-3">Register with</p>
+                      <p className="lead fw-normal mb-3 me-3">Register with us!</p>
+                      
+                      {/** 
                       <button type="button" data-mdb-button-init data-mdb-ripple-init className="btn btn-floating mx-1" style={{backgroundColor: '#c825da'}}>
                         <FaFacebookF style={{color: 'white'}} />
                       </button>
@@ -166,9 +172,10 @@ function RegistrationForm() {
                       </button>
                     </div>
 
-
                     <div className="divider d-flex align-items-center my-4">
                       <p className="text-center fw-bold mx-3 mb-0">Or</p>
+                    </div>
+                    **/}
                     </div>
 
 
@@ -180,6 +187,21 @@ function RegistrationForm() {
                       <label className="form-label" for="form3Example3">Email address</label>
                     </div>
 
+                    <div data-mdb-input-init className="form-outline mb-3">
+                      <input type="text" id="form3Example1" className="form-control form-control-lg"
+                        placeholder="Enter your username"  
+                        value={username} 
+                        onChange={(e) => setUsername(e.target.value)} />
+                      <label className="form-label" for="form3Example1">Username</label>
+                    </div>
+
+                    <div data-mdb-input-init className="form-outline mb-3">
+                      <input type="number" id="form3Example2" className="form-control form-control-lg"
+                        placeholder="Enter your age"  
+                        value={age} 
+                        onChange={(e) => setAge(e.target.value)} />
+                      <label className="form-label" for="form3Example2">Age</label>
+                    </div>
 
                     <div data-mdb-input-init className="form-outline mb-3">
                       <input type="password" id="form3Example4" className="form-control form-control-lg"
@@ -234,12 +256,17 @@ function RegistrationForm() {
               </div>
 
               <div>
-                <a href="#!" className="text-white me-4">
+                <a href="https://www.facebook.com/people/Planitfamit/61559385112154/?viewas&show_switched_toast=false&show_switched_
+                    tooltip=false&is_tour_dismissed=false&is_tour_completed=false&show_podcast_settings=false&show_community_review_
+                    changes=false&should_open_composer=false&badge_type=NEW_MEMBER&show_community_rollback_toast=false&show_community_
+                    rollback=false&show_follower_visibility_disclosure=false&bypass_exit_warning=true" className="text-white me-4" target="_blank" >
                   <FaFacebookF/>
                 </a>
+
                 <a href="#!" className="text-white me-4">
-                  <FaGoogle />
+                    <FaGoogle />
                 </a>
+              
               </div>
 
             </div>

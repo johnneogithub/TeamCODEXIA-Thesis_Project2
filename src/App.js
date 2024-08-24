@@ -54,7 +54,7 @@ function App() {
       </div> */}
         {/* <Navbar/> */}
         <Switch>
-          <Route path='/' component={LoginForm} exact />
+          <Route path='/' component={WelcomeLanding} exact />
           <Route path='/Welcome' component={WelcomeLanding} exact/>
           <Route path='/Login' component={LoginForm} exact />
           <Route path='/About' component={About} exact />
