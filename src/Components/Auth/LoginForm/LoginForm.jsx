@@ -76,14 +76,17 @@ function LoginForm() {
             </div>
             
             
+
             <div className="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
             <form onSubmit={SignIn}>
-              <div className="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
-                <p className="lead fw-normal mb-0 me-3">Login with</p>
                
+              <div className="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
+                <p className="lead fw-normal mb-4 me-2">Welcome, login to your account! </p>
+                </div>
+               {/**
                 <button type="button" onClick={FacebookAuthBtnClicked} data-mdb-button-init data-mdb-ripple-init className="btn btn-floating mx-1" style={{backgroundColor: '#c825da'}}>
                     <FaFacebookF style={{color: 'white'}} />
-                </button> {/*Facebook Login*/}
+                </button> 
 
                 <button  type="button" onClick={GoogleAuthBtnClicked} data-mdb-button-init data-mdb-ripple-init className="btn btn-floating mx-1" style={{backgroundColor: '#c825da'}}>
                   <FaGoogle style={{color: 'white'}} />
@@ -93,7 +96,7 @@ function LoginForm() {
                 <div className="divider d-flex align-items-center my-4">
                   <p className="text-center fw-bold mx-3 mb-0">Or</p>
                 </div>
-
+                ***/}
 
                 <div data-mdb-input-init className="form-outline mb-4">
                   <input type="email" id="form3Example3" className="form-control form-control-lg"
@@ -134,8 +137,6 @@ function LoginForm() {
           </div>
         </div>
 
-        
-        
         <div className="d-flex flex-column flex-md-row text-center text-md-start justify-content-between py-4 px-2 px-xl-5 bg-fotlogin">
 
           <div className="text-white mb-3 mb-md-0">
@@ -143,14 +144,16 @@ function LoginForm() {
           </div>
 
           <div>
+            {/*
             <a href="#!" className="text-white me-4">
               <FaTwitter/>
             </a>
+            */}
 
             <a href="https://www.facebook.com/people/Planitfamit/61559385112154/?viewas&show_switched_toast=false&show_switched_
             tooltip=false&is_tour_dismissed=false&is_tour_completed=false&show_podcast_settings=false&show_community_review_
             changes=false&should_open_composer=false&badge_type=NEW_MEMBER&show_community_rollback_toast=false&show_community_
-            rollback=false&show_follower_visibility_disclosure=false&bypass_exit_warning=true" className="text-white me-4">
+            rollback=false&show_follower_visibility_disclosure=false&bypass_exit_warning=true" className="text-white me-4" target="_blank">
               <FaFacebookF/>
             </a>
             <a href="#!" className="text-white me-4">

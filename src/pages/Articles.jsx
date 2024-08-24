@@ -21,17 +21,15 @@ const Articles = () => {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
     
     <div className='Heading'>
-            <h2>Journals and Articles</h2>
-        <div className='Underline'>
-            <h3>Looking for more informations? Here are the best articles that will suit your interest!</h3>
+        <h2>Journals and Articles</h2>
+            <div className='Underline'>
+                <h3>Looking for more informations? Here are the best articles that will suit your interest!</h3>
+            </div>
         </div>
-    </div>
 
 
     <img className='articles-image' src={Violet_Bkg} alt='Article Background'/>
-    
     <section className='article-cards'>
-
     <div class="card-list">
         <a href="https://www.healthline.com/health/womens-health/female-reproductive-organs#organs" target="_blank" rel="noopener noreferrer" class="card-item">
             <img src={WomenRH} alt="Card Visualizer"/>
