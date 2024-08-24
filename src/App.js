@@ -60,7 +60,7 @@ function App() {
           <Route path='/About' component={About} exact />
           <Route path='/Register' component={RegistrationForm} exact />
           <Route path="/Home" component={Home} exact />
-          <Route path="/StMargaretLyingInClinic" component={Clinic} exact />
+          <Route path="/CheckHealth" component={Clinic} exact />
           <Route path='/Articles' component={Articles} exact />
           <Route path='/Resetyourpassword' component={PasswordResetForm} exact />
           <Route path='/Chatbot' component={Chatbot} exact />
