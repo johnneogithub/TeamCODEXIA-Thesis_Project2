@@ -1,17 +1,10 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth, 
-        FacebookAuthProvider, 
-        GoogleAuthProvider,
-        signInWithPopup
-       } from "firebase/auth";
+import { getAuth, FacebookAuthProvider, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyBgtC9JuKZU1AJVS5c3idsrqY2ZXVv-XEA",
   authDomain: "planitfamit.firebaseapp.com",
@@ -24,15 +17,13 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const database = getFirestore()
-// Initialize Firebase Authentication and get a reference to the service
 
-export const auth = getAuth(app);
-
-export const crud = database;
+// Initialize Firebase services
+const auth = getAuth(app);
+const crud = getFirestore(app);
+const storage = getStorage(app);
 
 // Sign In with providers
-// Facebook Authentication (SignIn with Facebook)
 const fbprovider = new FacebookAuthProvider(); 
 
 export const FacebookAuth = async () => { 
@@ -40,11 +31,12 @@ export const FacebookAuth = async () => {
   return result;
 }
 
-// Google Authenticatin (SignIn with Google)
 const googleprovider = new GoogleAuthProvider();
 
 export const GoogleAuth = async () => {
-  const result = await signInWithPopup (auth, googleprovider);
+  const result = await signInWithPopup(auth, googleprovider);
   return result;
 }
 
+// Export Firebase services
+export { auth, crud, storage };

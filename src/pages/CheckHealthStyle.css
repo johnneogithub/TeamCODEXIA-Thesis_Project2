@@ -827,6 +827,7 @@
    background-position: 10% 0%;
    padding: 200px 0;
    position: relative;
+   z-index: -1;
  }
  @media (max-width: 992px) {
    .slider {
@@ -1269,6 +1270,7 @@
  }
  .contact-box .block img {
    width: 100%;
+   z-index: -1;
  }
  .contact-box .block h2 {
    font-weight: 300;
@@ -1764,6 +1766,7 @@
  }
  .about .block img {
    width: 100%;
+   z-index: -1;
  }
  .about .about-img {
    overflow: hidden;
@@ -2085,6 +2088,7 @@
    background-size: cover;
    background-repeat: no-repeat;
    background-attachment: fixed;
+   z-index: -1;
  }
  
  .bg-2 {

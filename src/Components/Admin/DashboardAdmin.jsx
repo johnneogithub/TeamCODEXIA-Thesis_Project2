@@ -60,7 +60,7 @@ function DashboardAdmin() {
         const approvedAppointmentsFromStorage = JSON.parse(localStorage.getItem('approvedAppointments') || '[]');
         localStorage.setItem('approvedAppointments', JSON.stringify([...approvedAppointmentsFromStorage, appointmentToApprove]));
         history.push({
-          // pathname: '/UserProfile',
+          pathname: '/UserProfile',
           state: { appointmentData: appointmentToApprove, action: 'approve' }
         });
       } catch (error) {

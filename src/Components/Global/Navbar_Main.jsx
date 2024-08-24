@@ -1,33 +1,49 @@
 import '../../pages/HomeStyle.css';
 import { Link } from 'react-router-dom';
-import iconyou from '../Assets/icon_you.png';
 import humber from '../Assets/hamburger.png';
-import React, { useState } from 'react';
-import { auth } from '../../Config/firebase'; // Import auth from firebase
+import iconyou from '../Assets/icon_you.png'; // Import the default icon
+import React, { useState, useEffect } from 'react';
+import { auth, crud } from '../../Config/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 function Nav() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [userProfilePic, setUserProfilePic] = useState('');
+
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
   const handleLogout = () => {
-    auth.signOut().then(() => { // Use auth.signOut() instead of firebase.auth().signOut()
-      // Sign-out successful.
+    auth.signOut().then(() => {
       localStorage.removeItem('authToken');
-      // Redirect or perform any other necessary actions after logout
-      // For example, redirect to the login page
       window.location.href = '/Login';
     }).catch((error) => {
-      // An error happened.
       console.error('Logout error:', error);
     });
   };
 
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        const userRef = doc(crud, `users/${user.uid}`);
+        const docSnap = await getDoc(userRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setUserProfilePic(data.profilePicture || ''); // Set profile picture URL or empty if not set
+        }
+      } else {
+        setUserProfilePic('');
+      }
+    });
+  
+    return () => unsubscribe();
+  }, []);
+
   return (
     <nav className='navbar_master'>
       <input type="checkbox" id="check" />
-      <label htmlFor="check" className="checkbtn"> {/* Use htmlFor instead of for for label */}
+      <label htmlFor="check" className="checkbtn">
         <i><img src={humber} alt="" /></i>
       </label>
 
@@ -41,7 +57,7 @@ function Nav() {
             Plan & Care
           </a>
         </li>
-        <Link to="/Type" className="st-mar-style-font">
+        <Link to="/CheckHealth" className="st-mar-style-font">
           <li>
             <a>St. Margaret Lying In Clinic</a>
           </li>
@@ -51,12 +67,10 @@ function Nav() {
         </li>
         <li>
           <a className="dropdown-toggle" onClick={toggleDropdown}>
-            <img src={iconyou} alt="" />
-            {/* Conditionally render the dropdown content based on dropdownOpen state */}
+            <img src={userProfilePic || iconyou} alt="Profile" className="profile-pic-small" /> {/* Apply CSS class */}
             {dropdownOpen && (
               <div className="dropdown">
                 <div className="dropdown-content">
-                  {/* Dropdown content goes here */}
                   <Link to="/UserProfile">Profile</Link>
                   <a onClick={handleLogout}>Logout</a>
                 </div>
