@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc, setDoc, getDoc  } from 'firebase/firestore';
 import Nav from '../Global/NavbarAdmin';
 import Sidebar from '../Global/Sidebar';
 import { Link } from 'react-router-dom';
@@ -28,7 +28,8 @@ function DashboardAdmin() {
     const fetchAppointments = async () => {
       const firestore = getFirestore();
       try {
-        const querySnapshot = await getDocs(collection(firestore, 'searchQueries'));
+        // Fetch pending appointments
+        const querySnapshot = await getDocs(collection(firestore, 'pendingAppointments'));
         const fetchedAppointments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setPendingAppointments(fetchedAppointments);
       } catch (error) {
@@ -44,31 +45,59 @@ function DashboardAdmin() {
     setApprovedAppointments(approvedAppointmentsFromStorage);
   }, []);
 
-  const handleApprove = async (id) => {
-    const appointmentToApprove = pendingAppointments.find(appointment => appointment.id === id);
-    if (appointmentToApprove) {
-      try { 
-        const firestore = getFirestore();
-        await updateDoc(doc(firestore, 'searchQueries', id), { approved: true });
-        setPendingAppointments(prevAppointments => prevAppointments.filter(appointment => appointment.id !== id));
-
-        const updatedPendingAppointments = pendingAppointments.filter(appointment => appointment.id !== id);
-        localStorage.setItem('pendingAppointments', JSON.stringify(updatedPendingAppointments));
-
-        await deleteDoc(doc(firestore, 'searchQueries', id));
-        setApprovedAppointments(prevAppointments => [...prevAppointments, appointmentToApprove]);
-        const approvedAppointmentsFromStorage = JSON.parse(localStorage.getItem('approvedAppointments') || '[]');
-        localStorage.setItem('approvedAppointments', JSON.stringify([...approvedAppointmentsFromStorage, appointmentToApprove]));
-        history.push({
-          pathname: '/UserProfile',
-          state: { appointmentData: appointmentToApprove, action: 'approve' }
-        });
-      } catch (error) {
-        console.error("Error approving appointment: ", error);
-      }
-      
-    }
+  const fetchDocument = async (firestore, collectionName, id) => {
+    const docRef = doc(firestore, collectionName, id);
+    const docSnap = await getDoc(docRef);
+    return docSnap;
   };
+  
+  const handleApprove = async (id) => {
+  try {
+    const firestore = getFirestore();
+
+    // Fetch the document from 'pendingAppointments'
+    const pendingDocRef = doc(firestore, 'pendingAppointments', id);
+    const pendingDocSnap = await getDoc(pendingDocRef);
+
+    if (!pendingDocSnap.exists()) {
+      console.error(`Document with ID ${id} does not exist in 'pendingAppointments' collection`);
+      return;
+    }
+
+    // Retrieve the appointment data
+    const appointmentToApprove = pendingDocSnap.data();
+
+    // Add the document to 'approvedAppointments'
+    const approvedDocRef = doc(firestore, 'approvedAppointments', id);
+    await setDoc(approvedDocRef, {
+      ...appointmentToApprove,
+      approved: true // Mark as approved
+    });
+
+    // Remove the document from 'pendingAppointments'
+    await deleteDoc(pendingDocRef);
+
+    // Update local state and localStorage
+    setPendingAppointments(prev => prev.filter(appointment => appointment.id !== id));
+    
+    const updatedApprovedAppointmentsSnapshot = await getDocs(collection(firestore, 'approvedAppointments'));
+    const updatedApprovedAppointments = updatedApprovedAppointmentsSnapshot.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }));
+
+    setApprovedAppointments(updatedApprovedAppointments);
+    localStorage.setItem('pendingAppointments', JSON.stringify(pendingAppointments.filter(appointment => appointment.id !== id)));
+    localStorage.setItem('approvedAppointments', JSON.stringify(updatedApprovedAppointments));
+
+    history.push({
+      state: { appointmentData: appointmentToApprove, action: 'approve' }
+    });
+
+  } catch (error) {
+    console.error("Error approving appointment: ", error);
+  }
+};
+
+  
 
   const handleReject = async (id) => {
     try {

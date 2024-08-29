@@ -3,117 +3,171 @@ import { useLocation } from 'react-router-dom';
 import Navbar from '../Components/Global/Navbar_Main';
 import { auth, storage, crud } from '../Config/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, updateDoc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './UserProfileStyle.css';
+import defaultProfilePic from '.././Components/Assets/Clock.png';
 
-// Your UserProfile component
 function UserProfile() {
   const location = useLocation();
   const [user, setUser] = useState(null);
   const [appointmentData, setAppointmentData] = useState(null);
-  const [userId, setUserId] = useState(null);
   const [isApproved, setIsApproved] = useState(false);
-  const [profilePic, setProfilePic] = useState('default-profile-pic-url');
+  const [profilePic, setProfilePic] = useState(defaultProfilePic);
   const [previewPic, setPreviewPic] = useState('');
-  const [editMode, setEditMode] = useState(false);
-  const [showModal, setShowModal] = useState(false); // State for modal visibility
+  const [showModal, setShowModal] = useState(false);
   const [personalDetails, setPersonalDetails] = useState({
-    name: 'John Ray Gloria',
-    location: 'Olongapo City East Tapinac',
-    phone: '#09999999999',
-    email: 'johnraygloria80@gmail.com',
-    age: '21',
-    gender: 'Male',
+    name: '',
+    location: '',
+    phone: '',
+    email: '',
+    age: '',
+    gender: '',
   });
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         setUser(user);
-        setUserId(user.uid);
+
+        // Load appointment data from localStorage
         const storedData = localStorage.getItem(`appointmentData_${user.uid}`);
-        setAppointmentData(storedData ? JSON.parse(storedData) : null);
+        if (storedData && storedData !== "undefined") {
+          try {
+            const parsedData = JSON.parse(storedData);
+            setAppointmentData(parsedData);
+          } catch (e) { 
+            console.error("Error parsing JSON from localStorage:", e);
+            setAppointmentData(null); // Reset to null if parsing fails
+          }
+        } else {
+          setAppointmentData(null); // Set to null if no valid data is found
+        }
+
         await fetchProfilePicture(user.uid);
-        await fetchPersonalDetails(user.uid); // Fetch personal details
+        await fetchPersonalDetails(user.uid);
+        const unsubscribeAppointments = subscribeToAppointments(user.uid);
+
+        return () => unsubscribeAppointments(); // Cleanup on unmount
       } else {
-        setUser(null);
-        setUserId(null);
-        setAppointmentData(null);
-        setProfilePic('default-profile-pic-url');
-        setPreviewPic('');
-        setPersonalDetails({
-          name: '',
-          location: '',
-          phone: '',
-          email: '',
-          age: '',
-          gender: '',
-        });
+        resetState();
       }
     });
-  
+
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (location.state && location.state.appointmentData) {
+    if (location.state?.appointmentData && user) {
       setAppointmentData(location.state.appointmentData);
-      if (user) {
-        localStorage.setItem(`appointmentData_${user.uid}`, JSON.stringify(location.state.appointmentData));
-      }
+      localStorage.setItem(`appointmentData_${user.uid}`, JSON.stringify(location.state.appointmentData));
+    } else {
+      console.log("No appointment data found in location.state or user not logged in.");
     }
-    if (location.state && location.state.action === 'approve') {
+    if (location.state?.action === 'approve') {
       setIsApproved(true);
     }
   }, [location.state, user]);
 
+  const resetState = () => {
+    setUser(null);
+    setAppointmentData(null);
+    setProfilePic(defaultProfilePic);
+    setPreviewPic('');
+    setPersonalDetails({
+      name: '',
+      location: '',
+      phone: '',
+      email: '',
+      age: '',
+      gender: '',
+    });
+  };
+
+  const subscribeToAppointments = (userId) => {
+    const userRef = doc(crud, `users/${userId}`);
+    const unsubscribe = onSnapshot(userRef, (doc) => {
+      const data = doc.data();
+      if (data) {
+        setAppointmentData(data.appointmentData || null);
+        setIsApproved(data.isApproved || false);
+      }
+    });
+    return unsubscribe;
+  };
+  
+  
+
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    if (!file) return;
-
+    if (!file) {
+      console.error("No file selected");
+      return;
+    }
+  
     const previewUrl = URL.createObjectURL(file);
     setPreviewPic(previewUrl);
     uploadFile(file);
   };
 
   const uploadFile = async (file) => {
-    if (!user) return;
-
+    if (!user) {
+      console.error("No user is authenticated");
+      return;
+    }
+  
     const fileRef = ref(storage, `profile_pictures/${user.uid}/${file.name}`);
-
     try {
       await uploadBytes(fileRef, file);
+      console.log("File uploaded successfully");
+  
       const downloadURL = await getDownloadURL(fileRef);
-      console.log('Download URL:', downloadURL); // Debugging log
+      console.log("Download URL:", downloadURL);
       await updateProfilePicture(downloadURL);
     } catch (error) {
-      console.error("Error uploading file: ", error);
+      console.error("Error uploading file:", error);
     }
   };
 
   const updateProfilePicture = async (url) => {
-    if (!user) return;
-
+    if (!user) {
+      console.error("No user is authenticated");
+      return;
+    }
+  
     try {
       const userRef = doc(crud, `users/${user.uid}`);
       const docSnap = await getDoc(userRef);
-      
+  
       if (docSnap.exists()) {
-        // Document exists, update it
-        await updateDoc(userRef, { profilePicture: url });
+        // Document exists, update only the profilePicture field while preserving other data
+        await updateDoc(userRef, {
+          profilePicture: url
+        });
+  
+        // Update the local state with the new profile picture
+        setProfilePic(url);
+        setPreviewPic('');
+        console.log("Profile picture updated successfully:", url);
       } else {
-        // Document does not exist, create it
-        await setDoc(userRef, { profilePicture: url });
+        // Document does not exist, create a new one with the minimum required fields
+        await setDoc(userRef, {
+          profilePicture: url,
+          appointmentData: appointmentData || null, // Preserve existing appointment data
+          isApproved: isApproved || false,
+          ...personalDetails // Preserve existing personal details
+        });
+  
+        setProfilePic(url);
+        setPreviewPic('');
+        console.log("Document created and profile picture set successfully:", url);
       }
-
-      setProfilePic(url);
-      setPreviewPic('');
-      console.log('Profile picture updated:', url); // Debugging log
     } catch (error) {
-      console.error("Error updating profile picture URL: ", error);
+      console.error("Error updating profile picture URL:", error);
     }
-  };    
+  };
+  
+
 
   const fetchProfilePicture = async (userId) => {
     try {
@@ -121,11 +175,9 @@ function UserProfile() {
       const docSnap = await getDoc(userRef);
       if (docSnap.exists()) {
         const data = docSnap.data();
-        const picUrl = data.profilePicture || 'default-profile-pic-url';
-        setProfilePic(picUrl);
-        console.log('Fetched profile picture:', picUrl); // Debugging log
+        setProfilePic(data.profilePicture || defaultProfilePic);
       } else {
-        setProfilePic('default-profile-pic-url');
+        setProfilePic(defaultProfilePic);
       }
     } catch (error) {
       console.error("Error fetching profile picture: ", error);
@@ -146,7 +198,6 @@ function UserProfile() {
           age: data.age || '',
           gender: data.gender || '',
         });
-        console.log('Fetched personal details:', data); // Debugging log
       }
     } catch (error) {
       console.error("Error fetching personal details: ", error);
@@ -167,9 +218,7 @@ function UserProfile() {
     try {
       const userRef = doc(crud, `users/${user.uid}`);
       await updateDoc(userRef, personalDetails);
-      setEditMode(false);
-      setShowModal(false); // Hide modal on save
-      console.log('Personal details updated:', personalDetails); // Debugging log
+      setShowModal(false); 
     } catch (error) {
       console.error("Error updating personal details: ", error);
     }
@@ -191,7 +240,7 @@ function UserProfile() {
                         className="img-fluid avatar-xxl rounded-circle"
                         alt="Profile"
                       />
-                      <h4 className="text-primary font-size-20 mt-3 mb-2">
+                      <h4 className="text-primary font-size-20 mt-2 mb-1">
                         {personalDetails.name}
                       </h4>
                       <input
@@ -240,58 +289,55 @@ function UserProfile() {
                                 </tr>
                               </tbody>
                             </table>
-                            <button className="btn btn-primary mt-2" onClick={() => setShowModal(true)}>
-                              Edit
-                            </button>
                           </div>
+                          <button
+                            type="button"
+                            className="btn btn-primary mt-4"
+                            onClick={() => setShowModal(true)}
+                          >
+                            Edit Personal Details
+                          </button>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="col-xl-12">
-                <div className="task-list-box" id="landing-task">
-                  <div id="task-item-1">
-                    <div className="card task-box rounded-3">
+                  <div className="col-xl-12">
+                    <div className="card">
                       <div className="card-body">
-                        <div className="row align-items-center">
-                          <h4 className="card-title">Approved Appointment</h4>
-                          <div className="table-responsive">
-                            <table className="table">
-                              <thead>
-                                <tr>
-                                  <th>#</th>
-                                  <th>Name</th>
-                                  <th>Email</th>
-                                  <th>Age</th>
-                                  <th>Type of Appointment</th>
-                                  <th>Date</th>
-                                  <th>Time</th>
-                                  <th>Action</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {appointmentData && user.uid === userId && (
-                                  <tr>
-                                    <td></td>
-                                    <td>{appointmentData.name}</td>
-                                    <td>{appointmentData.email}</td>
-                                    <td>{appointmentData.age}</td>
-                                    <td>{appointmentData.appointmentType}</td>
-                                    <td>{appointmentData.date}</td>
-                                    <td>{appointmentData.time}</td>
-                                    <td>
-                                      {isApproved ? 'Approved' : 'Pending'}
-                                    </td>
-                                  </tr>
-                                )}
-                              </tbody>
-                            </table>
-                          </div>
+                        <h4 className="card-title">Pending Appointment</h4>
+                        <div className="table-responsive">
+                          <table className="table">
+                            <thead>
+                              <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Age</th>
+                                <th>Type of Appointment</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Action</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                            {appointmentData ? (
+                              <tr>
+                                <td></td>
+                                <td>{appointmentData.name}</td>
+                                <td>{appointmentData.email}</td>
+                                <td>{appointmentData.age}</td>
+                                <td>{appointmentData.appointmentType}</td>
+                                <td>{appointmentData.date}</td>
+                                <td>{appointmentData.time}</td>
+                                <td>{isApproved ? 'Approved' : 'Pending'}</td>
+                              </tr>
+                            ) : (
+                              <tr>
+                                <td colSpan="8">No appointment data available</td>
+                              </tr>
+                            )}
+                          </tbody>
+                          </table>
                         </div>
                       </div>
                     </div>
@@ -303,7 +349,6 @@ function UserProfile() {
         </div>
       </div>
 
-      {/* Bootstrap Modal for Editing Personal Details */}
       <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} tabIndex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div className="modal-dialog row mt-.25" role="document">
           <div className="modal-content ">
