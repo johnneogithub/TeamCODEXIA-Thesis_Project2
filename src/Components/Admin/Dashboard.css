@@ -25527,7 +25527,7 @@ dl li {
 
 /* Sidebar */
 .sidebar {
-  min-height: calc(100vh - 70px);
+  /* min-height: calc(100vh - 70px); */
   background: #ffffff;
   font-family: "ubuntu-regular", sans-serif;
   padding: 0;
