@@ -3,7 +3,7 @@
 nav{
     background: transparent;
     display: flex;
-    position: fixed;
+    /* position: fixed; */
     top: 0%;
     width: 100%;
     flex-wrap: wrap;
