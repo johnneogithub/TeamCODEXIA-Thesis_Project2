@@ -94,7 +94,7 @@
                 </form>
 
                 <div className="col-md-4 col-xl-3">
-                  <div className="card bg-c-yellow output-card">
+                  <div className="card1 bg-c-yellow output-card">
                     <div className="card-block">
                       <div className="output_text">
                         <p>Your ovulation date</p>
