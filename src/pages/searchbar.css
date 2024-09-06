@@ -1,9 +1,9 @@
-.section {
+.section1 {
 	position: relative;
 	height: 87vh;
 }
 
-.section .section-center {
+.section1 .section-center {
 	position: absolute;
 	top: 50%;
 	left: 0;

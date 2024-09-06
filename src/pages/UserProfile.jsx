@@ -6,7 +6,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, updateDoc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './UserProfileStyle.css';
-import defaultProfilePic from '.././Components/Assets/Clock.png';
+import defaultProfilePic from '.././Components/Assets/icon_you.png';
 
 function UserProfile() {
   const location = useLocation();
@@ -30,7 +30,6 @@ function UserProfile() {
       if (user) {
         setUser(user);
 
-        // Load appointment data from localStorage
         const storedData = localStorage.getItem(`appointmentData_${user.uid}`);
         if (storedData && storedData !== "undefined") {
           try {
@@ -38,36 +37,42 @@ function UserProfile() {
             setAppointmentData(parsedData);
           } catch (e) { 
             console.error("Error parsing JSON from localStorage:", e);
-            setAppointmentData(null); // Reset to null if parsing fails
+            setAppointmentData(null); 
           }
         } else {
-          setAppointmentData(null); // Set to null if no valid data is found
+          setAppointmentData(null); 
         }
 
         await fetchProfilePicture(user.uid);
         await fetchPersonalDetails(user.uid);
         const unsubscribeAppointments = subscribeToAppointments(user.uid);
 
-        return () => unsubscribeAppointments(); // Cleanup on unmount
+        return () => unsubscribeAppointments(); 
       } else {
         resetState();
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (location.state?.appointmentData && user) {
       setAppointmentData(location.state.appointmentData);
       localStorage.setItem(`appointmentData_${user.uid}`, JSON.stringify(location.state.appointmentData));
-    } else {
-      console.log("No appointment data found in location.state or user not logged in.");
-    }
-    if (location.state?.action === 'approve') {
-      setIsApproved(true);
+  
+      if (location.state.action === 'approve') {
+        setIsApproved(true);
+      } else if (location.state.action === 'reject') {
+        setIsApproved(false);
+        alert("Your appointment has been rejected.");
+      }
     }
   }, [location.state, user]);
+  
+  
+  
+  
 
   const resetState = () => {
     setUser(null);
@@ -90,11 +95,13 @@ function UserProfile() {
       const data = doc.data();
       if (data) {
         setAppointmentData(data.appointmentData || null);
-        setIsApproved(data.isApproved || false);
+        setIsApproved(data.appointmentData?.status === 'approved'); // Check if the appointment is approved
       }
     });
     return unsubscribe;
   };
+  
+  
   
   
 
@@ -316,7 +323,7 @@ function UserProfile() {
                                 <th>Type of Appointment</th>
                                 <th>Date</th>
                                 <th>Time</th>
-                                <th>Action</th>
+                                <th>Pending</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -329,7 +336,7 @@ function UserProfile() {
                                 <td>{appointmentData.appointmentType}</td>
                                 <td>{appointmentData.date}</td>
                                 <td>{appointmentData.time}</td>
-                                <td>{isApproved ? 'Approved' : 'Pending'}</td>
+                                <td>{appointmentData.status === 'rejected' ? 'Rejected' : (appointmentData.status === 'approved' ? 'Approved' : 'Pending')}</td> {/* Show 'Approved' if approved */}
                               </tr>
                             ) : (
                               <tr>

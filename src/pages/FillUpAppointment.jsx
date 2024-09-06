@@ -85,14 +85,14 @@ const AppointmentFillUp = () => {
   return (
     <>
       <Navbar />
-      <div id="booking" className="section">
+      <div id="booking" className="section1">
         <div className="section-center">
           <div className="container">
             <div className="row">
               <div className="col-md-5">
                 <div className="booking-cta">
                   <h1>Make An Appointment</h1>
-                  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
+                  <p> with St. Margaret Lying-in Clinic and take the first step towards a healthy and happy delivery.</p>
                 </div>
               </div>
               <div className="col-md-6 col-md-offset-1">
