@@ -7,10 +7,11 @@
 
  @charset "UTF-8";
  /*=== MEDIA QUERY ===*/
- @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Volkhov:ital@1&display=swap");
+ /* @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Volkhov:ital@1&display=swap"); */
+ @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap');
  body {
    line-height: 1.65;
-   font-family: "Roboto", sans-serif;
+   font-family: 'Open Sans', sans-serif;
    -webkit-font-smoothing: antialiased;
  }
  
@@ -20,7 +21,7 @@
  h4,
  h5,
  h6 {
-   font-family: "Roboto", sans-serif;
+  font-family: 'Open Sans', sans-serif;
  }
  
  h1,
@@ -51,7 +52,7 @@
  p {
    color: #7B7B7B;
    font-size: 15px;
-   font-family: "Roboto", sans-serif;
+   font-family: 'Open Sans', sans-serif;
    line-height: 1.7;
  }
  
@@ -279,15 +280,16 @@
    margin-bottom: 70px;
  }
  .section-title h2 {
-   text-transform: uppercase;
+   /* text-transform: uppercase; */
    font-size: 28px;
    font-weight: 600;
-   margin-bottom: 20px;
+   margin-top: 20px;
  }
  .section-title p {
-   font-style: italic;
+   /* font-style: italic; */
+   margin-top: 20px;
    color: #666;
-   font-family: "Volkhov", serif;
+   font-family: 'Open Sans', sans-serif;
  }
  
  .section-subtitle {
@@ -419,7 +421,7 @@
  }
  .commonSelect:before {
    content: "\f3d0";
-   font-family: "themefisher-font";
+   font-family: 'Open Sans', sans-serif;
    position: absolute;
    right: -4px;
    top: 4px;
@@ -490,7 +492,7 @@
    content: "\f209";
    position: absolute;
    right: 25px;
-   font-family: "themefisher-font";
+   font-family: 'Open Sans', sans-serif;
  }
  .commonAccordion .panel .panel-title a.collapsed:before, .commonAccordion-2 .panel .panel-title a.collapsed:before {
    content: "\f217";
@@ -747,7 +749,7 @@
  .dropleft .dropdown-toggle::before,
  .dropright .dropdown-toggle::after {
    font-weight: bold;
-   font-family: "Ionicons";
+   font-family: 'Open Sans', sans-serif;
    border: 0;
    font-size: 10px;
    vertical-align: 1px;
@@ -1146,7 +1148,7 @@
    font-size: 35px;
  }
  .testimonial .testimonial-carousel p {
-   font-family: "Volkhov", serif;
+  font-family: 'Open Sans', sans-serif;
    line-height: 28px;
    padding-bottom: 20px;
  }
@@ -1157,7 +1159,7 @@
    display: inline-block;
  }
  .testimonial .testimonial-carousel .user p {
-   font-family: "Roboto", sans-serif;
+  font-family: 'Open Sans', sans-serif;
    padding-bottom: 0;
    margin-top: 6px;
    font-size: 12px;

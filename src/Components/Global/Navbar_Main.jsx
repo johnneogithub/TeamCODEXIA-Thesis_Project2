@@ -9,6 +9,7 @@ import { doc, getDoc } from 'firebase/firestore';
 function Nav() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [userProfilePic, setUserProfilePic] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -21,6 +22,10 @@ function Nav() {
     }).catch((error) => {
       console.error('Logout error:', error);
     });
+  };
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
   };
 
   useEffect(() => {
@@ -41,8 +46,8 @@ function Nav() {
   }, []);
 
   return (
-    <nav className='navbar_master'>
-      <input type="checkbox" id="check" />
+    <div className='navbar_master'>
+      <input type="checkbox" id="check" checked={menuOpen} onChange={toggleMenu} />
       <label htmlFor="check" className="checkbtn">
         <i><img src={humber} alt="" /></i>
       </label>
@@ -54,7 +59,7 @@ function Nav() {
       <ul>
         <li>
           <a className="active">
-            Plan & Care
+          Ovulation Tracker
           </a>
         </li>
         <Link to="/CheckHealth" className="st-mar-style-font">
@@ -66,11 +71,11 @@ function Nav() {
           <a>About Us</a>
         </li>
         <li>
-          <a className="dropdown-toggle" onClick={toggleDropdown}>
+          <a className="dropdown-toggle1" onClick={toggleDropdown}>
             <img src={userProfilePic || iconyou} alt="Profile" className="profile-pic-small" /> {/* Apply CSS class */}
             {dropdownOpen && (
-              <div className="dropdown">
-                <div className="dropdown-content">
+              <div className="dropdown1">
+                <div className="dropdown-content1">
                   <Link to="/UserProfile">Profile</Link>
                   <a onClick={handleLogout}>Logout</a>
                 </div>
@@ -79,7 +84,7 @@ function Nav() {
           </a>
         </li>
       </ul>
-    </nav>
+    </div>
   );
 }
 

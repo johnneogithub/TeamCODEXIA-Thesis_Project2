@@ -4,9 +4,10 @@ import Navbar from '../Components/Global/Navbar_Main';
 import { auth, storage, crud } from '../Config/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, updateDoc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { FaUser, FaEnvelope, FaCalendarAlt, FaVenusMars, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './UserProfileStyle.css';
-import defaultProfilePic from '.././Components/Assets/Clock.png';
+import defaultProfilePic from '.././Components/Assets/icon_you.png';
 
 function UserProfile() {
   const location = useLocation();
@@ -30,7 +31,6 @@ function UserProfile() {
       if (user) {
         setUser(user);
 
-        // Load appointment data from localStorage
         const storedData = localStorage.getItem(`appointmentData_${user.uid}`);
         if (storedData && storedData !== "undefined") {
           try {
@@ -38,36 +38,42 @@ function UserProfile() {
             setAppointmentData(parsedData);
           } catch (e) { 
             console.error("Error parsing JSON from localStorage:", e);
-            setAppointmentData(null); // Reset to null if parsing fails
+            setAppointmentData(null); 
           }
         } else {
-          setAppointmentData(null); // Set to null if no valid data is found
+          setAppointmentData(null); 
         }
 
         await fetchProfilePicture(user.uid);
         await fetchPersonalDetails(user.uid);
         const unsubscribeAppointments = subscribeToAppointments(user.uid);
 
-        return () => unsubscribeAppointments(); // Cleanup on unmount
+        return () => unsubscribeAppointments(); 
       } else {
         resetState();
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (location.state?.appointmentData && user) {
       setAppointmentData(location.state.appointmentData);
       localStorage.setItem(`appointmentData_${user.uid}`, JSON.stringify(location.state.appointmentData));
-    } else {
-      console.log("No appointment data found in location.state or user not logged in.");
-    }
-    if (location.state?.action === 'approve') {
-      setIsApproved(true);
+  
+      if (location.state.action === 'approve') {
+        setIsApproved(true);
+      } else if (location.state.action === 'reject') {
+        setIsApproved(false);
+        alert("Your appointment has been rejected.");
+      }
     }
   }, [location.state, user]);
+  
+  
+  
+  
 
   const resetState = () => {
     setUser(null);
@@ -90,11 +96,13 @@ function UserProfile() {
       const data = doc.data();
       if (data) {
         setAppointmentData(data.appointmentData || null);
-        setIsApproved(data.isApproved || false);
+        setIsApproved(data.appointmentData?.status === 'approved'); // Check if the appointment is approved
       }
     });
     return unsubscribe;
   };
+  
+  
   
   
 
@@ -150,12 +158,12 @@ function UserProfile() {
         setPreviewPic('');
         console.log("Profile picture updated successfully:", url);
       } else {
-        // Document does not exist, create a new one with the minimum required fields
+
         await setDoc(userRef, {
           profilePicture: url,
-          appointmentData: appointmentData || null, // Preserve existing appointment data
+          appointmentData: appointmentData || null, 
           isApproved: isApproved || false,
-          ...personalDetails // Preserve existing personal details
+          ...personalDetails 
         });
   
         setProfilePic(url);
@@ -224,124 +232,98 @@ function UserProfile() {
     }
   };
 
+  // Add this function to safely capitalize the first letter
+  const capitalizeFirstLetter = (string) => {
+    return string && typeof string === 'string' ? string.charAt(0).toUpperCase() + string.slice(1) : '';
+  };
+
   return (
-    <>
+    <div className="user-profile-page">
       <Navbar />
-      <div className="container mx-auto">
-        <div className="row mx-auto">
-          <div className="col-xl-15">
-            <div className="card mx-auto">
-              <div className="card-body pb-0 mx-auto">
-                <div className="row align-items-center mx-auto">
-                  <div className="col-md-5 mx-auto">
-                    <div className="text-center border-end mx-auto">
-                      <img
-                        src={previewPic || profilePic}
-                        className="img-fluid avatar-xxl rounded-circle"
-                        alt="Profile"
-                      />
-                      <h4 className="text-primary font-size-20 mt-2 mb-1">
-                        {personalDetails.name}
-                      </h4>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        style={{ display: 'none' }}
-                        id="fileInput"
-                      />
-                      <label htmlFor="fileInput" className="btn btn-primary mt-2">
-                        Choose Picture
-                      </label>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="ms-2">
-                      <div className="card">
-                        <div className="card-body">
-                          <h4 className="card-title mb-4">Personal Details</h4>
-                          <div className="table-responsive">
-                            <table className="table table-bordered mb-0">
-                              <tbody>
-                                <tr>
-                                  <th scope="row">Name</th>
-                                  <td>{personalDetails.name}</td>
-                                </tr>
-                                <tr>
-                                  <th scope="row">Email</th>
-                                  <td>{personalDetails.email}</td>
-                                </tr>
-                                <tr>                                
-                                  <th scope="row">Age</th>
-                                  <td>{personalDetails.age}</td>
-                                </tr>
-                                <tr>
-                                  <th scope="row">Gender</th>
-                                  <td>{personalDetails.gender}</td>
-                                </tr>
-                                <tr>       
-                                  <th scope="row">Phone</th>
-                                  <td>{personalDetails.phone}</td>
-                                </tr>
-                                <tr>
-                                  <th scope="row">Location</th>
-                                  <td>{personalDetails.location}</td>
-                                </tr>
-                              </tbody>
-                            </table>
-                          </div>
-                          <button
-                            type="button"
-                            className="btn btn-primary mt-4"
-                            onClick={() => setShowModal(true)}
-                          >
-                            Edit Personal Details
-                          </button>
+      <div className="container my-5">
+        <div className="row">
+          <div className="col-md-4">
+            <div className="card profile-card">
+              <div className="card-body text-center">
+                <div className="profile-image-container">
+                  <img
+                    src={previewPic || profilePic}
+                    className="profile-image"
+                    alt="Profile"
+                  />
+                </div>
+                <h4 className="mt-3">{personalDetails.name || 'User'}</h4>
+                <p className="text-muted">{personalDetails.email}</p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  style={{ display: 'none' }}
+                  id="fileInput"
+                />
+                <label htmlFor="fileInput" className="btn btn-outline-primary mt-2">
+                  Change Picture
+                </label>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-8">
+            <div className="card details-card">
+              <div className="card-body">
+                <h4 className="card-title mb-4">Personal Details</h4>
+                <div className="row">
+                  {Object.entries(personalDetails).map(([key, value]) => (
+                    <div className="col-md-6 mb-3" key={key}>
+                      <div className="detail-item">
+                        {getIcon(key)}
+                        <div>
+                          <h6 className="mb-0">{capitalizeFirstLetter(key)}</h6>
+                          <p className="text-muted">{value || 'Not provided'}</p>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="col-xl-12">
-                    <div className="card">
-                      <div className="card-body">
-                        <h4 className="card-title">Pending Appointment</h4>
-                        <div className="table-responsive">
-                          <table className="table">
-                            <thead>
-                              <tr>
-                                <th>#</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Age</th>
-                                <th>Type of Appointment</th>
-                                <th>Date</th>
-                                <th>Time</th>
-                                <th>Action</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                            {appointmentData ? (
-                              <tr>
-                                <td></td>
-                                <td>{appointmentData.name}</td>
-                                <td>{appointmentData.email}</td>
-                                <td>{appointmentData.age}</td>
-                                <td>{appointmentData.appointmentType}</td>
-                                <td>{appointmentData.date}</td>
-                                <td>{appointmentData.time}</td>
-                                <td>{isApproved ? 'Approved' : 'Pending'}</td>
-                              </tr>
-                            ) : (
-                              <tr>
-                                <td colSpan="8">No appointment data available</td>
-                              </tr>
-                            )}
-                          </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  ))}
+                </div>
+                <button className="btn btn-primary mt-3" onClick={() => setShowModal(true)}>
+                  Edit
+                </button>
+              </div>
+            </div>
+            
+            <div className="card mt-4 appointment-card">
+              <div className="card-body">
+                <h4 className="card-title mb-4">Appointment Status</h4>
+                <div className="table-responsive">
+                  <table className="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {appointmentData ? (
+                        <tr>
+                          <td>{appointmentData.name}</td>
+                          <td>{appointmentData.appointmentType}</td>
+                          <td>{appointmentData.date}</td>
+                          <td>{appointmentData.time}</td>
+                          <td>
+                            <span className={`badge ${getStatusBadgeClass(appointmentData.status)}`}>
+                              {capitalizeFirstLetter(appointmentData.status)}
+                            </span>
+                          </td>
+                        </tr>
+                      ) : (
+                        <tr>
+                          <td colSpan="5" className="text-center">No appointment data available</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
@@ -349,92 +331,60 @@ function UserProfile() {
         </div>
       </div>
 
-      <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} tabIndex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div className="modal-dialog row mt-.25" role="document">
-          <div className="modal-content ">
-            <div className="modal-header ">
-              <h5 className="modal-title  " id="exampleModalLabel">Edit Personal Details</h5>
-              <button type="button" className="btn-close " onClick={() => setShowModal(false)} aria-label="Close"></button>
+      {/* Modal for editing personal details */}
+      <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} tabIndex="-1">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Edit Personal Details</h5>
+              <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
             </div>
             <div className="modal-body">
               <form>
-                <div className="mb-1">
-                  <label htmlFor="name" className="form-label">Name</label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={personalDetails.name}
-                    onChange={handleChange}
-                    className="form-control"
-                  />
-                </div>
-                <div className="mb-1">
-                  <label htmlFor="email" className="form-label">Email</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={personalDetails.email}
-                    onChange={handleChange}
-                    className="form-control"
-                  />
-                </div>
-                <div className="mb-1">
-                  <label htmlFor="age" className="form-label">Age</label>
-                  <input
-                    type="text"
-                    id="age"
-                    name="age"
-                    value={personalDetails.age}
-                    onChange={handleChange}
-                    className="form-control"
-                  />
-                </div>
-                <div className="mb-1">
-                  <label htmlFor="gender" className="form-label">Gender</label>
-                  <input
-                    type="text"
-                    id="gender"
-                    name="gender"
-                    value={personalDetails.gender}
-                    onChange={handleChange}
-                    className="form-control"
-                  />
-                </div>
-                <div className="mb-1">
-                  <label htmlFor="phone" className="form-label">Phone</label>
-                  <input
-                    type="text"
-                    id="phone"
-                    name="phone"
-                    value={personalDetails.phone}
-                    onChange={handleChange}
-                    className="form-control"
-                  />
-                </div>
-                <div className="mb-1">
-                  <label htmlFor="location" className="form-label">Location</label>
-                  <input
-                    type="text"
-                    id="location"
-                    name="location"
-                    value={personalDetails.location}
-                    onChange={handleChange}
-                    className="form-control"
-                  />
-                </div>
+                {Object.entries(personalDetails).map(([key, value]) => (
+                  <div className="mb-3" key={key}>
+                    <label htmlFor={key} className="form-label">{capitalizeFirstLetter(key)}</label>
+                    <input
+                      type={key === 'email' ? 'email' : 'text'}
+                      className="form-control"
+                      id={key}
+                      name={key}
+                      value={value || ''}
+                      onChange={handleChange}
+                    />
+                  </div>
+                ))}
               </form>
             </div>
-            <div className="modal-footer col-mb-1">
+            <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
               <button type="button" className="btn btn-primary" onClick={handleSave}>Save</button>
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
+}
+
+function getIcon(key) {
+  switch (key) {
+    case 'name': return <FaUser className="detail-icon" />;
+    case 'email': return <FaEnvelope className="detail-icon" />;
+    case 'age': return <FaCalendarAlt className="detail-icon" />;
+    case 'gender': return <FaVenusMars className="detail-icon" />;
+    case 'phone': return <FaPhone className="detail-icon" />;
+    case 'location': return <FaMapMarkerAlt className="detail-icon" />;
+    default: return null;
+  }
+}
+
+function getStatusBadgeClass(status) {
+  switch (status) {
+    case 'approved': return 'bg-success';
+    case 'rejected': return 'bg-danger';
+    default: return 'bg-warning';
+  }
 }
 
 export default UserProfile;
