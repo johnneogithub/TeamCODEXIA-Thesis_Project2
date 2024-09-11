@@ -3,11 +3,12 @@ import React, { useEffect, useState } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
-// Landing
+// Landing & Admin
 import LoginForm from './Components/Auth/LoginForm/LoginForm.jsx';
 import About from './Components/About.jsx';
 import RegistrationForm from './Components/Auth/RegistrationForm/RegistrationForm.jsx';
 import PasswordResetForm from './Components/Auth/LoginForm/PasswordResetForm.jsx';
+import AdminLogin from './Components/Admin/AdminLogin/AdminLogin.jsx';
 
 // Pages
 import Home from './pages/Home.jsx';
@@ -71,6 +72,7 @@ function App() {
           <Route path='/PregnancyWheel' component={PregnancyWheel} exact />
           <Route path='/Dashboard' component={Dashboard} exact />
           <Route path='/PatientsRecord' component={PatientsRecord} exact />
+          <Route path='/AdminLogin' component={AdminLogin} exact />
           <Route component={Error404} />
         </Switch>
       </>
