@@ -400,7 +400,9 @@ const updateAppointment = async (appointment, fileName, importedData, fileType) 
           <div className="col-12 grid-margin">
             <div className="card">
               <div className="card-body">
-                <h4 className="card-title">For Approved of Appointment</h4>
+
+                <h4 className="card-title">For Approval of Appointment</h4>
+
                 <div className="table-responsive">
                   <table className="table">
                   <thead>
