@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc, setDoc, getDoc  } from 'firebase/firestore';
-import Nav from '../Global/NavbarAdmin';
 import Sidebar from '../Global/Sidebar';
 import { Link } from 'react-router-dom';
 
@@ -142,76 +141,89 @@ const handleDone = async (appointment) => {
     setApprovedAppointments(updatedApprovedAppointments);
     localStorage.setItem('approvedAppointments', JSON.stringify(updatedApprovedAppointments));
 
+    // Include the imported file data in the appointment object
+    const appointmentWithFile = {
+      ...appointment,
+      importedFile: appointment.importedFile ? {
+        name: appointment.importedFile.name,
+        data: appointment.importedFile.data,
+        type: appointment.importedFile.type
+      } : null
+    };
+
     // Store the appointment data in localStorage under 'patientsRecords'
     const patientsRecords = JSON.parse(localStorage.getItem('patientsRecords') || '[]');
-    localStorage.setItem('patientsRecords', JSON.stringify([...patientsRecords, appointment]));
+    localStorage.setItem('patientsRecords', JSON.stringify([...patientsRecords, appointmentWithFile]));
 
-    // Optionally, you can also add the appointment data to the Firestore collection for patientsRecords
+    // Add the appointment data to the Firestore collection for patientsRecords
     const patientsRecordsCollectionRef = collection(firestore, 'patientsRecords');
-    await setDoc(doc(patientsRecordsCollectionRef, appointment.id), appointment);
+    await setDoc(doc(patientsRecordsCollectionRef, appointment.id), appointmentWithFile);
 
-    // Navigate to Patients Record with the updated data
-    // history.push('/PatientsRecord');
+    console.log('Appointment moved to Patient Records successfully');
   } catch (error) {
     console.error("Error handling done action: ", error);
   }
 };
 
-  
+const handleImport = (appointment) => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.onchange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedData = e.target.result;
+          const base64Data = btoa(String.fromCharCode.apply(null, new Uint8Array(importedData)));
+          updateAppointment(appointment, file.name, base64Data, file.type);
+        } catch (error) {
+          console.error('Error reading imported file:', error);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+  };
+  input.click();
+};
+
+const updateAppointment = async (appointment, fileName, importedData, fileType) => {
+  try {
+    // Update the appointment in your state
+    setApprovedAppointments(prevAppointments => 
+      prevAppointments.map(app => 
+        app.id === appointment.id 
+          ? { ...app, importedFile: { name: fileName, data: importedData, type: fileType } }
+          : app
+      )
+    );
+    
+    // Update or create the appointment document in Firestore
+    const firestore = getFirestore();
+    const appointmentRef = doc(firestore, 'approvedAppointments', appointment.id);
+    await setDoc(appointmentRef, {
+      ...appointment,
+      importedFile: { name: fileName, data: importedData, type: fileType }
+    }, { merge: true });
+
+    console.log('Appointment updated successfully in database');
+  } catch (error) {
+    console.error('Error updating appointment:', error);
+  }
+};
 
   return (
     <>
    <div className="container-scroller">
-
-  <nav className="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
-    <div className="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
-      <a className="navbar-brand brand-logo" href="index.html">
-        <img src={Clinic} alt="logo" />
-      </a>
-      <a className="navbar-brand brand-logo-mini" href="index.html">
-        <img src={logomini} alt="logo" />
-      </a>
-    </div>
-    <div className="navbar-menu-wrapper  d-flex align-items-stretch">
-    <button className="navbar-toggler navbar-toggler align-self-center" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar">
-              <i className="bi bi-list mdi-menu"></i>
-            </button>
-      <div className="search-field d-none d-md-block">
-        <form className="d-flex align-items-center h-100" action="#">
-          <div className="input-group">
-            <div className="input-group-prepend bg-transparent">
-              <i className="input-group-text border-0 mdi mdi-magnify" />
-            </div>
-            <input
-              type="text"
-              className="form-control bg-transparent border-0"
-              placeholder="Search projects"
-            />
-          </div>
-        </form>
-      </div>
-    
-      <button
-        className="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar"
-        data-toggle="offcanvas"
-      >
-        <i class="bi bi-list"></i>
-        {/* <span className="mdi mdi-menu" /> */}
-        {/* <img height="32" width="32" src="@icon/themify-icons/icons/arrow-up.svg" /> */}
-      </button>
-    </div>
-  </nav>
-  {/* partial */}
   <div className="container-fluid page-body-wrapper">
-    {/* partial:partials/_sidebar.html */}
-    <nav className="sidebar sidebar-offcanvas" id="sidebar">
+    <Sidebar/>
+    {/* <nav className="sidebar sidebar-offcanvas" id="sidebar">
       <ul className="nav">
         <li className="nav-item nav-profile">
           <a href="#" className="nav-link">
             <div className="nav-profile-image">
               <img src={Clinic} alt="profile" />
               <span className="login-status online" />
-              {/*change to offline or busy as needed*/}
             </div>
             <div className="nav-profile-text d-flex flex-column">
               <span className="font-weight-bold mb-2">St. Margaret Lying<br/> In Clinic</span>
@@ -223,7 +235,6 @@ const handleDone = async (appointment) => {
         <li className="nav-item">
         <Link to="/Dashboard"> <a className="nav-link" href="index.html">
            <span className="menu-title">Dashboard</span>
-            {/* <i className="mdi mdi-home menu-icon" /> */}
             <i class="bi bi-house-fill menu-icon"></i>
           </a>
           </Link>
@@ -239,8 +250,6 @@ const handleDone = async (appointment) => {
         <li className="nav-item">
         <Link to="/PregnancyWheel">  <a className="nav-link" href="PregnancyWheel">
             <span className="menu-title">PregnancyWheel</span>
-            {/* <i className="mdi mdi-format-list-bulleted menu-icon" /> */}
-            {/* <i class="bi bi-arrow-down-circle-fill menu-icon"></i> */}
             <i class="bi bi-calendar-heart  menu-icon"></i>
           </a>
           </Link>
@@ -255,9 +264,7 @@ const handleDone = async (appointment) => {
             aria-controls="auth"
           >
             <span className="menu-title">User Pages</span>
-            {/* <i className="menu-arrow" /> */}
             <i class="bi bi-arrow-down-circle-fill menu-icon"></i>
-            {/* <i className="mdi mdi-lock menu-icon" /> */}
           </a>
           <div className="collapse" id="auth">
             <ul className="nav flex-column sub-menu">
@@ -277,8 +284,7 @@ const handleDone = async (appointment) => {
           </div>
         </li>
       </ul>
-    </nav>
-    {/* partial */}
+    </nav> */}
 
     <div className="main-panel">
       <div className="content-wrapper">
@@ -371,7 +377,13 @@ const handleDone = async (appointment) => {
                     <td>{appointment.date || 'N/A'}</td>
                     <td>{appointment.time || 'N/A'}</td>
                     <td>
-                      <button className='badge badge-gradient-success' onClick={() => handleDone(appointment)}>Done</button>
+                      <button className='badge badge-gradient-success me-2' onClick={() => handleDone(appointment)}>Done</button>
+                      <button className='badge badge-gradient-info' onClick={() => handleImport(appointment)}>
+                        <i className="bi bi-file-earmark-arrow-up"></i> Import
+                      </button>
+                      {appointment.importedFile && (
+                        <span className="ms-2">{appointment.importedFile.name}</span>
+                      )}
                     </td>
                   </tr>
                 ))}
