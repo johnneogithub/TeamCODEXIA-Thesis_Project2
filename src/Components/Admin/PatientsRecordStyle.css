@@ -10,3 +10,58 @@
   margin-top: 10rem;
   margin-left: 18rem;
 }
+
+.patients-record-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.patients-record-main {
+  flex-grow: 1;
+  padding: 2rem;
+  background-color: #f4f5f7;
+}
+
+.patients-record-header {
+  margin-bottom: 2rem;
+}
+
+.patients-record-header h1 {
+  color: #333;
+  font-size: 2rem;
+}
+
+.patients-record-content {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.5rem;
+}
+
+.table th {
+  background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 1rem;
+}
+
+.table td {
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
