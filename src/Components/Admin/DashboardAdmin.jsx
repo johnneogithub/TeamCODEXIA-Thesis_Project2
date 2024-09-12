@@ -16,31 +16,34 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 // import "unpkg.com/@icon/themify-icons/themify-icons.css"
 
 
+
+
 function DashboardAdmin() {
   const location = useLocation();
   const history = useHistory();
 
   const [pendingAppointments, setPendingAppointments] = useState([]);
   const [approvedAppointments, setApprovedAppointments] = useState([]);
+  const [remarkText, setRemarkText] = useState('');
+  const [openRemarkId, setOpenRemarkId] = useState(null);
 
   useEffect(() => {
     const fetchAppointments = async () => {
       const firestore = getFirestore();
       try {
-        const querySnapshot = await getDocs(collection(firestore, 'pendingAppointments'));
-        const fetchedAppointments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setPendingAppointments(fetchedAppointments);
+        const pendingSnapshot = await getDocs(collection(firestore, 'pendingAppointments'));
+        const pendingData = pendingSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setPendingAppointments(pendingData);
+
+        const approvedSnapshot = await getDocs(collection(firestore, 'approvedAppointments'));
+        const approvedData = approvedSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setApprovedAppointments(approvedData);
       } catch (error) {
         console.error("Error fetching appointments: ", error);
       }
     };
 
     fetchAppointments();
-  }, []);
-
-  useEffect(() => {
-    const approvedAppointmentsFromStorage = JSON.parse(localStorage.getItem('approvedAppointments') || '[]');
-    setApprovedAppointments(approvedAppointmentsFromStorage);
   }, []);
 
   const fetchDocument = async (firestore, collectionName, id) => {
@@ -51,40 +54,37 @@ function DashboardAdmin() {
   
   const handleApprove = async (id) => {
     try {
-      console.log(`Approving appointment with ID: ${id}`);
       const firestore = getFirestore();
       const pendingDocRef = doc(firestore, 'pendingAppointments', id);
       const pendingDocSnap = await getDoc(pendingDocRef);
       
-      if (!pendingDocSnap.exists()) {
-        console.error(`Document with ID ${id} does not exist in 'pendingAppointments' collection`);
-        return;
+      if (pendingDocSnap.exists()) {
+        const appointmentData = pendingDocSnap.data();
+        
+        // Update the status to 'approved'
+        const updatedAppointmentData = {
+          ...appointmentData,
+          status: 'approved'
+        };
+        
+        // Move to approved appointments
+        await setDoc(doc(firestore, 'approvedAppointments', id), updatedAppointmentData);
+        
+        // Remove from pending appointments
+        await deleteDoc(pendingDocRef);
+        
+        // Update the user's document with the approved status
+        if (appointmentData.userId) {
+          const userRef = doc(firestore, 'users', appointmentData.userId);
+          await updateDoc(userRef, {
+            'appointmentData': updatedAppointmentData
+          });
+        }
+        
+        // Update local state
+        setPendingAppointments(prev => prev.filter(app => app.id !== id));
+        setApprovedAppointments(prev => [...prev, { id, ...updatedAppointmentData }]);
       }
-  
-      const appointmentToApprove = pendingDocSnap.data();
-      
-      // Fetch the user's document in Firestore
-      const userDocRef = doc(firestore, 'users', appointmentToApprove.userId);
-      const userDocSnap = await getDoc(userDocRef);
-  
-      if (!userDocSnap.exists()) {
-        console.error(`User document with ID ${appointmentToApprove.userId} does not exist`);
-        return;
-      }
-  
-      // Update the user's appointmentData to reflect the approved status
-      await updateDoc(userDocRef, {
-        'appointmentData.status': 'approved'
-      });
-  
-      // Remove from pending appointments
-      await deleteDoc(pendingDocRef);
-  
-      // Update local state
-      setPendingAppointments(prev => prev.filter(appointment => appointment.id !== id));
-      const updatedApprovedAppointments = [...approvedAppointments, { id, ...appointmentToApprove }];
-      setApprovedAppointments(updatedApprovedAppointments);
-      localStorage.setItem('approvedAppointments', JSON.stringify(updatedApprovedAppointments));
     } catch (error) {
       console.error("Error approving appointment: ", error);
     }
@@ -136,30 +136,28 @@ const handleDone = async (appointment) => {
   try {
     const firestore = getFirestore();
 
-    // Update approved appointments locally
-    const updatedApprovedAppointments = approvedAppointments.filter(app => app.id !== appointment.id);
-    setApprovedAppointments(updatedApprovedAppointments);
-    localStorage.setItem('approvedAppointments', JSON.stringify(updatedApprovedAppointments));
+    await deleteDoc(doc(firestore, 'approvedAppointments', appointment.id));
 
-    // Include the imported file data in the appointment object
     const appointmentWithFile = {
       ...appointment,
       importedFile: appointment.importedFile ? {
         name: appointment.importedFile.name,
         data: appointment.importedFile.data,
         type: appointment.importedFile.type
-      } : null
+      } : null,
+      completedAt: new Date().toISOString() 
     };
+    await setDoc(doc(firestore, 'patientsRecords', appointment.id), appointmentWithFile);
 
-    // Store the appointment data in localStorage under 'patientsRecords'
-    const patientsRecords = JSON.parse(localStorage.getItem('patientsRecords') || '[]');
-    localStorage.setItem('patientsRecords', JSON.stringify([...patientsRecords, appointmentWithFile]));
-
-    // Add the appointment data to the Firestore collection for patientsRecords
-    const patientsRecordsCollectionRef = collection(firestore, 'patientsRecords');
-    await setDoc(doc(patientsRecordsCollectionRef, appointment.id), appointmentWithFile);
+    // Update local state
+    setApprovedAppointments(prevAppointments => 
+      prevAppointments.filter(app => app.id !== appointment.id)
+    );
 
     console.log('Appointment moved to Patient Records successfully');
+
+    // Navigate to PatientsRecord page
+    // history.push('/PatientsRecord');
   } catch (error) {
     console.error("Error handling done action: ", error);
   }
@@ -212,79 +210,56 @@ const updateAppointment = async (appointment, fileName, importedData, fileType) 
   }
 };
 
+const handleRemark = (id) => {
+  setOpenRemarkId(openRemarkId === id ? null : id);
+  setRemarkText('');
+};
+
+const handleRemarkSubmit = async (id) => {
+  if (remarkText.trim()) {
+    try {
+      const firestore = getFirestore();
+      const appointmentRef = doc(firestore, 'pendingAppointments', id);
+      const remarkTimestamp = new Date().toISOString();
+      
+      // Get the appointment data before deleting it
+      const appointmentSnap = await getDoc(appointmentRef);
+      const appointmentData = appointmentSnap.data();
+      
+      // Delete the appointment from pendingAppointments
+      await deleteDoc(appointmentRef);
+      
+      // Update the user's document with the remark and move the appointment data
+      if (appointmentData && appointmentData.userId) {
+        const userRef = doc(firestore, 'users', appointmentData.userId);
+        await updateDoc(userRef, {
+          'appointmentData': {
+            ...appointmentData,
+            status: 'remarked',
+            remark: remarkText,
+            remarkTimestamp: remarkTimestamp
+          }
+        });
+      }
+
+      // Update local state
+      setPendingAppointments(prevAppointments =>
+        prevAppointments.filter(app => app.id !== id)
+      );
+
+      setOpenRemarkId(null);
+      setRemarkText('');
+    } catch (error) {
+      console.error("Error adding remark: ", error);
+    }
+  }
+};
+
   return (
     <>
    <div className="container-scroller">
   <div className="container-fluid page-body-wrapper">
     <Sidebar/>
-    {/* <nav className="sidebar sidebar-offcanvas" id="sidebar">
-      <ul className="nav">
-        <li className="nav-item nav-profile">
-          <a href="#" className="nav-link">
-            <div className="nav-profile-image">
-              <img src={Clinic} alt="profile" />
-              <span className="login-status online" />
-            </div>
-            <div className="nav-profile-text d-flex flex-column">
-              <span className="font-weight-bold mb-2">St. Margaret Lying<br/> In Clinic</span>
-              <span className="text-secondary text-small">Project Manager</span>
-            </div>
-            <i className="mdi mdi-bookmark-check text-success nav-profile-badge" />
-          </a>
-        </li>
-        <li className="nav-item">
-        <Link to="/Dashboard"> <a className="nav-link" href="index.html">
-           <span className="menu-title">Dashboard</span>
-            <i class="bi bi-house-fill menu-icon"></i>
-          </a>
-          </Link>
-        </li>
-
-        <li className="nav-item">
-      <Link to="/PatientsRecord"><a className="nav-link" href="PatientsRecord">
-       <span className="menu-title">Patients Record</span>
-          <i class="bi bi-folder menu-icon"></i>
-        </a>
-        </Link>
-      </li>
-        <li className="nav-item">
-        <Link to="/PregnancyWheel">  <a className="nav-link" href="PregnancyWheel">
-            <span className="menu-title">PregnancyWheel</span>
-            <i class="bi bi-calendar-heart  menu-icon"></i>
-          </a>
-          </Link>
-        </li>
-   
-        <li className="nav-item">
-          <a
-            className="nav-link"
-            data-bs-toggle="collapse"
-            href="#auth"
-            aria-expanded="false"
-            aria-controls="auth"
-          >
-            <span className="menu-title">User Pages</span>
-            <i class="bi bi-arrow-down-circle-fill menu-icon"></i>
-          </a>
-          <div className="collapse" id="auth">
-            <ul className="nav flex-column sub-menu">
-              <li className="nav-item">
-                <a className="nav-link" >
-                  {" "}
-                  Blank Page{" "}
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="pages/samples/login.html">
-                  {" "}
-                  Login{" "}
-                </a>
-              </li>
-            </ul>
-          </div>
-        </li>
-      </ul>
-    </nav> */}
 
     <div className="main-panel">
       <div className="content-wrapper">
@@ -419,19 +394,39 @@ const updateAppointment = async (appointment, fileName, importedData, fileType) 
               </thead>
               <tbody>
                 {pendingAppointments.map((appointment, index) => (
-                  <tr key={appointment.id}>
-                    <td>{index + 1}</td>
-                    <td>{appointment.name || 'N/A'}</td>
-                    <td>{appointment.email || 'N/A'}</td>
-                    <td>{appointment.age || 'N/A'}</td>
-                    <td>{appointment.appointmentType || 'N/A'}</td>
-                    <td>{appointment.date || 'N/A'}</td>
-                    <td>{appointment.time || 'N/A'}</td>
-                    <td>
-                    <button className='badge badge-gradient-warning' onClick={() => handleApprove(appointment.id)}>Approve</button>
-                      <button className='badge badge-gradient-danger' onClick={() => handleReject(appointment.id)}>Reject</button>
-                    </td>
-                  </tr>
+                  <React.Fragment key={appointment.id}>
+                    <tr>
+                      <td>{index + 1}</td>
+                      <td>{appointment.name || 'N/A'}</td>
+                      <td>{appointment.email || 'N/A'}</td>
+                      <td>{appointment.age || 'N/A'}</td>
+                      <td>{appointment.appointmentType || 'N/A'}</td>
+                      <td>{appointment.date || 'N/A'}</td>
+                      <td>{appointment.time || 'N/A'}</td>
+                      <td>
+                        <button className='badge badge-gradient-warning me-1' onClick={() => handleApprove(appointment.id)}>Approve</button>
+                        <button className='badge badge-gradient-danger me-1' onClick={() => handleReject(appointment.id)}>Reject</button>
+                        <button className='badge badge-gradient-info' onClick={() => handleRemark(appointment.id)}>Remark</button>
+                      </td>
+                    </tr>
+                    {openRemarkId === appointment.id && (
+                      <tr>
+                        <td colSpan="8">
+                          <div className="remark-popup">
+                            <textarea 
+                              className="form-control mb-2" 
+                              rows="3" 
+                              value={remarkText}
+                              onChange={(e) => setRemarkText(e.target.value)}
+                              placeholder="Enter your remark here..."
+                            ></textarea>
+                            <button className="btn btn-primary btn-sm" onClick={() => handleRemarkSubmit(appointment.id)}>Submit Remark</button>
+                            <button className="btn btn-secondary btn-sm ms-2" onClick={() => setOpenRemarkId(null)}>Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))}
               </tbody>
                   </table>

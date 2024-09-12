@@ -4,7 +4,7 @@ import Navbar from '../Components/Global/Navbar_Main';
 import { auth, storage, crud } from '../Config/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, updateDoc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
-import { FaUser, FaEnvelope, FaCalendarAlt, FaVenusMars, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaCalendarAlt, FaVenusMars, FaPhone, FaMapMarkerAlt, FaEdit, FaCamera, FaUserCircle } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './UserProfileStyle.css';
 import defaultProfilePic from '.././Components/Assets/icon_you.png';
@@ -17,6 +17,7 @@ function UserProfile() {
   const [profilePic, setProfilePic] = useState(defaultProfilePic);
   const [previewPic, setPreviewPic] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showRemark, setShowRemark] = useState(false);
   const [personalDetails, setPersonalDetails] = useState({
     name: '',
     location: '',
@@ -25,6 +26,8 @@ function UserProfile() {
     age: '',
     gender: '',
   });
+  const [remark, setRemark] = useState('');
+  const [remarkTimestamp, setRemarkTimestamp] = useState(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -55,21 +58,14 @@ function UserProfile() {
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, []);
 
   useEffect(() => {
-    if (location.state?.appointmentData && user) {
+    if (location.state) {
       setAppointmentData(location.state.appointmentData);
-      localStorage.setItem(`appointmentData_${user.uid}`, JSON.stringify(location.state.appointmentData));
-  
-      if (location.state.action === 'approve') {
-        setIsApproved(true);
-      } else if (location.state.action === 'reject') {
-        setIsApproved(false);
-        alert("Your appointment has been rejected.");
-      }
+      setShowRemark(location.state.showRemark || false);
     }
-  }, [location.state, user]);
+  }, [location]);
   
   
   
@@ -94,9 +90,12 @@ function UserProfile() {
     const userRef = doc(crud, `users/${userId}`);
     const unsubscribe = onSnapshot(userRef, (doc) => {
       const data = doc.data();
-      if (data) {
-        setAppointmentData(data.appointmentData || null);
-        setIsApproved(data.appointmentData?.status === 'approved'); // Check if the appointment is approved
+      if (data && data.appointmentData) {
+        setAppointmentData(data.appointmentData);
+        setIsApproved(data.appointmentData.status === 'approved');
+        setRemark(data.appointmentData.remark || '');
+        setRemarkTimestamp(data.appointmentData.remarkTimestamp || null);
+        console.log("Updated appointment data:", data.appointmentData); // Add this line for debugging
       }
     });
     return unsubscribe;
@@ -148,12 +147,10 @@ function UserProfile() {
       const docSnap = await getDoc(userRef);
   
       if (docSnap.exists()) {
-        // Document exists, update only the profilePicture field while preserving other data
         await updateDoc(userRef, {
           profilePicture: url
         });
   
-        // Update the local state with the new profile picture
         setProfilePic(url);
         setPreviewPic('');
         console.log("Profile picture updated successfully:", url);
@@ -242,17 +239,24 @@ function UserProfile() {
       <Navbar />
       <div className="container my-5">
         <div className="row">
-          <div className="col-md-4">
-            <div className="card profile-card">
+          <div className="col-lg-4">
+            <div className="card profile-card shadow">
               <div className="card-body text-center">
-                <div className="profile-image-container">
-                  <img
-                    src={previewPic || profilePic}
-                    className="profile-image"
-                    alt="Profile"
-                  />
+                <div className="profile-image-container mb-4">
+                  {previewPic || profilePic ? (
+                    <img
+                      src={previewPic || profilePic}
+                      className="profile-image rounded-circle"
+                      alt="Profile"
+                    />
+                  ) : (
+                    <FaUserCircle className="profile-icon" size={150} />
+                  )}
+                  <label htmlFor="fileInput" className="edit-profile-pic">
+                    <FaCamera size={24} />
+                  </label>
                 </div>
-                <h4 className="mt-3">{personalDetails.name || 'User'}</h4>
+                <h3 className="mb-2">{personalDetails.name || 'User'}</h3>
                 <p className="text-muted">{personalDetails.email}</p>
                 <input
                   type="file"
@@ -261,36 +265,53 @@ function UserProfile() {
                   style={{ display: 'none' }}
                   id="fileInput"
                 />
-                <label htmlFor="fileInput" className="btn btn-outline-primary mt-2">
-                  Change Picture
-                </label>
+              </div>
+            </div>
+            
+            <div className="card mt-4 remark-card shadow">
+              <div className="card-body">
+                <h4 className="card-title mb-4">Appointment Remark</h4>
+                {remark ? (
+                  <>
+                    <p>{remark}</p>
+                    {remarkTimestamp && (
+                      <small className="text-muted">
+                        Added on: {new Date(remarkTimestamp).toLocaleString()}
+                      </small>
+                    )}
+                  </>
+                ) : (
+                  <p>No remark available</p>
+                )}
               </div>
             </div>
           </div>
-          <div className="col-md-8">
-            <div className="card details-card">
+          <div className="col-lg-8">
+            <div className="card details-card shadow">
               <div className="card-body">
-                <h4 className="card-title mb-4">Personal Details</h4>
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                  <h4 className="card-title m-0">Personal Details</h4>
+                  <button className="btn btn-outline-primary btn-sm" onClick={() => setShowModal(true)}>
+                    <FaEdit /> Edit
+                  </button>
+                </div>
                 <div className="row">
                   {Object.entries(personalDetails).map(([key, value]) => (
                     <div className="col-md-6 mb-3" key={key}>
-                      <div className="detail-item">
+                      <div className="detail-item d-flex align-items-center">
                         {getIcon(key)}
-                        <div>
-                          <h6 className="mb-0">{capitalizeFirstLetter(key)}</h6>
-                          <p className="text-muted">{value || 'Not provided'}</p>
+                        <div className="ms-3">
+                          <h6 className="mb-0 text-muted">{capitalizeFirstLetter(key)}</h6>
+                          <p className="mb-0 fw-bold">{value || 'Not provided'}</p>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
-                <button className="btn btn-primary mt-3" onClick={() => setShowModal(true)}>
-                  Edit
-                </button>
               </div>
             </div>
             
-            <div className="card mt-4 appointment-card">
+            <div className="card mt-4 appointment-card shadow">
               <div className="card-body">
                 <h4 className="card-title mb-4">Appointment Status</h4>
                 <div className="table-responsive">
@@ -313,7 +334,7 @@ function UserProfile() {
                           <td>{appointmentData.time}</td>
                           <td>
                             <span className={`badge ${getStatusBadgeClass(appointmentData.status)}`}>
-                              {capitalizeFirstLetter(appointmentData.status)}
+                              {capitalizeFirstLetter(appointmentData.status || 'pending')}
                             </span>
                           </td>
                         </tr>
@@ -383,6 +404,7 @@ function getStatusBadgeClass(status) {
   switch (status) {
     case 'approved': return 'bg-success';
     case 'rejected': return 'bg-danger';
+    case 'remarked': return 'bg-info';
     default: return 'bg-warning';
   }
 }
