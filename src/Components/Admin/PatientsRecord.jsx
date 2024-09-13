@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getFirestore, collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import Sidebar from '../Global/Sidebar';
 import './PatientsRecordStyle.css';
 
@@ -6,15 +7,31 @@ function PatientsRecord() {
   const [patientsRecords, setPatientsRecords] = useState([]);
 
   useEffect(() => {
-    const storedRecords = JSON.parse(localStorage.getItem('patientsRecords') || '[]');
-    setPatientsRecords(storedRecords);
+    fetchRecords();
   }, []);
 
-  const handleDeleteRecord = (index) => {
-    const updatedRecords = [...patientsRecords];
-    updatedRecords.splice(index, 1);
-    setPatientsRecords(updatedRecords);
-    localStorage.setItem('patientsRecords', JSON.stringify(updatedRecords));
+  const fetchRecords = async () => {
+    const firestore = getFirestore();
+    try {
+      const recordsSnapshot = await getDocs(collection(firestore, 'patientsRecords'));
+      const recordsData = recordsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setPatientsRecords(recordsData);
+    } catch (error) {
+      console.error("Error fetching patient records: ", error);
+    }
+  };
+
+  const handleDeleteRecord = async (id) => {
+    if (window.confirm("Are you sure you want to delete this record?")) {
+      try {
+        const firestore = getFirestore();
+        await deleteDoc(doc(firestore, 'patientsRecords', id));
+        setPatientsRecords(prev => prev.filter(record => record.id !== id));
+      } catch (error) {
+        console.error("Error deleting record: ", error);
+        alert("Failed to delete the record. Please try again.");
+      }
+    }
   };
 
   const handleViewDetails = (record) => {
@@ -71,6 +88,7 @@ Time: ${record.time || 'N/A'}
       <main className="patients-record-main">
         <div className="patients-record-header">
           <h1>Patients Records</h1>
+          <button className="btn btn-primary">Download ll Records</button>
         </div>
         <div className="patients-record-content">
           <div className="table-responsive">
@@ -89,7 +107,7 @@ Time: ${record.time || 'N/A'}
               </thead>
               <tbody>
                 {patientsRecords.map((record, index) => (
-                  <tr key={index}>
+                  <tr key={record.id}>
                     <td>{index + 1}</td>
                     <td>{record.name || 'N/A'}</td>
                     <td>{record.email || 'N/A'}</td>
@@ -101,7 +119,7 @@ Time: ${record.time || 'N/A'}
                       <button className="btn btn-primary btn-sm me-2" onClick={() => handleViewDetails(record)}>
                         <i className="bi bi-download"></i> Download
                       </button>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleDeleteRecord(index)}>
+                      <button className="btn btn-danger btn-sm" onClick={() => handleDeleteRecord(record.id)}>
                         <i className="bi bi-trash"></i>
                       </button>
                       {record.importedFile && (

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useHistory } from 'react-router-dom';
-import { getFirestore, collection, addDoc, doc, updateDoc, getDoc, setDoc} from 'firebase/firestore';
+import { getFirestore, collection, addDoc, doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import './AppointmentForm.css'; 
 import Navbar from '../Components/Global/Navbar_Main';
