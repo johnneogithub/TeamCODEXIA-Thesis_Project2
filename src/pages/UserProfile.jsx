@@ -28,6 +28,7 @@ function UserProfile() {
   });
   const [remark, setRemark] = useState('');
   const [remarkTimestamp, setRemarkTimestamp] = useState(null);
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -95,7 +96,8 @@ function UserProfile() {
         setIsApproved(data.appointmentData.status === 'approved');
         setRemark(data.appointmentData.remark || '');
         setRemarkTimestamp(data.appointmentData.remarkTimestamp || null);
-        console.log("Updated appointment data:", data.appointmentData); // Add this line for debugging
+        setMessage(data.appointmentData.message || '');
+        console.log("Updated appointment data:", data.appointmentData);
       }
     });
     return unsubscribe;
@@ -346,6 +348,12 @@ function UserProfile() {
                     </tbody>
                   </table>
                 </div>
+                {message && (
+                  <div className="mt-3">
+                    <h5>Additional Message:</h5>
+                    <p>{message}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

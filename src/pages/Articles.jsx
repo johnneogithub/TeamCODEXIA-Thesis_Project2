@@ -1,5 +1,5 @@
 import React from 'react';
-import '../pages/ArticlesStyle.css';
+import './ArticlesStyle.css';
 
 //Global
 import Nav from '../Components/Global/Navbar_Main';
@@ -16,80 +16,72 @@ import SX2 from '../Components/Assets/Safesex_img.jpg';
 
 const Articles = () => {
   return (
-    <>
-    <Nav/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
-    
-    <div className='Heading'>
-        <h2>Journals and Articles</h2>
-            <div className='Underline'>
-                <h3>Looking for more informations? Here are the best articles that will suit your interest!</h3>
-            </div>
+    <div className="articles-page">
+      <Nav />
+      <header className="articles-header" style={{backgroundImage: `url(${Violet_Bkg})`}}>
+        <div className="header-content">
+          <h1>Journals and Articles</h1>
+          <p>Explore our curated collection of informative articles to expand your knowledge on reproductive health and family planning.</p>
         </div>
-
-
-    <img className='articles-image' src={Violet_Bkg} alt='Article Background'/>
-    <section className='article-cards'>
-    <div class="card-list">
-        <a href="https://www.healthline.com/health/womens-health/female-reproductive-organs#organs" target="_blank" rel="noopener noreferrer" class="card-item">
-            <img src={WomenRH} alt="Card Visualizer"/>
-            <span class="Reproductive">Reproductive</span>
-            <h3>Learn more about Women's Reproductive Health</h3>
-            <div class="arrow">
-                <i class="fas fa-arrow-right card-icon"></i>
-            </div>
-
-        </a>
-        <a href="https://www.healthline.com/health/mens-health/male-genitalia" target="_blank" rel="noopener noreferrer" class="card-item">
-            <img src={MenRH} alt="Card Visualizer"/>
-            <span class="Reproductive">Reproductive</span>
-            <h3>Learn more about Men's Reproductive Health</h3>
-            <div class="arrow">
-                <i class="fas fa-arrow-right card-icon"></i>
-            </div>
-        </a>
-
-        <a href="https://doh.gov.ph/uhc/health-programs/family-planning-program/" target="_blank" rel="noopener noreferrer" class="card-item">
-            <img src={FP1} alt="Card Visualizer"/>
-            <span class="FP">Family Planning</span>
-            <h3>What is family planning in the Philippines?</h3>
-            <div class="arrow">
-                <i class="fas fa-arrow-right card-icon"></i>
-            </div>
-        </a>
-
-        <a href="https://hellodoctor.com.ph/sexual-wellness/contraception/importance-family-planning/" target="_blank" rel="noopener noreferrer" class="card-item">
-            <img src={FP2} alt="Card Visualizer"/>
-            <span class="FP">Family Planning</span>
-            <h3>Growing family size? Have family planning!</h3>
-            <div class="arrow">
-                <i class="fas fa-arrow-right card-icon"></i>
-            </div>
-        </a>
-
-        <a href="https://www.netdoctor.co.uk/healthy-living/sex-life/a2314/sexual-intercourse/" target="_blank" rel="noopener noreferrer" class="card-item">
-            <img src={SX1} alt="Card Visualizer"/>
-            <span class="Sex">Sex</span>
-            <h3>What is an intercourse and how does it work?</h3>
-            <div class="arrow">
-                <i class="fas fa-arrow-right card-icon"></i>
-            </div>
-        </a>
-
-        <a href="https://health.clevelandclinic.org/safe-sex" target="_blank" rel="noopener noreferrer" class="card-item">
-            <img src={SX2} alt="Card Visualizer"/>
-            <span class="Sex">Sex</span>
-            <h3>Let's practice safe sex, for the better!</h3>
-            <div class="arrow">
-                <i class="fas fa-arrow-right card-icon"></i>
-            </div>
-        </a>
-      </div>
-     </section>
-      <Footer/> 
-    </>
-    
-  )
+      </header>
+      
+      <main className="articles-content">
+        <div className="card-grid">
+          <ArticleCard 
+            image={WomenRH}
+            category="Reproductive"
+            title="Women's Reproductive Health"
+            link="https://www.healthline.com/health/womens-health/female-reproductive-organs#organs"
+          />
+          <ArticleCard 
+            image={MenRH}
+            category="Reproductive"
+            title="Men's Reproductive Health"
+            link="https://www.healthline.com/health/mens-health/male-genitalia"
+          />
+          <ArticleCard 
+            image={FP1}
+            category="Family Planning"
+            title="Family Planning in the Philippines"
+            link="https://doh.gov.ph/uhc/health-programs/family-planning-program/"
+          />
+          <ArticleCard 
+            image={FP2}
+            category="Family Planning"
+            title="Importance of Family Planning"
+            link="https://hellodoctor.com.ph/sexual-wellness/contraception/importance-family-planning/"
+          />
+          <ArticleCard 
+            image={SX1}
+            category="Sex"
+            title="Understanding Sexual Intercourse"
+            link="https://www.netdoctor.co.uk/healthy-living/sex-life/a2314/sexual-intercourse/"
+          />
+          <ArticleCard 
+            image={SX2}
+            category="Sex"
+            title="Practicing Safe Sex"
+            link="https://health.clevelandclinic.org/safe-sex"
+          />
+        </div>
+      </main>
+      
+      <Footer />
+    </div>
+  );
 }
+
+const ArticleCard = ({ image, category, title, link }) => (
+  <a href={link} target="_blank" rel="noopener noreferrer" className="card-item">
+    <div className="card-image" style={{backgroundImage: `url(${image})`}}></div>
+    <div className="card-content">
+      <span className={`category ${category.toLowerCase()}`}>{category}</span>
+      <h3>{title}</h3>
+      <div className="arrow">
+        <i className="fas fa-arrow-right card-icon"></i>
+      </div>
+    </div>
+  </a>
+);
 
 export default Articles;

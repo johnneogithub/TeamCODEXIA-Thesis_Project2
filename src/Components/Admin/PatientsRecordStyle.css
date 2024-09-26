@@ -13,59 +13,307 @@
 
 .patients-record-container {
   display: flex;
+  background-color: #f4f6f9;
   min-height: 100vh;
 }
 
 .patients-record-main {
   flex-grow: 1;
   padding: 2rem;
-  background-color: #f4f5f7;
 }
 
 .patients-record-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 2rem;
 }
 
 .patients-record-header h1 {
-  margin: 0;
-  color: #333;
   font-size: 2rem;
+  color: #333;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-bar input {
+  border: none;
+  background: transparent;
+  margin-left: 0.5rem;
+  flex-grow: 1;
+  font-size: 1rem;
+}
+
+.search-bar svg {
+  color: #6c757d;
 }
 
 .patients-record-content {
   background-color: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
 }
 
 .table {
+  font-size: 0.85rem;
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 0.5rem;
+  table-layout: fixed;
+}
+
+.table th,
+.table td {
+  padding: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .table th {
-  background-color: #f8f9fa;
-  color: #495057;
   font-weight: 600;
-  text-transform: uppercase;
-  padding: 1rem;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.table th:hover {
+  background-color: #e9ecef;
 }
 
 .table td {
-  padding: 1rem;
   vertical-align: middle;
 }
 
-.table-hover tbody tr:hover {
-  background-color: #f8f9fa;
+/* Column widths */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: 3%;
 }
 
-.btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  width: 15%;
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  width: 20%;
+}
+
+.table th:nth-child(4),
+.table td:nth-child(4) {
+  width: 5%;
+}
+
+.table th:nth-child(5),
+.table td:nth-child(5) {
+  width: 15%;
+}
+
+.table th:nth-child(6),
+.table td:nth-child(6) {
+  width: 15%;
+}
+
+.table th:nth-child(7),
+.table td:nth-child(7) {
+  width: 17%;
+}
+
+.table th:nth-child(8),
+.table td:nth-child(8) {
+  width: 10%;
+}
+
+.date {
+  font-weight: 500;
+}
+
+.time {
+  color: #6c757d;
+}
+
+.file-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 3.5em;
+  overflow-y: auto;
+}
+
+.file-link {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 2px;
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.2s;
+  font-size: 0.85rem;
+}
+
+.file-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.file-link svg {
+  margin-right: 5px;
+}
+
+.no-files {
+  color: #6c757d;
+  font-style: italic;
+}
+
+.btn-group {
+  display: flex;
+}
+
+.btn-group .btn {
+  padding: 0.2rem 0.4rem;
+  margin-right: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.btn-group .btn:last-child {
+  margin-right: 0;
+}
+
+.imported-file-row {
+  background-color: #e8f4ff;
+}
+
+.imported-file-container {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  padding: 0.5rem 0;
+}
+
+.imported-file-text {
+  margin-right: 10px;
+  font-weight: bold;
+  color: #0056b3;
+}
+
+.imported-file {
+  color: #0056b3;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+  margin-top: 1.5rem;
+}
+
+.page-item {
+  margin: 0 0.25rem;
+}
+
+.page-link {
+  color: #007bff;
+  padding: 0.5rem 0.75rem;
+  text-decoration: none;
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+  transition: all 0.2s;
+}
+
+.page-item.active .page-link {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+.page-link:hover {
+  background-color: #e9ecef;
+  border-color: #dee2e6;
+}
+
+.imported-file-row td {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.imported-file {
+  margin-top: 0;
+  font-weight: normal;
+  color: #28a745;
+}
+
+/* Remove or comment out the following styles as they're no longer needed */
+/*
+.imported-file-indicator {
+  margin-top: 5px;
+  font-size: 0.8rem;
+  color: #28a745;
+  display: flex;
+  align-items: center;
+}
+
+.imported-file-indicator svg {
+  margin-right: 5px;
+}
+*/
+
+.date-time {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.date {
+  font-weight: 500;
+}
+
+.time-separator {
+  margin: 0 0.5rem;
+  color: #6c757d;
+}
+
+.time {
+  color: #6c757d;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.file-item .btn {
+  margin-left: 10px;
+}
+
+.download-progress {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #f0f0f0;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  z-index: 1000;
+  min-width: 200px;
+}
+
+.download-progress progress {
+  width: 100%;
+  margin-top: 10px;
+  height: 10px;
+  border-radius: 5px;
+}
+
+.download-progress-text {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 5px;
 }
