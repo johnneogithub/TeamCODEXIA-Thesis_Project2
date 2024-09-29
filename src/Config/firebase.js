@@ -40,3 +40,5 @@ export const GoogleAuth = async () => {
 
 // Export Firebase services
 export { auth, crud, storage };
+
+
