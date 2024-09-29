@@ -14,7 +14,8 @@ const AppointmentFillUp = () => {
     age: "",
     appointmentType: "",
     date: "",
-    time: ""
+    time: "",
+    message: "", // Add this line
   });
 
   const [submitted, setSubmitted] = useState(false);
@@ -41,39 +42,38 @@ const AppointmentFillUp = () => {
     }
   
     try {
-      console.log("Submitting appointment data:", searchQuery);
-      const userId = auth.currentUser.uid; // Get the current user ID
+      const appointmentData = {
+        ...searchQuery,
+      };
+
+      console.log("Submitting appointment data:", appointmentData);
+      const userId = auth.currentUser.uid;
       const userRef = doc(firestore, `users/${userId}`);
   
-      // Check if the document exists
       const docSnap = await getDoc(userRef);
       if (docSnap.exists()) {
-        // Document exists, update it
         await updateDoc(userRef, {
-          appointmentData: searchQuery,
+          appointmentData: appointmentData,
           isApproved: false
         });
       } else {
-        // Document does not exist, create it
         await setDoc(userRef, {
-          appointmentData: searchQuery,
+          appointmentData: appointmentData,
           isApproved: false,
-          // You can add more fields here if needed
         });
       }
   
-      // Add the appointment to the 'pendingAppointments' collection
       const appointmentsRef = collection(firestore, 'pendingAppointments');
       await addDoc(appointmentsRef, {
-        ...searchQuery,
+        ...appointmentData,
         isApproved: false,
-        userId: userId // Optionally store the user ID for reference
+        userId: userId
       });
   
       alert("Appointment scheduled successfully!");
       history.push({
         pathname: '/UserProfile',
-        state: { appointmentData: searchQuery, action: 'update' }
+        state: { appointmentData: appointmentData, action: 'update' }
       });
   
     } catch (error) {
@@ -173,6 +173,18 @@ const AppointmentFillUp = () => {
                   onChange={handleChange}
                   autoComplete="off"
                 />
+              </div>
+              <div className="form-group">
+                <label htmlFor="message">Reason for Appointment / Additional Message</label>
+                <textarea
+                  id="message"
+                  className="form-control"
+                  name="message"
+                  value={searchQuery.message}
+                  onChange={handleChange}
+                  rows="3"
+                  placeholder="Please provide any additional information or specific concerns"
+                ></textarea>
               </div>
               <div className="form-group">
                 <button type="submit" className="submit-btn" disabled={submitted && Object.values(searchQuery).some(value => value === "")}>

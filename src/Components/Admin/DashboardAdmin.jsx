@@ -1,8 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc, setDoc, getDoc  } from 'firebase/firestore';
 import Sidebar from '../Global/Sidebar';
 import { Link } from 'react-router-dom';
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import ReactPaginate from 'react-paginate';
+import { getAuth } from 'firebase/auth';
 
 import Clinic from '../Assets/stmargaretlogo.png'
 import logomini from '../Assets/logo-mini.svg'
@@ -26,6 +30,10 @@ function DashboardAdmin() {
   const [approvedAppointments, setApprovedAppointments] = useState([]);
   const [remarkText, setRemarkText] = useState('');
   const [openRemarkId, setOpenRemarkId] = useState(null);
+  const [selectedMessage, setSelectedMessage] = useState(null);
+  const [currentApprovedPage, setCurrentApprovedPage] = useState(0);
+  const [currentPendingPage, setCurrentPendingPage] = useState(0);
+  const itemsPerPage = 5; // You can adjust this number
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -64,7 +72,8 @@ function DashboardAdmin() {
         // Update the status to 'approved'
         const updatedAppointmentData = {
           ...appointmentData,
-          status: 'approved'
+          status: 'approved',
+          isApproved: true
         };
         
         // Move to approved appointments
@@ -84,9 +93,13 @@ function DashboardAdmin() {
         // Update local state
         setPendingAppointments(prev => prev.filter(app => app.id !== id));
         setApprovedAppointments(prev => [...prev, { id, ...updatedAppointmentData }]);
+
+        // Optionally, you can show a success message
+        alert("Appointment approved successfully!");
       }
     } catch (error) {
       console.error("Error approving appointment: ", error);
+      alert("An error occurred while approving the appointment. Please try again.");
     }
   };
   
@@ -142,11 +155,17 @@ const handleDone = async (appointment) => {
       ...appointment,
       importedFile: appointment.importedFile ? {
         name: appointment.importedFile.name,
-        data: appointment.importedFile.data,
+        url: appointment.importedFile.url,
         type: appointment.importedFile.type
       } : null,
       completedAt: new Date().toISOString() 
     };
+
+    // Remove any undefined fields
+    Object.keys(appointmentWithFile).forEach(key => 
+      appointmentWithFile[key] === undefined && delete appointmentWithFile[key]
+    );
+
     await setDoc(doc(firestore, 'patientsRecords', appointment.id), appointmentWithFile);
 
     // Update local state
@@ -156,8 +175,11 @@ const handleDone = async (appointment) => {
 
     console.log('Appointment moved to Patient Records successfully');
 
-    // Navigate to PatientsRecord page
-    // history.push('/PatientsRecord');
+    // Navigate to PatientsRecord page with the new record data
+    history.push({
+      // pathname: '/PatientsRecord',
+      state: { newRecord: appointmentWithFile }
+    });
   } catch (error) {
     console.error("Error handling done action: ", error);
   }
@@ -166,32 +188,42 @@ const handleDone = async (appointment) => {
 const handleImport = (appointment) => {
   const input = document.createElement('input');
   input.type = 'file';
-  input.onchange = (event) => {
+  input.onchange = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const importedData = e.target.result;
-          const base64Data = btoa(String.fromCharCode.apply(null, new Uint8Array(importedData)));
-          updateAppointment(appointment, file.name, base64Data, file.type);
-        } catch (error) {
-          console.error('Error reading imported file:', error);
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        
+        if (!user) {
+          throw new Error('User not authenticated');
         }
-      };
-      reader.readAsArrayBuffer(file);
+
+        const storage = getStorage();
+        const storageRef = ref(storage, `appointments/${user.uid}/${appointment.id}/${file.name}`);
+        
+        // Upload file to Firebase Storage
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        
+        // Update appointment with file metadata and download URL
+        updateAppointment(appointment, file.name, downloadURL, file.type);
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        alert(`Error uploading file: ${error.message}`);
+      }
     }
   };
   input.click();
 };
 
-const updateAppointment = async (appointment, fileName, importedData, fileType) => {
+const updateAppointment = async (appointment, fileName, fileURL, fileType) => {
   try {
     // Update the appointment in your state
     setApprovedAppointments(prevAppointments => 
       prevAppointments.map(app => 
         app.id === appointment.id 
-          ? { ...app, importedFile: { name: fileName, data: importedData, type: fileType } }
+          ? { ...app, importedFile: { name: fileName, url: fileURL, type: fileType } }
           : app
       )
     );
@@ -201,7 +233,7 @@ const updateAppointment = async (appointment, fileName, importedData, fileType) 
     const appointmentRef = doc(firestore, 'approvedAppointments', appointment.id);
     await setDoc(appointmentRef, {
       ...appointment,
-      importedFile: { name: fileName, data: importedData, type: fileType }
+      importedFile: { name: fileName, url: fileURL, type: fileType }
     }, { merge: true });
 
     console.log('Appointment updated successfully in database');
@@ -242,18 +274,49 @@ const handleRemarkSubmit = async (id) => {
         });
       }
 
-      // Update local state
+      // Update local state to remove the appointment
       setPendingAppointments(prevAppointments =>
         prevAppointments.filter(app => app.id !== id)
       );
 
+      // Close the remark popup
       setOpenRemarkId(null);
       setRemarkText('');
+      
+      // Optionally, show a success message
+      alert("Remark added successfully and appointment removed from pending list!");
     } catch (error) {
       console.error("Error adding remark: ", error);
+      alert("An error occurred while adding the remark. Please try again.");
     }
   }
 };
+
+const handleMessageClick = (message) => {
+  setSelectedMessage(message);
+};
+
+const closeMessagePopup = () => {
+  setSelectedMessage(null);
+};
+
+const handleApprovedPageClick = ({ selected }) => {
+  setCurrentApprovedPage(selected);
+};
+
+const handlePendingPageClick = ({ selected }) => {
+  setCurrentPendingPage(selected);
+};
+
+const paginatedApprovedAppointments = approvedAppointments.slice(
+  currentApprovedPage * itemsPerPage,
+  (currentApprovedPage + 1) * itemsPerPage
+);
+
+const paginatedPendingAppointments = pendingAppointments.slice(
+  currentPendingPage * itemsPerPage,
+  (currentPendingPage + 1) * itemsPerPage
+);
 
   return (
     <>
@@ -329,43 +392,73 @@ const handleRemarkSubmit = async (id) => {
                 <h4 className="card-title">Approved Appointment</h4>
                 <div className="table-responsive">
                   <table className="table">
-                  <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Age</th>
-                  <th>Type of Appointment</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {approvedAppointments.map((appointment, index) => (
-                  <tr key={appointment.id}>
-                    <td>{index + 1}</td>
-                    <td>{appointment.name || 'N/A'}</td>
-                    <td>{appointment.email || 'N/A'}</td>
-                    <td>{appointment.age || 'N/A'}</td>
-                    <td>{appointment.appointmentType || 'N/A'}</td>
-                    <td>{appointment.date || 'N/A'}</td>
-                    <td>{appointment.time || 'N/A'}</td>
-                    <td>
-                      <button className='badge badge-gradient-success me-2' onClick={() => handleDone(appointment)}>Done</button>
-                      <button className='badge badge-gradient-info' onClick={() => handleImport(appointment)}>
-                        <i className="bi bi-file-earmark-arrow-up"></i> Import
-                      </button>
-                      {appointment.importedFile && (
-                        <span className="ms-2">{appointment.importedFile.name}</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+                    <thead>
+                      <tr>
+                        <th style={{width: '5%'}}>#</th>
+                        <th style={{width: '15%'}}>Name</th>
+                        <th style={{width: '20%'}}>Email</th>
+                        <th style={{width: '5%'}}>Age</th>
+                        <th style={{width: '15%'}}>Type of Appointment</th>
+                        <th style={{width: '10%'}}>Date</th>
+                        <th style={{width: '10%'}}>Time</th>
+                        <th style={{width: '10%'}}>Message</th>
+                        <th style={{width: '25%'}}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedApprovedAppointments.map((appointment, index) => (
+                        <tr key={appointment.id}>
+                          <td>{index + 1}</td>
+                          <td>{appointment.name || 'N/A'}</td>
+                          <td>{appointment.email || 'N/A'}</td>
+                          <td>{appointment.age || 'N/A'}</td>
+                          <td>{appointment.appointmentType || 'N/A'}</td>
+                          <td>{appointment.date || 'N/A'}</td>
+                          <td>{appointment.time || 'N/A'}</td>
+                          <td>
+                            {appointment.message ? (
+                              <i 
+                                className="bi bi-envelope-fill" 
+                                style={{ cursor: 'pointer', fontSize: '1.5em', color: 'rgb(197, 87, 219)' }}
+                                onClick={() => handleMessageClick(appointment.message)}
+                              ></i>
+                            ) : 'N/A'}
+                          </td>
+                          <td>
+                            <div className="d-flex flex-row align-items-center">
+                              <button className='btn btn-success btn-sm me-2' onClick={() => handleDone(appointment)}>Done</button>
+                              <button className='btn btn-info btn-sm me-2' onClick={() => handleImport(appointment)}>
+                                <i className="bi bi-file-earmark-arrow-up"></i> Import
+                              </button>
+                              {appointment.importedFile && (
+                                <small className="text-muted">{appointment.importedFile.name}</small>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
                   </table>
-                  
                 </div>
+                <ReactPaginate
+                  previousLabel={'<'}
+                  nextLabel={'>'}
+                  breakLabel={'...'}
+                  pageCount={Math.ceil(approvedAppointments.length / itemsPerPage)}
+                  marginPagesDisplayed={2}
+                  pageRangeDisplayed={5}
+                  onPageChange={handleApprovedPageClick}
+                  containerClassName={'pagination justify-content-center'}
+                  pageClassName={'page-item'}
+                  pageLinkClassName={'page-link'}
+                  previousClassName={'page-item'}
+                  previousLinkClassName={'page-link'}
+                  nextClassName={'page-item'}
+                  nextLinkClassName={'page-link'}
+                  breakClassName={'page-item'}
+                  breakLinkClassName={'page-link'}
+                  activeClassName={'active'}
+                />
               </div>
             </div>
           </div>
@@ -375,67 +468,112 @@ const handleRemarkSubmit = async (id) => {
           <div className="col-12 grid-margin">
             <div className="card">
               <div className="card-body">
-
                 <h4 className="card-title">For Approval of Appointment</h4>
-
                 <div className="table-responsive">
                   <table className="table">
-                  <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Age</th>
-                  <th>Type of Appointment</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pendingAppointments.map((appointment, index) => (
-                  <React.Fragment key={appointment.id}>
-                    <tr>
-                      <td>{index + 1}</td>
-                      <td>{appointment.name || 'N/A'}</td>
-                      <td>{appointment.email || 'N/A'}</td>
-                      <td>{appointment.age || 'N/A'}</td>
-                      <td>{appointment.appointmentType || 'N/A'}</td>
-                      <td>{appointment.date || 'N/A'}</td>
-                      <td>{appointment.time || 'N/A'}</td>
-                      <td>
-                        <button className='badge badge-gradient-warning me-1' onClick={() => handleApprove(appointment.id)}>Approve</button>
-                        <button className='badge badge-gradient-danger me-1' onClick={() => handleReject(appointment.id)}>Reject</button>
-                        <button className='badge badge-gradient-info' onClick={() => handleRemark(appointment.id)}>Remark</button>
-                      </td>
-                    </tr>
-                    {openRemarkId === appointment.id && (
+                    <thead>
                       <tr>
-                        <td colSpan="8">
-                          <div className="remark-popup">
-                            <textarea 
-                              className="form-control mb-2" 
-                              rows="3" 
-                              value={remarkText}
-                              onChange={(e) => setRemarkText(e.target.value)}
-                              placeholder="Enter your remark here..."
-                            ></textarea>
-                            <button className="btn btn-primary btn-sm" onClick={() => handleRemarkSubmit(appointment.id)}>Submit Remark</button>
-                            <button className="btn btn-secondary btn-sm ms-2" onClick={() => setOpenRemarkId(null)}>Cancel</button>
-                          </div>
-                        </td>
+                        <th style={{width: '5%'}}>#</th>
+                        <th style={{width: '15%'}}>Name</th>
+                        <th style={{width: '20%'}}>Email</th>
+                        <th style={{width: '5%'}}>Age</th>
+                        <th style={{width: '15%'}}>Type of Appointment</th>
+                        <th style={{width: '10%'}}>Date</th>
+                        <th style={{width: '10%'}}>Time</th>
+                        <th style={{width: '10%'}}>Message</th>
+                        <th style={{width: '25%'}}>Action</th>
                       </tr>
-                    )}
-                  </React.Fragment>
-                ))}
-              </tbody>
+                    </thead>
+                    <tbody>
+                      {paginatedPendingAppointments.map((appointment, index) => (
+                        <React.Fragment key={appointment.id}>
+                          <tr>
+                            <td>{index + 1}</td>
+                            <td>{appointment.name || 'N/A'}</td>
+                            <td>{appointment.email || 'N/A'}</td>
+                            <td>{appointment.age || 'N/A'}</td>
+                            <td>{appointment.appointmentType || 'N/A'}</td>
+                            <td>{appointment.date || 'N/A'}</td>
+                            <td>{appointment.time || 'N/A'}</td>
+                            <td>
+                              {appointment.message ? (
+                                <i 
+                                  className="bi bi-envelope-fill" 
+                                  style={{ cursor: 'pointer', fontSize: '1.5em', color: 'rgb(197, 87, 219)' }}
+                                  onClick={() => handleMessageClick(appointment.message)}
+                                ></i>
+                              ) : 'N/A'}
+                            </td>
+                            <td>
+                              <div className="d-flex flex-row align-items-center">
+                                <button className='btn btn-outline-success btn-sm me-2' onClick={() => handleApprove(appointment.id)}>Approve</button>
+                                <button className='btn btn-outline-danger btn-sm me-2' onClick={() => handleReject(appointment.id)}>Reject</button>
+                                <button className='btn btn-outline-info btn-sm me-2' onClick={() => handleRemark(appointment.id)}>Remark</button>
+                              </div>
+                            </td>
+                          </tr>
+                          {openRemarkId === appointment.id && (
+                            <tr>
+                              <td colSpan="9">
+                                <div className="remark-popup">
+                                  <textarea
+                                    className="form-control mb-2"
+                                    value={remarkText}
+                                    onChange={(e) => setRemarkText(e.target.value)}
+                                    placeholder="Enter your remark here..."
+                                    rows="3"
+                                  />
+                                  <button className="btn btn-primary" onClick={() => handleRemarkSubmit(appointment.id)}>Submit Remark</button>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </tbody>
                   </table>
-                  
                 </div>
+                <ReactPaginate
+                  previousLabel={'<'}
+                  nextLabel={'>'}
+                  breakLabel={'...'}
+                  pageCount={Math.ceil(pendingAppointments.length / itemsPerPage)}
+                  marginPagesDisplayed={2}
+                  pageRangeDisplayed={5}
+                  onPageChange={handlePendingPageClick}
+                  containerClassName={'pagination justify-content-center'}
+                  pageClassName={'page-item'}
+                  pageLinkClassName={'page-link'}
+                  previousClassName={'page-item'}
+                  previousLinkClassName={'page-link'}
+                  nextClassName={'page-item'}
+                  nextLinkClassName={'page-link'}
+                  breakClassName={'page-item'}
+                  breakLinkClassName={'page-link'}
+                  activeClassName={'active'}
+                />
               </div>
             </div>
           </div>
         </div>
+
+        {selectedMessage && (
+          <div className="message-popup" style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            backgroundColor: 'white',
+            padding: '20px',
+            borderRadius: '5px',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+            zIndex: 1000
+          }}>
+            <h5>Message</h5>
+            <p>{selectedMessage}</p>
+            <button className="btn btn-primary" onClick={closeMessagePopup}>Close</button>
+          </div>
+        )}
 
 </div>
 

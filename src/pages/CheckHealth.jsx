@@ -1,5 +1,5 @@
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import './CheckHealthStyle.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css'; // Make sure this line is included
@@ -15,7 +15,7 @@ const Type = () => {
     };
 
     const handleGetDirections = () => {
-        const address = encodeURIComponent("GF 74A 20th St., East Bajac Bajac, Olongapo, Philippines");
+        const address = encodeURIComponent("74 E 20th St, East Bajac Bajac, Olongapo, Philippines");
         window.open(`https://www.google.com/maps/dir/?api=1&destination=${address}`, '_blank');
     };
 
@@ -78,9 +78,9 @@ const Type = () => {
               Partnered with the innovative family planning application, PlanItFamIt, we aim to empower and support you in every step 
               of your family planning journey. Together, let's celebrate the joy of parenthood!
             </p>
-            <button className="btn mt-3" style={{color: 'rgb(197, 87, 219)', borderColor: 'rgb(197, 87, 219)'}} onClick={() => history.push('/about')}>
+            <Link to="/Aboutus" className="btn mt-3" style={{color: 'rgb(197, 87, 219)', borderColor: 'rgb(197, 87, 219)'}}>
               <i className="bi bi-info-circle me-2"></i> Learn More
-            </button>
+            </Link>
           </div>
           <div className="col-lg-6 mt-4 mt-lg-0">
             <img src={Cover} alt="Mother and Baby" className="img-fluid rounded shadow-lg" />
@@ -148,7 +148,7 @@ const Type = () => {
               We extend a warm welcome to you at our clinic located at:
             </p>
             <p className="font-weight-bold">
-              GF 74A 20th St., East Bajac Bajac, Olongapo, Philippines
+              74 E 20th St, East Bajac Bajac, Olongapo, Philippines
             </p>
             <p>
               Our dedicated team is here to provide quality maternal and child care services. 
@@ -165,7 +165,7 @@ const Type = () => {
           <div className="col-lg-6 mt-4 mt-lg-0">
             <div className="rounded shadow overflow-hidden">
               <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3855.0679128830735!2d120.28204731484233!3d14.83307998964941!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33967b0f9c9f9d6f%3A0x9f7c7d0a4b4b4b4b!2s20th%20St%2C%20East%20Bajac-Bajac%2C%20Olongapo%2C%20Zambales!5e0!3m2!1sen!2sph!4v1623456789012!5m2!1sen!2sph" 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3855.0679128830735!2d120.28204731484233!3d14.83307998964941!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33967b0f9c9f9d6f%3A0x9f7c7d0a4b4b4b4b!2s74%20E%2020th%20St%2C%20East%20Bajac-Bajac%2C%20Olongapo%2C%20Zambales!5e0!3m2!1sen!2sph!4v1623456789012!5m2!1sen!2sph" 
                 width="100%" 
                 height="450" 
                 style={{border:0}} 

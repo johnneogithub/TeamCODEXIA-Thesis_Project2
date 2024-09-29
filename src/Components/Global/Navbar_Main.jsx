@@ -5,6 +5,7 @@ import iconyou from '../Assets/icon_you.png'; // Import the default icon
 import React, { useState, useEffect } from 'react';
 import { auth, crud } from '../../Config/firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { FaUser, FaSignOutAlt } from 'react-icons/fa'; // Import icons
 
 function Nav() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -49,35 +50,41 @@ function Nav() {
     <div className='navbar_master'>
       <input type="checkbox" id="check" checked={menuOpen} onChange={toggleMenu} />
       <label htmlFor="check" className="checkbtn">
-        <i><img src={humber} alt="" /></i>
+        <div className="hamburger-icon">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </label>
 
       <Link className="page_name" to="/Home">
         <label>PlanIt<span>FamIt</span></label>
       </Link>
 
-      <ul>
+      <ul className={menuOpen ? 'open' : ''}>
         <li>
-          <a className="active">
-          Ovulation Tracker
-          </a>
+          <Link to="/OvulationTracker" className="OvulationTracker">
+            <a className="active">Ovulation Tracker</a>
+          </Link>
         </li>
-        <Link to="/CheckHealth" className="st-mar-style-font">
-          <li>
-            <a>St. Margaret Lying In Clinic</a>
-          </li>
-        </Link>
         <li>
+          <Link to="/CheckHealth" className="st-mar-style-font">
+            <a>St. Margaret Lying In Clinic</a>
+          </Link>
+        </li>
+        <li>
+          <Link to="/Aboutus" className="aboutus-style-font">
           <a>About Us</a>
+          </Link>
         </li>
         <li>
           <a className="dropdown-toggle1" onClick={toggleDropdown}>
-            <img src={userProfilePic || iconyou} alt="Profile" className="profile-pic-small" /> {/* Apply CSS class */}
+            <img src={userProfilePic || iconyou} alt="Profile" className="profile-pic-small" />
             {dropdownOpen && (
               <div className="dropdown1">
                 <div className="dropdown-content1">
-                  <Link to="/UserProfile">Profile</Link>
-                  <a onClick={handleLogout}>Logout</a>
+                  <Link to="/UserProfile"><FaUser /> Profile</Link>
+                  <a onClick={handleLogout}><FaSignOutAlt /> Logout</a>
                 </div>
               </div>
             )}
