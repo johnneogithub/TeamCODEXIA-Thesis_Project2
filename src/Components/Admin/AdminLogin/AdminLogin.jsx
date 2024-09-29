@@ -5,9 +5,11 @@ import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import "../AdminLogin/AdminLoginStyle.css";
 import logo_stmargaret from "../../Assets/StMargaret_Logo.jpg";
 import logo_landscape from "../../Assets/PlanItFamIt Landspace Logo White-Bkg.png";
+import { useAuth } from '../../../AuthContext';
 
 function AdminLogin() {
   const history = useHistory();
+  const { loginAsAdmin } = useAuth(); // Destructure loginAsAdmin from AuthContext
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,6 +20,11 @@ function AdminLogin() {
     if (emailVal === "stmrgrtdmn@gmail.com") {
       try {
         await signInWithEmailAndPassword(auth, emailVal, passwordVal);
+        
+        // After successful login, call loginAsAdmin
+        loginAsAdmin();
+
+        // Redirect to dashboard
         history.push("/Dashboard");
       } catch (error) {
         alert(error.message);

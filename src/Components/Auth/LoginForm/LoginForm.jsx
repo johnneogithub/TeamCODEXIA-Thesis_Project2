@@ -1,9 +1,9 @@
 import "../LoginForm/LoginFormStyle.css";
 import { FaUser, FaLock, FaFacebookF, FaTwitter, FaGoogle } from "react-icons/fa";
 import React, { useState, useEffect } from "react";
-import { auth } from "../../../Config/firebase";
 import { useHistory, Link } from 'react-router-dom'; // React Router's useHistory and Link hooks
-import { signInWithEmailAndPassword, signInWithPopup, FacebookAuthProvider, GoogleAuthProvider, getAuth } from "firebase/auth";
+import { signInWithEmailAndPassword, getAuth } from "firebase/auth";
+import { useAuth } from '../../../AuthContext';
 
 import background1 from '../../Assets/landing_page_bkg1.png';
 
@@ -12,9 +12,8 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const history = useHistory();
-  const fbprovider = new FacebookAuthProvider();
-  const googleprovider = new GoogleAuthProvider();
   const auth = getAuth();
+  const { loginAsUser } = useAuth();  // Use the auth context
 
   useEffect(() => {
     const storedEmail = localStorage.getItem("rememberedEmail");
@@ -28,21 +27,27 @@ function LoginForm() {
     e.preventDefault();
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        console.log(userCredential);
+        const user = userCredential.user;
+        console.log("User logged in:", user);
+
+        // Call loginAsUser to set the user in the global auth state
+        loginAsUser(user);
+
+        // Store the remembered email if checkbox is checked
         if (rememberMe) {
           localStorage.setItem("rememberedEmail", email);
         } else {
           localStorage.removeItem("rememberedEmail");
         }
-      
-        // Redirect to the desired page after successful login
-        history.push("/home"); // (Change to desired route) Proceeds to Home.
+
+        // Redirect to home page after successful login
+        history.push("/home");
       })
       .catch((error) => {
-        console.error(error);
-        // Show error message to user
+        console.error("Login error:", error.code, error.message);
+        alert(`Login failed: ${error.message}`);
       });
-  }
+  };
 
   return (
     <>
@@ -54,7 +59,7 @@ function LoginForm() {
                 <img src={background1} className="img-fluid" alt="Log/Regis Illustration" />
               </Link>
             </div>
-            
+
             <div className="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
               <form onSubmit={SignIn} className="px-3 px-md-0">
                 <div className="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
@@ -79,7 +84,8 @@ function LoginForm() {
 
                 <div className="d-flex justify-content-between align-items-center">
                   <div className="form-check mb-0">
-                    <input className="form-check-input me-2" type="checkbox" value="" id="form2Example3" />
+                    <input className="form-check-input me-2" type="checkbox" value="" id="form2Example3"
+                      onChange={() => setRememberMe(!rememberMe)} checked={rememberMe} />
                     <label className="form-check-label" htmlFor="form2Example3">
                       Remember me
                     </label>
@@ -104,7 +110,7 @@ function LoginForm() {
           </div>
 
           <div>
-            <a href="https://www.facebook.com/people/Planitfamit/61559385112154/?viewas&show_switched_toast=false&show_switched_tooltip=false&is_tour_dismissed=false&is_tour_completed=false&show_podcast_settings=false&show_community_review_changes=false&should_open_composer=false&badge_type=NEW_MEMBER&show_community_rollback_toast=false&show_community_rollback=false&show_follower_visibility_disclosure=false&bypass_exit_warning=true" className="text-white me-4" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.facebook.com" className="text-white me-4" target="_blank" rel="noopener noreferrer">
               <FaFacebookF />
             </a>
             <a href="#!" className="text-white me-4">

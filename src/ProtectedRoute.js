@@ -5,6 +5,7 @@ import { useAuth } from './AuthContext';
 
 const ProtectedRoute = ({ component: Component, ...rest }) => {
   const { isAdmin } = useAuth();
+  console.log("isAdmin:", isAdmin);
 
   return (
     <Route
