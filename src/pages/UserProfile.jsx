@@ -29,6 +29,7 @@ function UserProfile() {
   const [remark, setRemark] = useState('');
   const [remarkTimestamp, setRemarkTimestamp] = useState(null);
   const [message, setMessage] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -116,7 +117,10 @@ function UserProfile() {
   
     const previewUrl = URL.createObjectURL(file);
     setPreviewPic(previewUrl);
-    uploadFile(file);
+    setIsUploading(true);
+    uploadFile(file).finally(() => {
+      setIsUploading(false);
+    });
   };
 
   const uploadFile = async (file) => {
@@ -135,6 +139,14 @@ function UserProfile() {
       await updateProfilePicture(downloadURL);
     } catch (error) {
       console.error("Error uploading file:", error);
+      // Handle the error and show a user-friendly message
+      if (error.code === 'storage/unauthorized') {
+        alert("You don't have permission to upload files. Please contact support.");
+      } else {
+        alert("An error occurred while uploading the file. Please try again later.");
+      }
+      // Reset the preview picture
+      setPreviewPic('');
     }
   };
 
@@ -255,7 +267,13 @@ function UserProfile() {
                     <FaUserCircle className="profile-icon" size={150} />
                   )}
                   <label htmlFor="fileInput" className="edit-profile-pic">
-                    <FaCamera size={24} />
+                    {isUploading ? (
+                      <div className="spinner-border spinner-border-sm" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                    ) : (
+                      <FaCamera size={24} />
+                    )}
                   </label>
                 </div>
                 <h3 className="mb-2">{personalDetails.name || 'User'}</h3>

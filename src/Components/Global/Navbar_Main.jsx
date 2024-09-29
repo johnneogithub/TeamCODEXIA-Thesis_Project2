@@ -73,7 +73,9 @@ function Nav() {
           </Link>
         </li>
         <li>
+          <Link to="/Aboutus" className="aboutus-style-font">
           <a>About Us</a>
+          </Link>
         </li>
         <li>
           <a className="dropdown-toggle1" onClick={toggleDropdown}>
