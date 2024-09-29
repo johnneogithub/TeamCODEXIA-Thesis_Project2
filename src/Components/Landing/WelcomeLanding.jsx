@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import ReactGA from 'react-ga';
-import BkgVideo from '../../Components/Assets/Happy_family3.mp4';
+import BkgVideo from '../../Components/Assets/Happy_family2.mp4';
 import '../../Components/Landing/WelcomeLandingStyle.css';
 import { FaFacebook, FaBars } from 'react-icons/fa';
 import Logo from '../../Components/Assets/PlantItFamIt_Logo.png';
@@ -71,7 +71,7 @@ const WelcomeLanding = () => {
 
 const Footer = () => {
   return (
-    <footer>
+    <footer className='footerers'>
       <div className="foot_container">
         <p>Page Views: <span id="page-views">Loading...</span></p>
       </div>

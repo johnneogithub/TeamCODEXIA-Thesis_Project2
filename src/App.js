@@ -24,7 +24,7 @@ import UserProfile from './pages/UserProfile';
 import OvulationTracker from './pages/OvulationTracker.jsx';
 import Error404 from '../src/Components/Global/Error404.jsx';
 import WelcomeLanding from './Components/Landing/WelcomeLanding.jsx';
-
+import Aboutus from './pages/Aboutus.jsx';
 
 
 function App() {
@@ -58,7 +58,7 @@ function App() {
           <Route path='/' component={WelcomeLanding} exact />
           <Route path='/Welcome' component={WelcomeLanding} exact/>
           <Route path='/Login' component={LoginForm} exact />
-          <Route path='/About' component={About} exact />
+          <Route path='/Aboutus' component={Aboutus} exact />
           <Route path='/Register' component={RegistrationForm} exact />
           <Route path="/Home" component={Home} exact />
           <Route path="/CheckHealth" component={Clinic} exact />

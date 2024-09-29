@@ -24,9 +24,9 @@
   margin: 0 auto;
   border-radius: 50%;
   background-color: #f0f0f0;
-  display: flex;
+  /* display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center; */
   overflow: hidden;
 }
 
