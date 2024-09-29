@@ -1,59 +1,38 @@
-// React Libraries and Things
-import React, { useEffect, useState } from 'react';
+// App.js
+import React from 'react';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { AuthProvider } from './AuthContext';
+import ProtectedRoute from './ProtectedRoute';
 import './App.css';
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
-// Landing & Admin
+// Import your components here
+import AdminLogin from './Components/Admin/AdminLogin/AdminLogin.jsx';
+import Dashboard from './Components/Admin/DashboardAdmin';
+import PatientsRecord from './Components/Admin/PatientsRecord';
+import WelcomeLanding from './Components/Landing/WelcomeLanding.jsx';
+import Error404 from './Components/Global/Error404.jsx';
+
+// Other user-side components
 import LoginForm from './Components/Auth/LoginForm/LoginForm.jsx';
-import About from './Components/About.jsx';
+import Aboutus from './Components/About.jsx';
 import RegistrationForm from './Components/Auth/RegistrationForm/RegistrationForm.jsx';
 import PasswordResetForm from './Components/Auth/LoginForm/PasswordResetForm.jsx';
-import AdminLogin from './Components/Admin/AdminLogin/AdminLogin.jsx';
-
-// Pages
 import Home from './pages/Home.jsx';
 import Clinic from './pages/CheckHealth';
 import Appointment from './pages/CalendarAppointment';
 import FillUpAppointment from './pages/FillUpAppointment';
 import Articles from './pages/Articles';
-import Dashboard from './Components/Admin/DashboardAdmin';
 import PregnancyWheel from './Components/Admin/TabView/PregnancyWheel.jsx';
 import Chatbot from './pages/Chatbot.jsx';
-import PatientsRecord from './Components/Admin/PatientsRecord';
 import UserProfile from './pages/UserProfile';
 import OvulationTracker from './pages/OvulationTracker.jsx';
-import Error404 from '../src/Components/Global/Error404.jsx';
-import WelcomeLanding from './Components/Landing/WelcomeLanding.jsx';
-import Aboutus from './pages/Aboutus.jsx';
+
 
 
 function App() {
-  //const [data, setData] = useState([]);
-
-  /*useEffect(() => {
-    fetch("/members")
-      .then(res => res.json())
-      .then(data => {
-        setData(data);
-        console.log(data);
-      });
-  }, []);*/
-
   return (
-    <Router>
-      <>
-      {/*<div>
-
-        {(typeof data.members === 'undefined') ? (
-          <p>Loading...</p>
-        ) : (
-          data.members.map((member, i ) => (
-          <p key={i}>{member}</p>
-        ))
-        )} 
-
-      </div> */}
-        {/* <Navbar/> */}
+    <AuthProvider>
+      <Router>
         <Switch>
           <Route path='/' component={WelcomeLanding} exact />
           <Route path='/Welcome' component={WelcomeLanding} exact/>
@@ -69,14 +48,14 @@ function App() {
           <Route path='/Appointment' component={Appointment} exact />
           <Route path='/FillUpAppointment' component={FillUpAppointment} exact />
           <Route path='/OvulationTracker' component={OvulationTracker} exact />
-          <Route path='/PregnancyWheel' component={PregnancyWheel} exact />
-          <Route path='/Dashboard' component={Dashboard} exact />
-          <Route path='/PatientsRecord' component={PatientsRecord} exact />
+          <ProtectedRoute path='/PregnancyWheel' component={PregnancyWheel} exact />
+          <ProtectedRoute path='/Dashboard' component={Dashboard} exact />
+          <ProtectedRoute path='/PatientsRecord' component={PatientsRecord} exact />
           <Route path='/AdminLogin' component={AdminLogin} exact />
           <Route component={Error404} />
         </Switch>
-      </>
-    </Router>
+      </Router>
+    </AuthProvider>
   );
 }
 
