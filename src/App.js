@@ -34,13 +34,13 @@ function App() {
           <Route path='/Welcome' component={WelcomeLanding} exact/>
           <Route path='/Login' component={LoginForm} exact />
           <Route path='/Register' component={RegistrationForm} exact />
+          <Route path='/Resetyourpassword' component={PasswordResetForm} exact />
 
           {/* User-protected routes */}
           <UserProtectedRoute path='/Aboutus' component={AboutUs} exact />
           <UserProtectedRoute path="/Home" component={Home} exact />
-          <UserProtectedRoute path="/CheckHealth" component={Clinic} exact />
+          <UserProtectedRoute path="/StMargaretLyinInClinic" component={Clinic} exact />
           <UserProtectedRoute path='/Articles' component={Articles} exact />
-          <UserProtectedRoute path='/Resetyourpassword' component={PasswordResetForm} exact />
           <UserProtectedRoute path='/Chatbot' component={Chatbot} exact />
           <UserProtectedRoute path='/UserProfile' component={UserProfile} exact />
           <UserProtectedRoute path='/Appointment' component={Appointment} exact />
