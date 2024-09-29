@@ -1,3 +1,10 @@
+.st-mar-style-font{
+  text-decoration: none;
+  color: black;
+}
+.OvulationTracker{
+  text-decoration: none;
+}
 .background_home {
   min-height: 100vh;
   display: flex;
@@ -152,10 +159,60 @@
 }
 
 .profile-pic-small {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+.dropdown-toggle1 {
+  position: relative;
+  cursor: pointer;
+}
+
+.dropdown1 {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  min-width: 150px;
+  z-index: 1000;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.dropdown-toggle1:hover .dropdown1 {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dropdown-content1 {
+  padding: 8px 0;
+}
+
+.dropdown-content1 a {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  color: #333;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-content1 a:hover {
+  background-color: #f5f5f5;
+}
+
+.dropdown-content1 a svg {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
 .checkbtn{
   /* font-size: 30px; */
   color: black;
@@ -176,8 +233,8 @@
 @media (max-width: 952px){
   .checkbtn{
     position: absolute;
-    left: 0;
-    right: 0;
+    right: 20px; /* Changed from left: 0; right: 0; to right: 20px */
+    top: 50px; /* Added to position the button */
     display: block;
   }
   .navbar_master ul{
@@ -186,23 +243,44 @@
     height: 100vh;
     top: 82px;
     left: -100%;
-    background-color: aqua;
+    background-color: rgba(255, 255, 255, 0.95); /* Changed from aqua to a semi-transparent white */
     text-align: center;
     transition: all .5s;
     z-index: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 20px; /* Added padding at the top */
+  }
+  .navbar_master ul li{
+    margin: 15px 0; /* Added margin to separate menu items */
   }
   #check:checked ~ ul{
     left: 0;
   }
-    
+  .dropdown1 {
+    position: static;
+    width: 100%;
+    box-shadow: none;
+    background-color: transparent;
   }
-  @media (min-width: 768px) {
-    .cta_container {
-      flex-direction: row;
-      justify-content: center;
-    }
+  .dropdown-content1 {
+    padding: 10px 0;
+  }
+  .dropdown-content1 a {
+    padding: 10px 0;
+    color: #333;
+  }
+}
 
+@media (min-width: 768px) {
+  .cta_container {
+    flex-direction: row;
+    justify-content: center;
   }
+
+}
+
 @media screen and (max-width: 768px) {
   .navbar_master {
     flex-wrap: wrap;
@@ -276,4 +354,32 @@
   right: 0;
   z-index: 1;
   display: block;
+}
+
+.hamburger-icon {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 21px;
+}
+
+.hamburger-icon span {
+  display: block;
+  height: 3px;
+  width: 100%;
+  background-color: #333;
+  transition: all 0.3s ease-in-out;
+}
+
+.check:checked ~ .checkbtn .hamburger-icon span:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+}
+
+.check:checked ~ .checkbtn .hamburger-icon span:nth-child(2) {
+  opacity: 0;
+}
+
+.check:checked ~ .checkbtn .hamburger-icon span:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
 }

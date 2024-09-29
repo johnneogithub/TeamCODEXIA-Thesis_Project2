@@ -49,9 +49,45 @@ background: #eee;
   box-shadow: rgba(40, 170, 255, 0.25) 0 0 0 .125em;
 }
 
-.bg-fotlogin{
-    background-color: #8b1a98;
+.bg-fotlogin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
 }
+
+.bg-fotlogin > div {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.bg-fotlogin > div:last-child {
+  margin-bottom: 0;
+}
+
+@media (min-width: 768px) {
+  .bg-fotlogin {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+  }
+
+  .bg-fotlogin > div {
+    width: auto;
+    margin-bottom: 0;
+  }
+
+  .bg-fotlogin > div:first-child {
+    text-align: left;
+  }
+
+  .bg-fotlogin > div:last-child {
+    text-align: right;
+  }
+}
+
 .h-custom {
 height: calc(100% - 73px);
 }
@@ -59,4 +95,33 @@ height: calc(100% - 73px);
 .h-custom {
 height: 100%;
 }
+}
+
+@media (max-width: 991.98px) {
+  .h-custom {
+    height: 100%;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .btn-login {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+.btn-login {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+
+.bg-fotlogin {
+  background-color: #8b1a98;
 }

@@ -49,16 +49,16 @@ function LoginForm() {
       <section className="vh-100">
         <div className="container-fluid h-custom">
           <div className="row d-flex justify-content-center align-items-center h-100">
-            <div className="col-md-9 col-lg-6 col-xl-5">
+            <div className="col-md-9 col-lg-6 col-xl-5 mb-4 mb-md-0">
               <Link to="/Welcome">
                 <img src={background1} className="img-fluid" alt="Log/Regis Illustration" />
               </Link>
             </div>
             
             <div className="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-              <form onSubmit={SignIn}>
+              <form onSubmit={SignIn} className="px-3 px-md-0">
                 <div className="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
-                  <p className="lead fw-normal mb-4 me-2">Welcome, login to your account!</p>
+                  <p className="lead fw-normal mb-4 me-2 text-center text-lg-start">Welcome, login to your account!</p>
                 </div>
 
                 <div data-mdb-input-init className="form-outline mb-4">
@@ -88,7 +88,7 @@ function LoginForm() {
                 </div>
 
                 <div className="text-center text-lg-start mt-4 pt-2">
-                  <button type="submit" data-mdb-button-init data-mdb-ripple-init className="btn-login"
+                  <button type="submit" data-mdb-button-init data-mdb-ripple-init className="btn-login w-100"
                     style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem' }}>Login</button>
                   <p className="small fw-bold mt-2 pt-1 mb-0">Don't have an account? <a href="/Register"
                       className="link-danger">Register</a></p>
@@ -104,9 +104,8 @@ function LoginForm() {
           </div>
 
           <div>
-            <a href="https://www.facebook.com/people/Planitfamit/61559385112154/?viewas&show_switched_toast=false&show_switched_tooltip=false&is_tour_dismissed=false&is_tour_completed=false&show_podcast_settings=false&show_community_review_changes=false&should_open_composer=false&badge_type=NEW_MEMBER&show_community_rollback_toast=false&show_community_rollback=false&show_follower_visibility_disclosure=false&bypass_exit_warning=true" className="text-white me-4" target="_blank">
+            <a href="https://www.facebook.com/people/Planitfamit/61559385112154/?viewas&show_switched_toast=false&show_switched_tooltip=false&is_tour_dismissed=false&is_tour_completed=false&show_podcast_settings=false&show_community_review_changes=false&should_open_composer=false&badge_type=NEW_MEMBER&show_community_rollback_toast=false&show_community_rollback=false&show_follower_visibility_disclosure=false&bypass_exit_warning=true" className="text-white me-4" target="_blank" rel="noopener noreferrer">
               <FaFacebookF />
-
             </a>
             <a href="#!" className="text-white me-4">
               <FaGoogle />

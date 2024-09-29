@@ -11,7 +11,7 @@ const Sidebar = () => {
 		{ path: '/dashboard', name: 'Dashboard', icon: <FaHome /> },
 		{ path: '/PatientsRecord', name: 'PatientsRecord', icon: <FaUserFriends /> },
 		{ path: '/PregnancyWheel', name: 'PregnancyWheel', icon: <FaNewspaper /> },
-		{ path: '/profile', name: 'User Profile', icon: <FaUser /> },
+		{ path: '/AdminLogin', name: 'User Profile', icon: <FaUser /> },
 	];
 
 	return (

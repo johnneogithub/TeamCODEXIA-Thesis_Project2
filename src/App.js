@@ -14,7 +14,7 @@ import Error404 from './Components/Global/Error404.jsx';
 
 // Other user-side components
 import LoginForm from './Components/Auth/LoginForm/LoginForm.jsx';
-import About from './Components/About.jsx';
+import Aboutus from './Components/About.jsx';
 import RegistrationForm from './Components/Auth/RegistrationForm/RegistrationForm.jsx';
 import PasswordResetForm from './Components/Auth/LoginForm/PasswordResetForm.jsx';
 import Home from './pages/Home.jsx';
@@ -27,6 +27,8 @@ import Chatbot from './pages/Chatbot.jsx';
 import UserProfile from './pages/UserProfile';
 import OvulationTracker from './pages/OvulationTracker.jsx';
 
+
+
 function App() {
   return (
     <AuthProvider>
@@ -35,7 +37,7 @@ function App() {
           <Route path='/' component={WelcomeLanding} exact />
           <Route path='/Welcome' component={WelcomeLanding} exact/>
           <Route path='/Login' component={LoginForm} exact />
-          <Route path='/About' component={About} exact />
+          <Route path='/Aboutus' component={Aboutus} exact />
           <Route path='/Register' component={RegistrationForm} exact />
           <Route path="/Home" component={Home} exact />
           <Route path="/CheckHealth" component={Clinic} exact />
