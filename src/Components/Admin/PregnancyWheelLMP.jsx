@@ -2,13 +2,10 @@ import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import Modal from 'react-modal';
 import "react-datepicker/dist/react-datepicker.css";
-import "../TabView/PregnancyWheelLMPStyle.css";
 import moment from 'moment';
 import Calendar from 'react-calendar';
+import "./PregnancyWheelLMPStyle.css";
 
-
-// Children 1: Last Menstruation Period 
-// Hierachy: three children (components), 1 parent, & 1  grandparent 
 
 function PregnancyWheelLMP() {
     const [USweeks, setUSweeks] = useState("");
@@ -103,10 +100,11 @@ function PregnancyWheelLMP() {
         if (EGAweeks !== "" && EGAdays !== "") {
             const today = new Date();
             const EGAdate = new Date(today.getTime());
-            EGAdate.setDate(EGAdate.getDate() + parseInt(EGAweeks) * 7 + parseInt(EGAdays));
-            setLMP(EGAdate);
+            EGAdate.setDate(EGAdate.getDate() - (parseInt(EGAweeks) * 7 + parseInt(EGAdays))); // Correct: subtracting weeks and days
+            setLMP(EGAdate); // Correct: setting LMP based on subtraction
         }
     }, [EGAweeks, EGAdays]);
+    
 
     return (
         <>
