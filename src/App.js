@@ -1,3 +1,4 @@
+// App.js
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
@@ -35,11 +36,11 @@ function App() {
           <Route path='/Login' component={LoginForm} exact />
           <Route path='/Register' component={RegistrationForm} exact />
           <Route path='/Resetyourpassword' component={PasswordResetForm} exact />
+          <Route path="/StMargaretLyingInClinic" component={Clinic} exact />
 
           {/* User-protected routes */}
           <UserProtectedRoute path='/Aboutus' component={AboutUs} exact />
           <UserProtectedRoute path="/Home" component={Home} exact />
-          <UserProtectedRoute path="/StMargaretLyingInClinic" component={Clinic} exact />
           <UserProtectedRoute path='/Articles' component={Articles} exact />
           <UserProtectedRoute path='/Chatbot' component={Chatbot} exact />
           <UserProtectedRoute path='/UserProfile' component={UserProfile} exact />

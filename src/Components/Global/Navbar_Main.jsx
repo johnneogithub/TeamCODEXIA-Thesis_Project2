@@ -1,28 +1,33 @@
 import '../../pages/HomeStyle.css';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import humber from '../Assets/hamburger.png';
 import iconyou from '../Assets/icon_you.png'; // Import the default icon
 import React, { useState, useEffect } from 'react';
 import { auth, crud } from '../../Config/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { FaUser, FaSignOutAlt } from 'react-icons/fa'; // Import icons
+import { useAuth } from '../../AuthContext';
 
 function Nav() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [userProfilePic, setUserProfilePic] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+  const { logout } = useAuth();
+  const history = useHistory(); // Get history object for redirection
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
-  const handleLogout = () => {
-    auth.signOut().then(() => {
-      localStorage.removeItem('authToken');
-      window.location.href = '/Login';
-    }).catch((error) => {
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+      localStorage.removeItem('authToken'); // Clear any auth tokens
+      logout(); // Call the logout function from context (to update state)
+      history.push('/Login'); // Redirect to the login page
+    } catch (error) {
       console.error('Logout error:', error);
-    });
+    }
   };
 
   const toggleMenu = () => {
@@ -39,11 +44,11 @@ function Nav() {
           setUserProfilePic(data.profilePicture || ''); // Set profile picture URL or empty if not set
         }
       } else {
-        setUserProfilePic('');
+        setUserProfilePic(''); // Reset profile picture if user is not logged in
       }
     });
-  
-    return () => unsubscribe();
+
+    return () => unsubscribe(); // Cleanup on component unmount
   }, []);
 
   return (
@@ -74,7 +79,7 @@ function Nav() {
         </li>
         <li>
           <Link to="/Aboutus" className="aboutus-style-font">
-          <a>About Us</a>
+            <a>About Us</a>
           </Link>
         </li>
         <li>
