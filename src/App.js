@@ -39,7 +39,7 @@ function App() {
           {/* User-protected routes */}
           <UserProtectedRoute path='/Aboutus' component={AboutUs} exact />
           <UserProtectedRoute path="/Home" component={Home} exact />
-          <UserProtectedRoute path="/StMargaretLyinInClinic" component={Clinic} exact />
+          <UserProtectedRoute path="/StMargaretLyingInClinic" component={Clinic} exact />
           <UserProtectedRoute path='/Articles' component={Articles} exact />
           <UserProtectedRoute path='/Chatbot' component={Chatbot} exact />
           <UserProtectedRoute path='/UserProfile' component={UserProfile} exact />

@@ -68,7 +68,7 @@ function Nav() {
           </Link>
         </li>
         <li>
-          <Link to="/CheckHealth" className="st-mar-style-font">
+          <Link to="/StMargaretLyingInClinic" className="st-mar-style-font">
             <a>St. Margaret Lying In Clinic</a>
           </Link>
         </li>

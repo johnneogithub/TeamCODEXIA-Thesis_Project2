@@ -23,7 +23,7 @@ function Home() {
           </div>
 
           <div className="healthcare_check">
-            <Link to="/StMargaretLyinInClinic" className='cta_button cta_button--tertiary'>Check your healthcare</Link>
+            <Link to="/StMargaretLyingInClinic" className='cta_button cta_button--tertiary'>Check your healthcare</Link>
           </div>    
         </div>
       </div>
