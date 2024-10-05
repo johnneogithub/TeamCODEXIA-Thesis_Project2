@@ -1,4 +1,4 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
 import './FooterStyle.css';
 
 const Footer = () => {
@@ -17,10 +17,12 @@ const Footer = () => {
           <div className="col-lg-3 col-md-6 mb-4">
             <h3 className="footer-heading">Explore</h3>
             <ul className="footer-links">
+
               <li><a href="/Home">Home</a></li>
               <li><a href="/Articles">Articles</a></li>
               <li><a href="/Chatbot">PlanIt Assistant</a></li>
               <li><a href="/StMargaretLyingInClinic">St. Margaret Lying In Clinic</a></li>
+
             </ul>
           </div>
           <div className="col-lg-3 col-md-6 mb-4">
@@ -51,7 +53,7 @@ const Footer = () => {
       </div>
       <div className="footer-copyright">
         © 2024 Copyright:
-        <a href="/#">PlanItFamIt.com</a>
+        <Link to="/">PlanItFamIt.com</Link>
       </div>
     </footer>
   );

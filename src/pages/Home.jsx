@@ -23,7 +23,9 @@ function Home() {
           </div>
 
           <div className="healthcare_check">
-            <Link to="/CheckHealth" className='cta_button cta_button--tertiary'>Check your healthcare</Link>
+
+            <Link to="/StMargaretLyingInClinic" className='cta_button cta_button--tertiary'>Check your healthcare</Link>
+
           </div>    
         </div>
       </div>
