@@ -17,7 +17,6 @@ import RegistrationForm from './Components/Auth/RegistrationForm/RegistrationFor
 import PasswordResetForm from './Components/Auth/LoginForm/PasswordResetForm.jsx';
 import Home from './pages/Home.jsx';
 import Clinic from './pages/CheckHealth';
-import Appointment from './pages/CalendarAppointment';
 import FillUpAppointment from './pages/FillUpAppointment';
 import Articles from './pages/Articles';
 import PregnancyWheel from '../src/Components/Admin/PregnancyWheelLMP.jsx';
@@ -44,7 +43,6 @@ function App() {
           <UserProtectedRoute path='/Articles' component={Articles} exact />
           <UserProtectedRoute path='/Chatbot' component={Chatbot} exact />
           <UserProtectedRoute path='/UserProfile' component={UserProfile} exact />
-          <UserProtectedRoute path='/Appointment' component={Appointment} exact />
           <UserProtectedRoute path='/FillUpAppointment' component={FillUpAppointment} exact />
           <UserProtectedRoute path='/OvulationTracker' component={OvulationTracker} exact />
 
