@@ -1,3 +1,4 @@
+// App.js
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
@@ -16,7 +17,6 @@ import RegistrationForm from './Components/Auth/RegistrationForm/RegistrationFor
 import PasswordResetForm from './Components/Auth/LoginForm/PasswordResetForm.jsx';
 import Home from './pages/Home.jsx';
 import Clinic from './pages/CheckHealth';
-import Appointment from './pages/CalendarAppointment';
 import FillUpAppointment from './pages/FillUpAppointment';
 import Articles from './pages/Articles';
 import PregnancyWheel from '../src/Components/Admin/PregnancyWheelLMP.jsx';
@@ -34,16 +34,15 @@ function App() {
           <Route path='/Welcome' component={WelcomeLanding} exact/>
           <Route path='/Login' component={LoginForm} exact />
           <Route path='/Register' component={RegistrationForm} exact />
+          <Route path='/Resetyourpassword' component={PasswordResetForm} exact />
+          <Route path="/StMargaretLyingInClinic" component={Clinic} exact />
 
           {/* User-protected routes */}
           <UserProtectedRoute path='/Aboutus' component={AboutUs} exact />
           <UserProtectedRoute path="/Home" component={Home} exact />
-          <UserProtectedRoute path="/CheckHealth" component={Clinic} exact />
           <UserProtectedRoute path='/Articles' component={Articles} exact />
-          <UserProtectedRoute path='/Resetyourpassword' component={PasswordResetForm} exact />
           <UserProtectedRoute path='/Chatbot' component={Chatbot} exact />
           <UserProtectedRoute path='/UserProfile' component={UserProfile} exact />
-          <UserProtectedRoute path='/Appointment' component={Appointment} exact />
           <UserProtectedRoute path='/FillUpAppointment' component={FillUpAppointment} exact />
           <UserProtectedRoute path='/OvulationTracker' component={OvulationTracker} exact />
 

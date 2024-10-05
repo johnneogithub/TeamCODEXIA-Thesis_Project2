@@ -1,11 +1,12 @@
 import React from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../../Config/firebase";
+import { auth, crud } from "../../../Config/firebase";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import "../AdminLogin/AdminLoginStyle.css";
 import logo_stmargaret from "../../Assets/StMargaret_Logo.jpg";
 import logo_landscape from "../../Assets/PlanItFamIt Landspace Logo White-Bkg.png";
 import { useAuth } from '../../../AuthContext';
+import { doc, getDoc } from "firebase/firestore";
 
 function AdminLogin() {
   const history = useHistory();
@@ -17,20 +18,27 @@ function AdminLogin() {
     const emailVal = e.target.email.value;
     const passwordVal = e.target.password.value;
 
-    if (emailVal === "stmrgrtdmn@gmail.com") {
-      try {
-        await signInWithEmailAndPassword(auth, emailVal, passwordVal);
-        
-        // After successful login, call loginAsAdmin
-        loginAsAdmin();
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, emailVal, passwordVal);
+      const user = userCredential.user;
 
-        // Redirect to dashboard
-        history.push("/Dashboard");
-      } catch (error) {
-        alert(error.message);
+      // Check user role
+      const userDoc = await getDoc(doc(crud, 'admin', user.email));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        if (userData.roles[0] === 'admin') {
+          // After successful login and role check, call loginAsAdmin
+          loginAsAdmin();
+          // Redirect to dashboard
+          history.push("/Dashboard");
+        } else {
+          alert("Unauthorized role");
+        }
+      } else {
+        alert("No such document!");
       }
-    } else {
-      alert("Unauthorized email address");
+    } catch (error) {
+      alert(error.message);
     }
   };
 

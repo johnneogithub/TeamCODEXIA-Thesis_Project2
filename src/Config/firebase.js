@@ -1,8 +1,8 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth, FacebookAuthProvider, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getFunctions } from "firebase/functions";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -22,6 +22,26 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const crud = getFirestore(app);
 const storage = getStorage(app);
+const functions = getFunctions(app);
+
+// Function to set the admin user
+const setAdminUser = async () => {
+  const adminEmail = 'stmrgrtdmn@gmail.com';
+  try {
+    await setDoc(doc(crud, 'admin', adminEmail), {
+      roles: {
+        0: 'admin',
+        1: 'author'
+      }
+    });
+    console.log('Admin user added successfully');
+  } catch (error) {
+    console.error('Error adding admin user: ', error);
+  }
+};
+
+// Call the function to set the admin user (you can call this function from a component or during initial setup)
+setAdminUser();
 
 // Sign In with providers
 const fbprovider = new FacebookAuthProvider(); 
@@ -39,6 +59,4 @@ export const GoogleAuth = async () => {
 }
 
 // Export Firebase services
-export { auth, crud, storage };
-
-
+export { auth, crud, storage, functions };

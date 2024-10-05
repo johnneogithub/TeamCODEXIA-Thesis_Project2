@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc, setDoc, getDoc  } from 'firebase/firestore';
@@ -147,9 +146,29 @@ function DashboardAdmin() {
 
 const handleDone = async (appointment) => {
   try {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+      console.error("User is not authenticated");
+      alert("You must be logged in to perform this action.");
+      return;
+    }
+
     const firestore = getFirestore();
 
-    await deleteDoc(doc(firestore, 'approvedAppointments', appointment.id));
+    // Check if the document exists before trying to delete it
+    const appointmentRef = doc(firestore, 'approvedAppointments', appointment.id);
+    const appointmentDoc = await getDoc(appointmentRef);
+
+    if (!appointmentDoc.exists()) {
+      console.error(`Appointment with ID ${appointment.id} does not exist`);
+      alert("This appointment no longer exists in the database.");
+      return;
+    }
+
+    // Attempt to delete the document
+    await deleteDoc(appointmentRef);
 
     const appointmentWithFile = {
       ...appointment,
@@ -166,6 +185,7 @@ const handleDone = async (appointment) => {
       appointmentWithFile[key] === undefined && delete appointmentWithFile[key]
     );
 
+    // Attempt to add the document to patientsRecords
     await setDoc(doc(firestore, 'patientsRecords', appointment.id), appointmentWithFile);
 
     // Update local state
@@ -177,11 +197,15 @@ const handleDone = async (appointment) => {
 
     // Navigate to PatientsRecord page with the new record data
     history.push({
-      // pathname: '/PatientsRecord',
       state: { newRecord: appointmentWithFile }
     });
   } catch (error) {
     console.error("Error handling done action: ", error);
+    if (error.code === 'permission-denied') {
+      alert("You don't have permission to perform this action. Please contact your administrator.");
+    } else {
+      alert(`An error occurred: ${error.message}`);
+    }
   }
 };
 
