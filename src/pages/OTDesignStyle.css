@@ -1,262 +1,137 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 body {
-  padding: 0;
-  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f0f2f5;
+  color: #333;
 }
 
 .app-container {
-  background: #e7e7ff;
-  min-height: 940px;
-  width: 100%;
-  height: 100vh;
-}
-/*
-.circle {
-  width: 550px;
-  height: 550px;
-  background: linear-gradient(to bottom, #fd9a44 40%, #f474da 50%);
-  filter: blur(130px);
-  transform: translateY(30%);
+  padding: 2rem 0;
 }
 
-.circle2 {
-  width: 550px;
-  height: 450px;
-  background: linear-gradient(to bottom, #fd9a44 40%, #f474da 50%);
-  filter: blur(110px);
-  transform: translateX(10%);
-  transform: translateY(-50%);
-}
-*/
-.red {
-  background: #fe624d;
-  border: 2px solid #ee5e4b;
+.content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.yellow {
-  background: #FFC432;
-  border: 2px solid #F2BD3A;
+header {
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 1rem 0;
+  width: 180%;
 }
 
-.green {
-  background: #5BDE47;
-  border: 2px solid #5FC651;
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
 }
 
-.app-color-yellow {
-  color: #FFA41D;
+.nav-item {
+  position: relative;
 }
 
-.app-color-black {
-  color: #292B48;
+.nav-link {
+  color: #4a4a4a;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  transition: color 0.3s ease;
 }
 
-.app-color-gray {
-  color: #877F95;
-}
-
-.app-color-lavendar {
-  color: #9EA1CF;
-}
-
-.app-color-pink {
+.nav-link:hover, .nav-link.active {
   color: #FB28CD;
 }
 
-.app-bg-lavendar {
-  background: #D5D7FF;
-}
-
-.app-bg-light-white {
-  background: #ffffff;
-}
-
-.app-bg-light-white-2 {
-  background: #ffffff;
-}
-
-.app-shadow {
-  box-shadow: 0 10px 25px 0 rgba(0, 0, 0, 0.03);
-  background-color: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(140px);
-  border-radius: 15px;
-  margin-top: 4rem;
-}
-
-.ot-header {
-  margin-top: 30rem;
-}
-
-.font-ovu {
-  background: rgb(83, 0, 85);
-  -webkit-text-fill-color: transparent;
-  -webkit-background-clip: text;
-  font-family: 'Poppins';
-  font-weight: 600;
-  font-size: 1.2rem;
-  padding-left: 5px;
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #FB28CD;
 }
 
 .app-title {
-  background: linear-gradient(45deg, #fc466b, #3f5efb);
-  -webkit-text-fill-color: transparent;
-  -webkit-background-clip: text;
-  font-family: 'Poppins';
-  font-weight: 600;
-  letter-spacing: 1px;
-  padding-top: 5%;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #FB28CD;
+  margin-bottom: 1rem;
 }
 
 .app-subtitle {
-  background-color: #292B48;
-  font-family: 'Poppins';
-  -webkit-text-fill-color: transparent;
-  -webkit-background-clip: text;
-  font-weight: 400;
   font-size: 1.2rem;
-  letter-spacing: 0px;
- /* Reduce this padding to move up the card */
+  color: #666;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-.app-d-flex {
-  display: flex;
+.tracker-content {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-span.active {
-  position: relative;
-  color: #292b48;
-  display: flex;
-  justify-content: center;
-  /* align-items: end; */
+.form-control-lg {
+  font-size: 1rem;
 }
 
-span.active::after {
-  content: '';
-  width: 200%;
-  height: 2px;
-  background: #292b48;
-  position: absolute;
-  bottom: -20px;
-}
-
-/* Card for output */
-.bg-c-yellow {
-  background: rgb(234, 176, 255);
-  margin-left: 20%;
-}
-
-.src_ml {
-  font-size: 14px; /* Smaller font size */
-  color: rgb(49, 49, 49);
-}
-
-.card1 {
-  border-radius: 10px;
-  -webkit-box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
-  box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
-  border: none;
-  margin-bottom: 0px;
-  -webkit-transition: all 0.3s ease-in-out;
-  transition: all 0.3s ease-in-out;
-  width: 22rem;
-  height: 10rem;
-}
-
-.card2 {
-  border-radius: 10px;
-  -webkit-box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
-  box-shadow: 0 1px 2.94px 0.06px rgba(4, 26, 55, 0.16);
-  border: none;
-  margin-bottom: 0px;
-  -webkit-transition: all 0.3s ease-in-out;
-  transition: all 0.3s ease-in-out;
-  width: 20rem;
-  height: 10rem;
-}
-.card .card-block {
-  padding: 10px;
-}
-
-.f-left {
-  float: left;
-}
-
-.f-right {
-  float: right;
-}
-
-
-.output_text p {
-  font-size: 1.4rem;
-  padding: 10px 10px 0px 10px;
-  text-align: center;
-  color: rgb(0, 61, 52);
-  font-family: 'Poppins';
-  font-weight: 600;
-}
-
-.outputOT {
-  font-size: 1.1rem;
-  text-align: center;
-  font-family: 'Poppins';
-  font-weight: 500;
-  color: rgb(0, 60, 69);
-  padding: 0px 0px 0px 0px;
-}
-
-.output_src{
-  padding-top: 10px;
-}
-.output_src p {
-  font-size: 12px;
-  text-align: center;
-  font-family: 'Poppins';
-  font-weight: 500;
-  color: rgb(0, 23, 141);
-  padding-top: 2rem;
-  padding: 0px 0px 0px 0px;
-}
-
-.output_src a {
-  font-size: 12px;
-  text-align: center;
-  font-family: 'Poppins';
-  font-weight: 100;
-  color: rgb(0, 23, 141);
-}
-
-/* Predict button, calendar, h2-title */
 .btn-primary {
-  padding: 10px 90px;
-  font-weight: 400;
-  font-family: 'Poppins';
-  color: #ffffff;
+  background-color: #FB28CD;
+  border-color: #FB28CD;
+  transition: background-color 0.3s ease;
 }
 
-.form-group h2 {
-  font-size: 2rem;
+.btn-primary:hover {
+  background-color: #FB28CD;
+  border-color: #FB28CD;
+}
+
+.output-card {
+  background: linear-gradient(135deg, #FB28CD 0%, #FB28CD 100%);
+  color: #fff;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.result-text {
+  font-size: 1.2rem;
   font-weight: 500;
-  font-family: 'Poppins';
-  color: #2a3039;
+}
+
+.source-text {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.source-text a {
+  color: #fff;
+  text-decoration: underline;
 }
 
 .disclaimer-card {
-  margin-left: 5.5rem;
+  background-color: #e8eaf6;
+  border-radius: 8px;
 }
 
-.disclaimer_text p{
-  font-size: 18px;
-  text-align: justify;
-  padding: 0px 20px 20px 10px;
-  color: #002a68;
-}
-.disclaimer_text h2{
-  font-size: 25px;
-  font-weight: 600;
-  font-family: 'Poppins';
-  text-align: justify;
-  padding: 10px 20px 0px 10px;
-  text-align: center;
-  color: #0e3064;
+@media (max-width: 768px) {
+  .app-title {
+    font-size: 2rem;
+  }
+
+  .app-subtitle {
+    font-size: 1rem;
+  }
+
+  .tracker-content {
+    padding: 2rem !important;
+  }
+
+  .output-card {
+    margin-top: 2rem;
+  }
 }
