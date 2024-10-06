@@ -263,8 +263,8 @@ function RegistrationForm() {
                   <FaFacebookF/>
                 </a>
 
-                <a href="#!" className="text-white me-4">
-                    <FaGoogle />
+                <a href="mailto:codexia.info@planitfamit.com" className="text-white me-4">
+                  <FaGoogle />
                 </a>
               
               </div>

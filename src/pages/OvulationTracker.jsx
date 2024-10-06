@@ -51,83 +51,70 @@ const OvulationTracker = () => {
   };
   
   return (
-    <>
-      <div className="app-container d-flex justify-content-center align-items-center vh-100 position-relative">
-        <div className="position-absolute d-flex flex-column w-100 align-items-center top-10 translate-middle-y ot-header">
-          <div className="d-flex w-100 justify-content-center align-items-center mb-4">
-            <div className="d-flex bg-white align-items-center w-50 px-3 py-3 rounded app-shadow mx-3">
-              <span className="font-ovu app-color-black ml-2 mr-auto text-xs text-justify">Ovulation Tracker</span>
+    <div className="app-container d-flex justify-content-center align-items-center min-vh-100">
+      <div className="content-wrapper d-flex flex-column align-items-center w-100">
+        <header className=" mb-4">
+          <nav className="d-flex justify-content-center">
+            <div className="nav-item">
+              <span className="nav-link active">Ovulation Tracker</span>
             </div>
+            <div className="nav-item">
+              <a href="/Chatbot" className="nav-link">PlanIt Assistant</a>
+            </div>
+            <div className="nav-item">
+              <a href="/Home" className="nav-link">Home</a>
+            </div>
+          </nav>
+        </header>
 
-            <div className="d-flex app-bg-light-white rounded px-3 py-3 app-shadow mx-3">
-              <a href="/Chatbot" className="app-color-black text-justify" style={{ textDecoration: 'none' }}>
-                <span className="font-ovu app-color-black text-xs">PlanIt Assistant</span>
-              </a>
-            </div>
-            <div className="d-flex app-bg-light-white rounded px-3 py-3 app-shadow mx-3">
-              <a href="/Home" className="app-color-black text-justify" style={{ textDecoration: 'none' }}>
-                <span className="font-ovu app-color-black text-xs">Home</span>
-              </a>
-            </div>
-          </div>
+        <main className="text-center mb-5">
+          <h1 className="app-title mb-3">Know your next Ovulation Day!</h1>
+          <p className="app-subtitle">Be protected and secured, let us track your next ovulation date.</p>
+        </main>
 
-          <div className="d-flex flex-column text-center my-5">
-            <span className="font-weight-semibold display-5 mb-3 app-title text-justify">Know your next Ovulation Day!</span>
-            <span className="app-color-black font-weight-semibold app-subtitle text-justify">Be protected and secured, let us track your next ovulation date.</span>
-          </div>
-          
-          <div className="bg-white-10 w-75 px-3 pt-5 pb-5 app-shadow">
-            <div className="d-flex justify-content-center mb-3">
-              <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                  <h2 className="text-justify">Last Menstrual Period:</h2>
+        <div className="tracker-content bg-white rounded-lg shadow-lg p-5">
+          <div className="row">
+            <div className="col-md-6">
+              <form onSubmit={handleSubmit} className="mb-4 mb-md-0">
+                <div className="form-group mb-4">
+                  <h2 className="text-left mb-3">Last Menstrual Period:</h2>
                   <input
                     type="date"
-                    className="form-control"
+                    className="form-control form-control-lg"
                     value={lastMenstrualPeriod}
                     onChange={(e) => setLastMenstrualPeriod(e.target.value)}
                   />
                 </div>
-                <button type="submit" className="btn btn-primary" data-mdb-ripple-init>Predict Ovulation Day</button>
+                <button type="submit" className="btn btn-primary btn-lg btn-block">Predict Ovulation Day</button>
               </form>
-
-              <div className="col-md-4 col-xl-3">
-                <div className="card1 bg-c-yellow output-card">
-                  <div className="card-block">
-                    <div className="output_text text-justify">
-                      <p>Your Ovulation Date</p>
-                      {predictedDay && lastMenstrualPeriod ? (
-                        <>
-                          <div className='outputOT'>{`Ovulation Date: ${predictedDay}`}</div>
-                          <div className='outputOT'>{`${calculateDaysBetween(lastMenstrualPeriod, predictedDay)} days until ovulation`}</div>
-                          <div className='output_src'>
-                            <p>Source
-                              <a href="https://scholar.smu.edu/datasciencereview/vol1/iss1/2/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                                :  Forecasting Ovulation for Family Planning
-                              </a>
-                            </p>
-                          </div>
-                        </>
-                      ) : ''}
+            </div>
+            <div className="col-md-6">
+              <div className="output-card bg-gradient rounded-lg p-4 h-100">
+                <h3 className="text-white mb-3">Your Ovulation Date</h3>
+                {predictedDay && lastMenstrualPeriod ? (
+                  <>
+                    <p className="result-text mb-2">{`Ovulation Date: ${predictedDay}`}</p>
+                    <p className="result-text mb-4">{`${calculateDaysBetween(lastMenstrualPeriod, predictedDay)} days until ovulation`}</p>
+                    <div className="source-text">
+                      <small>
+                        Source: <a href="https://scholar.smu.edu/datasciencereview/vol1/iss1/2/" target="_blank" rel="noopener noreferrer" className="text-white">Forecasting Ovulation for Family Planning</a>
+                      </small>
                     </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-4 col-xl-3"> {/* this is the second card */}
-                <div className="card2 bg-white disclaimer-card">
-                  <div className="disclaimer_text">
-                    <div className="disclaimer_text text-justify">
-                      <h2> Disclaimer </h2>
-                      <p> As per professional, not advisable for women having irregular menstruation.</p>
-                    </div>
-                  </div>
-                </div>
+                  </>
+                ) : (
+                  <p className="text-white">Enter your last menstrual period to see the prediction.</p>
+                )}
               </div>
             </div>
-          </div> 
+          </div>
+        </div>
+
+        <div className="disclaimer-card bg-light rounded-lg shadow-sm p-4 mt-5">
+          <h4 className="mb-3">Disclaimer</h4>
+          <p className="mb-0">As per professional advice, this tracker is not recommended for women having irregular menstruation.</p>
         </div>
       </div>
-    </>
+    </div>
   )
 }
 
