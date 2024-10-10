@@ -1,5 +1,5 @@
 import "../LoginForm/LoginFormStyle.css";
-import { FaUser, FaLock, FaFacebookF, FaTwitter, FaGoogle } from "react-icons/fa";
+import { FaFacebookF, FaEnvelope  } from "react-icons/fa";
 import React, { useState, useEffect } from "react";
 import { useHistory, Link } from 'react-router-dom'; // React Router's useHistory and Link hooks
 import { signInWithEmailAndPassword, getAuth } from "firebase/auth";
@@ -50,8 +50,8 @@ function LoginForm() {
   };
 
   return (
-    <>
-      <section className="vh-100">
+    <div className="login-container">
+      <section className="login-content">
         <div className="container-fluid h-custom">
           <div className="row d-flex justify-content-center align-items-center h-100">
             <div className="col-md-9 col-lg-6 col-xl-5 mb-4 mb-md-0">
@@ -103,26 +103,25 @@ function LoginForm() {
             </div>
           </div>
         </div>
+      </section>
 
-        <div className="d-flex flex-column flex-md-row text-center text-md-start justify-content-between py-4 px-2 px-xl-5 bg-fotlogin">
-          <div className="text-white mb-3 mb-md-0">
+      <footer className="footer-login bg-fotlogin">
+        <div className="footer-content-login">
+          <div className="text-white">
             Copyright © 2024 PlanItFamIt. All rights reserved. 
           </div>
 
           <div>
-              <a href="https://www.facebook.com/people/Planitfamit/61559385112154/?viewas&show_switched_toast=false&show_switched_
-                  tooltip=false&is_tour_dismissed=false&is_tour_completed=false&show_podcast_settings=false&show_community_review_
-                  changes=false&should_open_composer=false&badge_type=NEW_MEMBER&show_community_rollback_toast=false&show_community_
-                  rollback=false&show_follower_visibility_disclosure=false&bypass_exit_warning=true" className="text-white me-4" target="_blank" >
-                <FaFacebookF/>
-              </a>
-              <a href="mailto:codexia.info@planitfamit.com" className="text-white me-4">
-                <FaGoogle />
-              </a>
-            </div>
+            <a href="https://www.facebook.com" className="text-white me-4" target="_blank" rel="noopener noreferrer">
+              <FaFacebookF />
+            </a>
+            <a href="mailto:codexia.info@planitfamit.com" className="text-white me-4">
+                  <FaEnvelope  />
+            </a>
+          </div>
         </div>
-      </section>
-    </>
+      </footer>
+    </div>
   );
 }
 

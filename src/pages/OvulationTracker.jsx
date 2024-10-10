@@ -53,7 +53,7 @@ const OvulationTracker = () => {
   return (
     <div className="app-container d-flex justify-content-center align-items-center min-vh-100">
       <div className="content-wrapper d-flex flex-column align-items-center w-100">
-        <header className=" mb-4">
+        <header className="header-ovu-trac mb-4">
           <nav className="d-flex justify-content-center">
             <div className="nav-item">
               <span className="nav-link active">Ovulation Tracker</span>

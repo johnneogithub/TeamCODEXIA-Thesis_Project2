@@ -49,6 +49,38 @@ background: #eee;
   box-shadow: rgba(40, 170, 255, 0.25) 0 0 0 .125em;
 }
 
+.login-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.login-content {
+  flex: 1 0 auto;
+}
+
+.footer-login {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.footer-content-login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+}
+
+@media (min-width: 768px) {
+  .footer-content {
+    flex-direction: row;
+    padding: 1rem 2rem;
+  }
+}
+
+/* Remove or comment out these styles as they're no longer needed */
+/*
 .bg-fotlogin {
   display: flex;
   flex-direction: column;
@@ -87,6 +119,7 @@ background: #eee;
     text-align: right;
   }
 }
+*/
 
 .h-custom {
 height: calc(100% - 73px);
