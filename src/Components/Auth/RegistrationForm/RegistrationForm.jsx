@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { FaUser, FaLock, FaFacebookF, FaTwitter, FaGoogle   } from "react-icons/fa";
+import { FaFacebookF, FaEnvelope } from "react-icons/fa";
 import { getAuth, createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from "firebase/auth";
 import { auth } from "../../../Config/firebase";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from 'react-router-dom'; // React Router's useHistory and Link hooks
 import Modal from "react-modal";
+import "../RegistrationForm/RegistrationFormStyle.css";
 
 
 import background1 from '../../Assets/landing_page_bkg1.png'
@@ -19,7 +20,6 @@ function RegistrationForm() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [username, setUsername] = useState("");
   const [age, setAge] = useState("");
-
 
   const openModal = (e) => {
     if (e) {
@@ -148,132 +148,106 @@ function RegistrationForm() {
       </Modal>
 
 
-    <section className="vh-100">
-            <div className="container-fluid h-custom">
-              <div className="row d-flex justify-content-center align-items-center h-100">
-                <div className="col-md-9 col-lg-6 col-xl-5">
-                  <img src={ background1 }
-                    className="img-fluid" alt="Log/Regis Illustration"></img>
+      <div className="container-fluid h-custom">
+          <div className="row d-flex justify-content-center align-items-center h-100">
+            <div className="col-md-9 col-lg-6 col-xl-5 mb-4 mb-md-0">
+              <Link to="/Welcome">
+                <img src={background1} className="img-fluid" alt="Log/Regis Illustration" />
+              </Link>
+            </div>
+            
+            <div className="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+              <form onSubmit={SignUp} className="registration-form">
+                <div className="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
+                  <p className="lead fw-normal mb-3 me-3">Register with us!</p>
                 </div>
-                
-                <div className="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-                <form onSubmit={SignUp}>
-                  
-                    <div className="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
-                      <p className="lead fw-normal mb-3 me-3">Register with us!</p>
-                      
-                      {/** 
-                      <button type="button" data-mdb-button-init data-mdb-ripple-init className="btn btn-floating mx-1" style={{backgroundColor: '#c825da'}}>
-                        <FaFacebookF style={{color: 'white'}} />
-                      </button>
 
-                      <button  type="button" data-mdb-button-init data-mdb-ripple-init className="btn btn-floating mx-1" style={{backgroundColor: '#c825da'}}>
-                        <FaGoogle style={{color: 'white'}} />
-                      </button>
-                    </div>
-
-                    <div className="divider d-flex align-items-center my-4">
-                      <p className="text-center fw-bold mx-3 mb-0">Or</p>
-                    </div>
-                    **/}
-                    </div>
-
-
-                    <div data-mdb-input-init className="form-outline mb-8">
-                      <input type="email" id="form3Example3" className="form-control form-control-lg"
-                        placeholder="Enter a valid email address" 
-                        value={email} 
-                        onChange={(e) => setEmail(e.target.value)}/>
-                      <label className="form-label" for="form3Example3">Email address</label>
-                    </div>
-
-                    <div data-mdb-input-init className="form-outline mb-3">
-                      <input type="text" id="form3Example1" className="form-control form-control-lg"
-                        placeholder="Enter your username"  
-                        value={username} 
-                        onChange={(e) => setUsername(e.target.value)} />
-                      <label className="form-label" for="form3Example1">Username</label>
-                    </div>
-
-                    <div data-mdb-input-init className="form-outline mb-3">
-                      <input type="number" id="form3Example2" className="form-control form-control-lg"
-                        placeholder="Enter your age"  
-                        value={age} 
-                        onChange={(e) => setAge(e.target.value)} />
-                      <label className="form-label" for="form3Example2">Age</label>
-                    </div>
-
-                    <div data-mdb-input-init className="form-outline mb-3">
-                      <input type="password" id="form3Example4" className="form-control form-control-lg"
-                        placeholder="Enter password"  
-                        value={password} 
-                        onChange={(e) => setPassword(e.target.value)} />
-                      <label className="form-label" for="form3Example4">Password</label>
-                    </div>
-
-                    <div data-mdb-input-init className="form-outline mb-3">
-                      <input type="password" id="form3Example4cp" className="form-control form-control-lg"
-                        placeholder="Please, confirm your password"  
-                        value={confirmPassword} 
-                        onChange={(e) => setConfirmPassword(e.target.value)} />
-                      <label className="form-label" for="form3Example4cp">Confirm your password</label>
-                    </div>
-
-                    <div className="d-flex justify-content-between align-items-center">
-                    <div className="form-check mb-0">
-                      <input 
-                          className="form-check-input me-2" 
-                          type="checkbox" 
-                          id="form2Example3" 
-                          checked={agreedToTerms} 
-                          onChange={() => setAgreedToTerms(!agreedToTerms)}
-                      />
-                      <label className="form-check-label" htmlFor="form2Example3">
-                          <a href="#" onClick={openModal}>Terms and Conditions</a>
-                      </label>
-                  </div>
-
-                      <a href="/Resetyourpassword" className="text-body">Forgot password?</a>
-                    </div>
-
-                    <div className="text-center text-lg-start mt-4 pt-2">
-                      <button type="submit" data-mdb-button-init data-mdb-ripple-init className="btn-login "
-                        style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem' }}>Register Now!</button>
-                      <p className="small fw-bold mt-2 pt-1 mb-0" style={{ paddingBottom: '1.5rem' }}>Already have an account? <a href="/Login"
-                          className="link-danger">Login</a></p>
-                    </div>
-                  </form>
+                <div data-mdb-input-init className="form-outline mb-3">
+                  <input type="text" id="form3Example1" className="form-control form-control-lg"
+                    placeholder="Enter your username"  
+                    value={username} 
+                    onChange={(e) => setUsername(e.target.value)} />
+                  <label className="form-label" for="form3Example1">Username</label>
                 </div>
+
+                <div data-mdb-input-init className="form-outline mb-3">
+                  <input type="number" id="form3Example2" className="form-control form-control-lg"
+                    placeholder="Enter your age"  
+                    value={age} 
+                    onChange={(e) => setAge(e.target.value)} />
+                  <label className="form-label" for="form3Example2">Age</label>
+                </div>
+
+                <div data-mdb-input-init className="form-outline mb-8">
+                  <input type="email" id="form3Example3" className="form-control form-control-lg"
+                    placeholder="Enter a valid email address" 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)}/>
+                  <label className="form-label" for="form3Example3">Email address</label>
+                </div>
+
+                <div data-mdb-input-init className="form-outline mb-3">
+                  <input type="password" id="form3Example4" className="form-control form-control-lg"
+                    placeholder="Enter password"  
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)} />
+                  <label className="form-label" for="form3Example4">Password</label>
+                </div>
+
+                <div data-mdb-input-init className="form-outline mb-3">
+                  <input type="password" id="form3Example4cp" className="form-control form-control-lg"
+                    placeholder="Please, confirm your password"  
+                    value={confirmPassword} 
+                    onChange={(e) => setConfirmPassword(e.target.value)} />
+                  <label className="form-label" for="form3Example4cp">Confirm your password</label>
+                </div>
+
+                <div className="d-flex justify-content-between align-items-center">
+                <div className="form-check mb-0">
+                  <input 
+                      className="form-check-input me-2" 
+                      type="checkbox" 
+                      id="form2Example3" 
+                      checked={agreedToTerms} 
+                      onChange={() => setAgreedToTerms(!agreedToTerms)}
+                  />
+                  <label className="form-check-label" htmlFor="form2Example3">
+                      <a href="#" onClick={openModal}>Terms and Conditions</a>
+                  </label>
               </div>
+
+                  <a href="/Resetyourpassword" className="text-body">Forgot password?</a>
+                </div>
+
+                <div className="text-center text-lg-start mt-4 pt-2">
+                  <button type="submit" className="btn-login"
+                    style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem' }}>Register Now!</button>
+                  <p className="small fw-bold mt-2 pt-1 mb-0">Already have an account? <a href="/Login"
+                      className="link-danger">Login</a></p>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <footer className="footer-register bg-fotregister mt-auto">
+          <div className="footer-content-register">
+            <div className="text-white">
+              Copyright © 2024 PlanItFamIt. All rights reserved. 
             </div>
 
-            
-            
-            <div className="d-flex flex-column flex-md-row text-center text-md-start justify-content-between py-4 px-2 px-xl-5 bg-fotlogin">
-
-              <div className="text-white mb-3 mb-md-0">
-                Copyright © 2024 PlanItFamIt. All rights reserved. 
-              </div>
-
-              <div>
-                <a href="https://www.facebook.com/people/Planitfamit/61559385112154/?viewas&show_switched_toast=false&show_switched_
-                    tooltip=false&is_tour_dismissed=false&is_tour_completed=false&show_podcast_settings=false&show_community_review_
-                    changes=false&should_open_composer=false&badge_type=NEW_MEMBER&show_community_rollback_toast=false&show_community_
-                    rollback=false&show_follower_visibility_disclosure=false&bypass_exit_warning=true" className="text-white me-4" target="_blank" >
-                  <FaFacebookF/>
-                </a>
-
-                <a href="mailto:codexia.info@planitfamit.com" className="text-white me-4">
-                  <FaGoogle />
-                </a>
-              
-              </div>
-
+            <div>
+              <a href="https://www.facebook.com" className="text-white me-4" target="_blank" rel="noopener noreferrer">
+                <FaFacebookF />
+              </a>
+              <a href="mailto:codexia.info@planitfamit.com" className="text-white me-4">
+                <FaEnvelope  />
+              </a>
             </div>
-          </section>
+          </div>
+        </footer>
     
-          {registrationSuccess && <p style={{ color: 'green' }}>Successfully registered! You can now log in.</p>}
-
+      {registrationSuccess && <p style={{ color: 'green' }}>Successfully registered! You can now log in.</p>}
   </>  
   );
 };

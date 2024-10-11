@@ -1,9 +1,9 @@
 // App.js
-import React from 'react';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Route, Switch, useLocation } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
-import ProtectedRoute from './ProtectedRoute';  // Admin protected route
-import UserProtectedRoute from './UserProtectedRoute';  // User protected route
+import ProtectedRoute from './ProtectedRoute'; // Admin protected route
+import UserProtectedRoute from './UserProtectedRoute'; // User protected route
 import './App.css';
 
 // Import components
@@ -19,7 +19,7 @@ import Home from './pages/Home.jsx';
 import Clinic from './pages/CheckHealth';
 import FillUpAppointment from './pages/FillUpAppointment';
 import Articles from './pages/Articles';
-import PregnancyWheel from '../src/Components/Admin/PregnancyWheelLMP.jsx';
+import PregnancyWheel from './Components/Admin/PregnancyWheelLMP.jsx';
 import Chatbot from './pages/Chatbot.jsx';
 import UserProfile from './pages/UserProfile';
 import OvulationTracker from './pages/OvulationTracker.jsx';
@@ -29,9 +29,10 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <GoogleAnalyticsHandler />
         <Switch>
           <Route path='/' component={WelcomeLanding} exact />
-          <Route path='/Welcome' component={WelcomeLanding} exact/>
+          <Route path='/Welcome' component={WelcomeLanding} exact />
           <Route path='/Login' component={LoginForm} exact />
           <Route path='/Register' component={RegistrationForm} exact />
           <Route path='/Resetyourpassword' component={PasswordResetForm} exact />
@@ -39,7 +40,7 @@ function App() {
 
           {/* User-protected routes */}
           <UserProtectedRoute path='/Aboutus' component={AboutUs} exact />
-          <UserProtectedRoute path="/Home" component={Home} exact />
+          <UserProtectedRoute path='/Home' component={Home} exact />
           <UserProtectedRoute path='/Articles' component={Articles} exact />
           <UserProtectedRoute path='/Chatbot' component={Chatbot} exact />
           <UserProtectedRoute path='/UserProfile' component={UserProfile} exact />
@@ -58,6 +59,20 @@ function App() {
       </Router>
     </AuthProvider>
   );
+}
+
+// Component to handle Google Analytics tracking
+function GoogleAnalyticsHandler() {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.gtag('config', 'G-TQF0WD897P', {
+      page_path: location.pathname + location.search,
+    });
+    console.log('Pageview tracked:', location.pathname + location.search);
+  }, [location]);
+
+  return null;
 }
 
 export default App;

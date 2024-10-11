@@ -11,7 +11,7 @@ import Clinic from '../Assets/stmargaretlogo.png'
 import logomini from '../Assets/logo-mini.svg'
 import Circle from '../Assets/circle.png'
 
-import '../Admin/Dashboard.css';
+import './DashboardAdmin.css';
 import 'bootstrap/dist/js/bootstrap.js';
 import 'bootstrap/dist/css/bootstrap.css';
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -223,18 +223,32 @@ const handleImport = (appointment) => {
           throw new Error('User not authenticated');
         }
 
+        console.log('Current user:', user.uid); // Log the user ID
+
         const storage = getStorage();
         const storageRef = ref(storage, `appointments/${user.uid}/${appointment.id}/${file.name}`);
         
+        console.log('Attempting to upload file:', file.name); // Log the file name
+        console.log('Upload path:', `appointments/${user.uid}/${appointment.id}/${file.name}`); // Log the full path
+
         // Upload file to Firebase Storage
         const snapshot = await uploadBytes(storageRef, file);
+        console.log('File uploaded successfully:', snapshot);
+
         const downloadURL = await getDownloadURL(snapshot.ref);
+        console.log('Download URL obtained:', downloadURL);
         
         // Update appointment with file metadata and download URL
-        updateAppointment(appointment, file.name, downloadURL, file.type);
+        await updateAppointment(appointment, file.name, downloadURL, file.type);
+        
+        alert('File uploaded successfully!');
       } catch (error) {
         console.error('Error uploading file:', error);
-        alert(`Error uploading file: ${error.message}`);
+        let errorMessage = 'An error occurred while uploading the file.';
+        if (error.code === 'storage/unauthorized') {
+          errorMessage = 'You do not have permission to upload files. Please contact the administrator.';
+        }
+        alert(`Error: ${errorMessage}`);
       }
     }
   };
@@ -263,6 +277,7 @@ const updateAppointment = async (appointment, fileName, fileURL, fileType) => {
     console.log('Appointment updated successfully in database');
   } catch (error) {
     console.error('Error updating appointment:', error);
+    alert(`Error updating appointment: ${error.message}`);
   }
 };
 
@@ -346,7 +361,7 @@ const paginatedPendingAppointments = pendingAppointments.slice(
     <>
    <div className="container-scroller">
   <div className="container-fluid page-body-wrapper">
-    <Sidebar/>
+  <Sidebar/>
 
     <div className="main-panel">
       <div className="content-wrapper">
@@ -441,11 +456,12 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                           <td>{appointment.time || 'N/A'}</td>
                           <td>
                             {appointment.message ? (
-                              <i 
-                                className="bi bi-envelope-fill" 
-                                style={{ cursor: 'pointer', fontSize: '1.5em', color: 'rgb(197, 87, 219)' }}
+                              <button 
+                                className="btn btn-link p-0"
                                 onClick={() => handleMessageClick(appointment.message)}
-                              ></i>
+                              >
+                                <i className="bi bi-eye" style={{ fontSize: '1.2em', color: '#007bff' }}></i>
+                              </button>
                             ) : 'N/A'}
                           </td>
                           <td>
@@ -521,11 +537,12 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                             <td>{appointment.time || 'N/A'}</td>
                             <td>
                               {appointment.message ? (
-                                <i 
-                                  className="bi bi-envelope-fill" 
-                                  style={{ cursor: 'pointer', fontSize: '1.5em', color: 'rgb(197, 87, 219)' }}
+                                <button 
+                                  className="btn btn-link p-0"
                                   onClick={() => handleMessageClick(appointment.message)}
-                                ></i>
+                                >
+                                  <i className="bi bi-eye" style={{ fontSize: '1.2em', color: '#007bff' }}></i>
+                                </button>
                               ) : 'N/A'}
                             </td>
                             <td>
@@ -582,20 +599,12 @@ const paginatedPendingAppointments = pendingAppointments.slice(
         </div>
 
         {selectedMessage && (
-          <div className="message-popup" style={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            backgroundColor: 'white',
-            padding: '20px',
-            borderRadius: '5px',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-            zIndex: 1000
-          }}>
-            <h5>Message</h5>
-            <p>{selectedMessage}</p>
-            <button className="btn btn-primary" onClick={closeMessagePopup}>Close</button>
+          <div className="message-popup">
+            <div className="message-popup-content">
+              <h5>Message</h5>
+              <p>{selectedMessage}</p>
+              <button className="btn btn-primary" onClick={closeMessagePopup}>Close</button>
+            </div>
           </div>
         )}
 
