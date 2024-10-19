@@ -3,7 +3,7 @@ import { getFirestore, collection, getDocs, deleteDoc, doc, query, orderBy, limi
 import Sidebar from '../Global/Sidebar';
 import './PatientsRecordStyle.css';
 import { useLocation } from 'react-router-dom';
-import { FaTrash, FaSearch, FaSort, FaFile, FaDownload } from 'react-icons/fa';
+import { FaTrash, FaSearch, FaSort, FaFile, FaDownload, FaEye } from 'react-icons/fa';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
@@ -128,115 +128,110 @@ Imported File: ${record.importedFile ? record.importedFile.name : 'N/A'}
   };
 
   return (
-    <div className="patients-record-container">
+    <div className="dashboard-container">
       <Sidebar />
-      <main className="patients-record-main">
-        <div className="patients-record-header">
-          <h1>Patients Records</h1>
-          <div className="search-bar">
-            <FaSearch />
-            <input
-              type="text"
-              placeholder="Search records..."
-              value={searchTerm}
-              onChange={handleSearch}
+      <div className="main-content">
+        <div className="content-wrapper">
+          <div className="patients-record-header">
+            <h1>Patients Records</h1>
+            <div className="search-bar">
+              <FaSearch />
+              <input
+                type="text"
+                placeholder="Search records..."
+                value={searchTerm}
+                onChange={handleSearch}
+              />
+            </div>
+          </div>
+          <div className="patients-record-content">
+            <div className="table-responsive">
+              <table className="table table-hover">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th onClick={() => handleSort('name')}>Name {sortConfig.key === 'name' && <FaSort />}</th>
+                    <th onClick={() => handleSort('email')}>Email {sortConfig.key === 'email' && <FaSort />}</th>
+                    <th onClick={() => handleSort('age')}>Age {sortConfig.key === 'age' && <FaSort />}</th>
+                    <th onClick={() => handleSort('appointmentType')}>Type {sortConfig.key === 'appointmentType' && <FaSort />}</th>
+                    <th onClick={() => handleSort('date')}>Date & Time {sortConfig.key === 'date' && <FaSort />}</th>
+                    <th>Message</th>
+                    <th>File</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentRecords.map((record, index) => (
+                    <tr key={record.id}>
+                      <td>{index + 1}</td>
+                      <td>{record.name || 'N/A'}</td>
+                      <td>{record.email || 'N/A'}</td>
+                      <td>{record.age || 'N/A'}</td>
+                      <td>{record.appointmentType || 'N/A'}</td>
+                      <td>
+                        <span className="date-time">
+                          <span className="date">{record.date || 'N/A'}</span>
+                          {record.date && record.time && <span className="time-separator">|</span>}
+                          <span className="time">{record.time || 'N/A'}</span>
+                        </span>
+                      </td>
+                      <td>
+                        {record.message ? (
+                          <button 
+                            className="btn btn-link p-0"
+                            onClick={() => handleMessageClick(record.message)}
+                          >
+                            <FaEye />
+                          </button>
+                        ) : 'N/A'}
+                      </td>
+                      <td>
+                        {record.importedFile ? (
+                          <a href={record.importedFile.url} target="_blank" rel="noopener noreferrer" title={record.importedFile.name}>
+                            <FaFile />
+                          </a>
+                        ) : 'N/A'}
+                      </td>
+                      <td>
+                        <div className="btn-group" role="group">
+                          {/* <button 
+                            className="btn btn-outline-primary btn-sm" 
+                            onClick={() => handleDownload(record)} 
+                            title="Download Patient Info"
+                          >
+                            <FaDownload />
+                          </button> */}
+                          <button 
+                            className="btn btn-outline-danger btn-sm" 
+                            onClick={() => handleDeleteRecord(record.id)} 
+                            title="Delete Record"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <Pagination
+              recordsPerPage={recordsPerPage}
+              totalRecords={filteredRecords.length}
+              paginate={paginate}
+              currentPage={currentPage}
             />
           </div>
         </div>
-        <div className="patients-record-content">
-          <div className="table-responsive">
-            <table className="table table-hover">
-              <thead>
-                <tr>
-                  <th style={{width: '3%'}}>#</th>
-                  <th style={{width: '15%'}} onClick={() => handleSort('name')}>Name {sortConfig.key === 'name' && <FaSort />}</th>
-                  <th style={{width: '15%'}} onClick={() => handleSort('email')}>Email {sortConfig.key === 'email' && <FaSort />}</th>
-                  <th style={{width: '5%'}} onClick={() => handleSort('age')}>Age {sortConfig.key === 'age' && <FaSort />}</th>
-                  <th style={{width: '15%'}} onClick={() => handleSort('appointmentType')}>Appointment Type {sortConfig.key === 'appointmentType' && <FaSort />}</th>
-                  <th style={{width: '15%'}} onClick={() => handleSort('date')}>Date & Time {sortConfig.key === 'date' && <FaSort />}</th>
-                  <th style={{width: '7%'}} onClick={() => handleSort('message')}>Message {sortConfig.key === 'message' && <FaSort />}</th>
-                  <th style={{width: '10%'}}>Imported File</th>
-                  <th style={{width: '15%'}}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentRecords.map((record, index) => (
-                  <tr key={record.id}>
-                    <td>{index + 1}</td>
-                    <td>{record.name || 'N/A'}</td>
-                    <td>{record.email || 'N/A'}</td>
-                    <td>{record.age || 'N/A'}</td>
-                    <td>{record.appointmentType || 'N/A'}</td>
-                    <td>
-                      <span className="date-time">
-                        <span className="date">{record.date || 'N/A'}</span>
-                        {record.date && record.time && <span className="time-separator">|</span>}
-                        <span className="time">{record.time || 'N/A'}</span>
-                      </span>
-                    </td>
-                    <td>
-                      {record.message ? (
-                        <i 
-                          className="bi bi-envelope-fill" 
-                          style={{ cursor: 'pointer', fontSize: '1.2em', color: 'rgb(197, 87, 219)' }}
-                          onClick={() => handleMessageClick(record.message)}
-                        ></i>
-                      ) : 'N/A'}
-                    </td>
-                    <td>
-                      {record.importedFile ? (
-                        <a href={record.importedFile.url} target="_blank" rel="noopener noreferrer" title={record.importedFile.name}>
-                          <FaFile style={{ fontSize: '1.2em', color: '#007bff' }} />
-                        </a>
-                      ) : 'N/A'}
-                    </td>
-                    <td>
-                      <div className="btn-group" role="group">
-                        <button 
-                          className="btn btn-outline-primary btn-sm me-1" 
-                          onClick={() => handleDownload(record)} 
-                          title="Download Patient Info"
-                        >
-                          <FaDownload />
-                        </button>
-                        <button 
-                          className="btn btn-outline-danger btn-sm" 
-                          onClick={() => handleDeleteRecord(record.id)} 
-                          title="Delete Record"
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <Pagination
-            recordsPerPage={recordsPerPage}
-            totalRecords={filteredRecords.length}
-            paginate={paginate}
-            currentPage={currentPage}
-          />
-        </div>
-      </main>
+      </div>
 
       {selectedMessage && (
-        <div className="message-popup" style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          backgroundColor: 'white',
-          padding: '20px',
-          borderRadius: '5px',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-          zIndex: 1000
-        }}>
-          <h5>Message</h5>
-          <p>{selectedMessage}</p>
-          <button className="btn btn-primary" onClick={closeMessagePopup}>Close</button>
+        <div className="message-popup">
+          <div className="message-popup-content">
+            <h5>Message</h5>
+            <p>{selectedMessage}</p>
+            <button className="btn btn-primary" onClick={closeMessagePopup}>Close</button>
+          </div>
         </div>
       )}
     </div>

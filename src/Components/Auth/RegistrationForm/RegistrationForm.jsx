@@ -1,14 +1,17 @@
 import React, { useState } from "react";
-import { FaFacebookF, FaEnvelope } from "react-icons/fa";
+import { FaUser, FaLock, FaFacebookF, FaTwitter, FaGoogle   } from "react-icons/fa";
 import { getAuth, createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from "firebase/auth";
 import { auth } from "../../../Config/firebase";
-import { useHistory, Link } from 'react-router-dom'; // React Router's useHistory and Link hooks
+import { useHistory } from "react-router-dom";
 import Modal from "react-modal";
 import "../RegistrationForm/RegistrationFormStyle.css";
 
 
 import background1 from '../../Assets/landing_page_bkg1.png'
 import background2 from '../../Assets/landing_page_bkg2.png'
+
+// Add these imports at the top of the file
+import { getFirestore, doc, runTransaction } from 'firebase/firestore';
 
 function RegistrationForm() {
   const [email, setEmail] = useState("");
@@ -46,7 +49,8 @@ function RegistrationForm() {
       return;
     }
 
-    const auth = getAuth(); // Get the auth instance
+    const auth = getAuth();
+    const firestore = getFirestore();
 
     try {
       // Check if the email is already registered
@@ -58,6 +62,19 @@ function RegistrationForm() {
 
       // Register the user
       await createUserWithEmailAndPassword(auth, email, password);
+
+      // Increment the user count in Firestore
+      const userCountRef = doc(firestore, 'statistics', 'userCount');
+      await runTransaction(firestore, async (transaction) => {
+        const userCountDoc = await transaction.get(userCountRef);
+        if (!userCountDoc.exists()) {
+          transaction.set(userCountRef, { count: 1 });
+        } else {
+          const newCount = userCountDoc.data().count + 1;
+          transaction.update(userCountRef, { count: newCount });
+        }
+      });
+
       // User registered successfully
       setRegistrationSuccess(true);
       setTimeout(() => {
@@ -148,12 +165,12 @@ function RegistrationForm() {
       </Modal>
 
 
-      <div className="container-fluid h-custom">
-          <div className="row d-flex justify-content-center align-items-center h-100">
-            <div className="col-md-9 col-lg-6 col-xl-5 mb-4 mb-md-0">
-              <Link to="/Welcome">
-                <img src={background1} className="img-fluid" alt="Log/Regis Illustration" />
-              </Link>
+    <div className="registration-section">
+        <div className="container-fluid">
+          <div className="row d-flex justify-content-center align-items-center">
+            <div className="col-md-9 col-lg-6 col-xl-5">
+              <img src={background1}
+                className="img-fluid" alt="Log/Regis Illustration" />
             </div>
             
             <div className="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
@@ -162,44 +179,44 @@ function RegistrationForm() {
                   <p className="lead fw-normal mb-3 me-3">Register with us!</p>
                 </div>
 
-                <div data-mdb-input-init className="form-outline mb-3">
-                  <input type="text" id="form3Example1" className="form-control form-control-lg"
-                    placeholder="Enter your username"  
-                    value={username} 
-                    onChange={(e) => setUsername(e.target.value)} />
-                  <label className="form-label" for="form3Example1">Username</label>
-                </div>
-
-                <div data-mdb-input-init className="form-outline mb-3">
-                  <input type="number" id="form3Example2" className="form-control form-control-lg"
-                    placeholder="Enter your age"  
-                    value={age} 
-                    onChange={(e) => setAge(e.target.value)} />
-                  <label className="form-label" for="form3Example2">Age</label>
-                </div>
-
                 <div data-mdb-input-init className="form-outline mb-8">
+                <label className="form-label" for="form3Example3">Email address</label>
                   <input type="email" id="form3Example3" className="form-control form-control-lg"
                     placeholder="Enter a valid email address" 
                     value={email} 
                     onChange={(e) => setEmail(e.target.value)}/>
-                  <label className="form-label" for="form3Example3">Email address</label>
                 </div>
 
                 <div data-mdb-input-init className="form-outline mb-3">
+                <label className="form-label" for="form3Example1">Username</label>
+                  <input type="text" id="form3Example1" className="form-control form-control-lg"
+                    placeholder="Enter your username"  
+                    value={username} 
+                    onChange={(e) => setUsername(e.target.value)} />
+                </div>
+
+                <div data-mdb-input-init className="form-outline mb-3">
+                <label className="form-label" for="form3Example2">Age</label>
+                  <input type="number" id="form3Example2" className="form-control form-control-lg"
+                    placeholder="Enter your age"  
+                    value={age} 
+                    onChange={(e) => setAge(e.target.value)} />
+                </div>
+
+                <div data-mdb-input-init className="form-outline mb-3">
+                <label className="form-label" for="form3Example4">Password</label>
                   <input type="password" id="form3Example4" className="form-control form-control-lg"
                     placeholder="Enter password"  
                     value={password} 
                     onChange={(e) => setPassword(e.target.value)} />
-                  <label className="form-label" for="form3Example4">Password</label>
                 </div>
 
                 <div data-mdb-input-init className="form-outline mb-3">
+                <label className="form-label" for="form3Example4cp">Confirm your password</label>
                   <input type="password" id="form3Example4cp" className="form-control form-control-lg"
                     placeholder="Please, confirm your password"  
                     value={confirmPassword} 
                     onChange={(e) => setConfirmPassword(e.target.value)} />
-                  <label className="form-label" for="form3Example4cp">Confirm your password</label>
                 </div>
 
                 <div className="d-flex justify-content-between align-items-center">
@@ -240,14 +257,16 @@ function RegistrationForm() {
               <a href="https://www.facebook.com" className="text-white me-4" target="_blank" rel="noopener noreferrer">
                 <FaFacebookF />
               </a>
-              <a href="mailto:codexia.info@planitfamit.com" className="text-white me-4">
-                <FaEnvelope  />
+              <a href="#!" className="text-white me-4">
+                <FaGoogle />
               </a>
             </div>
           </div>
         </footer>
+      </div>
     
       {registrationSuccess && <p style={{ color: 'green' }}>Successfully registered! You can now log in.</p>}
+
   </>  
   );
 };

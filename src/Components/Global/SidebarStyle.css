@@ -1,167 +1,98 @@
-@import url('https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;500;600&display=swap');
-
-:root {
-    --main-color: #22BAA0;
-    --color-dark: #34425A;
-    --text-grey: #B0B0B0;
-}
-
-
-#menu-toggle1{
-    display: none;
-}
-NAV{
-    z-index: -1;
-}
-/* .bgd-page{
-    height: 58rem;
-    background: rgb(245,173,207);
-    background: linear-gradient(162deg,
-     rgba(245,173,207,1) 29%, rgba(196,255,159,1) 73%, rgba(253,176,255,1) 92%);
-} */
-.sidebar-container1 {
+.sidebar-admin {
+    width: 260px;
+    height: 100vh;
+    background: #fff;
     position: fixed;
-    width: 15%;
     left: 0;
-    bottom: 0;
-    top: 12.9%;
-    display: flex;
-    flex-direction: column;
-    /* margin-top: 50%; */
-    background: rgb(229, 157, 167);
-    transition: left 300ms;
-    gap: 5%;
-}
-.sidebar-container1 a{
-    cursor: pointer;
-}
-.side-menu{
-    margin-top: 15%;
-}
-.side-menu .decoration-text-sidebar{
-    text-decoration: none;
-}
-.side-menu ul li:hover {
-    background: #F5ADCF;
-    width: 100%;
-    border-radius: 10%;
-}
-
-/* .side-header-main {
-    box-shadow: 0px 5px 5px -5px rgb(0 0 0 /10%);
-    background: var(--main-color);
-    height: 60px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-} */
-
-.side-header h3, side-head span {
-    color: #fff;
-    font-weight: 400;
-}
-
-.side-conten-container {
-    height: calc(100vh - 60px);
-    margin-top: 55%;
-    overflow: auto;
-}
-
-.side-conten-container::-webkit-scrollbar {
-  width: 555%;
-}
-
-
-.side-conten-container::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 5px grey; 
-  border-radius: 10px;
-}
- 
-.side-conten-container::-webkit-scrollbar-thumb {
-  background: #b0b0b0; 
-  border-radius: 10px;
-}
-
-.side-conten-container::-webkit-scrollbar-thumb:hover {
-  background: #b30000; 
-}
-
-.profile {
-    text-align: center;
-    padding: 2rem 0rem;
-}
-
-.bg-img {
-    background-repeat: no-repeat;
-    background-size: cover;
+    top: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 35px 0 rgba(154,161,171,.15);
+    z-index: 1000;
+    padding-top: 70px;
+  }
+  
+  .sidebar-toggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1001;
+    background-color: #fff;
+    border: none;
     border-radius: 50%;
-    background-size: cover;
-}
-
-.profile-img {
-    height: 80px;
-    width: 80px;
-    display: inline-block;
-    margin: 0 auto .5rem auto;
-    border: 3px solid #899DC1;
-}
-
-
-.profile small {
-    color: #899DC1;
-    font-weight: 600;
-}
-
-.sidebar {
-    overflow-y: auto;
-}
-
-.side-menu ul {
+    width: 40px;
+    height: 40px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  
+  .sidebar-header {
+    padding: 20px;
     text-align: center;
-}
-
-.side-menu a {
-    display: block;
-    padding: 1.2rem 0rem;
-}
-
-
-.side-menu a.active span, .side-menu a.active small {
-    color: black;
-}
-
-.side-menu a span {
-    display: block;
-    text-align: center;
-    font-size: 1.7rem;
-}
-
-.side-menu a span, .side-menu a small {
-    color: #899DC1;
-}
-
-#menu-toggle:checked ~ .sidebar {
+    border-bottom: 1px solid #f1f1f1;
+  }
+  
+  .clinic-logo {
     width: 60px;
-}
-
-#menu-toggle:checked ~ .sidebar .side-header span {
-    display: none;
-}
-
-#menu-toggle:checked ~ .main-content {
-    margin-left: 60px;
-    width: calc(100% - 60px);
-}
-
-#menu-toggle:checked ~ .main-content header {
-    left: 60px;
-}
-
-#menu-toggle:checked ~ .sidebar .profile,
-#menu-toggle:checked ~ .sidebar .side-menu a small {
-    display: none;
-}
-
-#menu-toggle:checked ~ .sidebar .side-menu a span {
-    font-size: 1.3rem;
-}
+    height: 60px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+  }
+  
+  .sidebar-header h3 {
+    color: #333;
+    font-size: 1.2rem;
+    margin: 0;
+  }
+  
+  .nav-menu-admin {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+  }
+  
+  .nav-item {
+    margin-bottom: 5px;
+  }
+  
+  .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #6c757d;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-link:hover {
+    background-color: #f8f9fa;
+    color: #727cf5;
+  }
+  
+  .nav-item.active .nav-link {
+    background-color: #727cf5;
+    color: #fff;
+  }
+  
+  .menu-icon {
+    margin-right: 15px;
+    font-size: 1.2rem;
+  }
+  
+  .menu-title {
+    font-size: 0.9rem;
+  }
+  
+  @media (max-width: 991px) {
+    .sidebar-admin {
+      left: -260px;
+    }
+  
+    .sidebar-admin.open {
+      left: 0;
+    }
+  
+    .sidebar-toggle {
+      display: block;
+    }
+  }
+  

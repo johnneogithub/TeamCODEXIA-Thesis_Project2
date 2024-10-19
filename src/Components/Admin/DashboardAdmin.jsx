@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc, setDoc, getDoc  } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc, setDoc, getDoc, onSnapshot  } from 'firebase/firestore';
 import Sidebar from '../Global/Sidebar';
 import { Link } from 'react-router-dom';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -32,25 +32,71 @@ function DashboardAdmin() {
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [currentApprovedPage, setCurrentApprovedPage] = useState(0);
   const [currentPendingPage, setCurrentPendingPage] = useState(0);
+  const [registeredUsersCount, setRegisteredUsersCount] = useState(0);
+  const [appointmentCount, setAppointmentCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [pendingAppointmentsCount, setPendingAppointmentsCount] = useState(0);
+  const [approvedAppointmentsCount, setApprovedAppointmentsCount] = useState(0);
+  const [totalAppointmentsCount, setTotalAppointmentsCount] = useState(0);
   const itemsPerPage = 5; // You can adjust this number
 
   useEffect(() => {
-    const fetchAppointments = async () => {
+    const fetchData = async () => {
       const firestore = getFirestore();
+      
+      // Fetch existing appointments
       try {
         const pendingSnapshot = await getDocs(collection(firestore, 'pendingAppointments'));
         const pendingData = pendingSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setPendingAppointments(pendingData);
+        setPendingAppointmentsCount(pendingSnapshot.size);
 
         const approvedSnapshot = await getDocs(collection(firestore, 'approvedAppointments'));
         const approvedData = approvedSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setApprovedAppointments(approvedData);
+        setApprovedAppointmentsCount(approvedSnapshot.size);
+
+        // Calculate total appointments
+        const totalCount = pendingSnapshot.size + approvedSnapshot.size;
+        setTotalAppointmentsCount(totalCount);
       } catch (error) {
         console.error("Error fetching appointments: ", error);
+        setError("Failed to load appointments");
+      } finally {
+        setLoading(false);
       }
+
+      // Fetch and count existing users
+      try {
+        const usersSnapshot = await getDocs(collection(firestore, 'users'));
+        const existingUsersCount = usersSnapshot.size;
+        
+        // Get the current count from statistics
+        const userCountRef = doc(firestore, 'statistics', 'userCount');
+        const unsubscribe = onSnapshot(userCountRef, (doc) => {
+          if (doc.exists()) {
+            const totalCount = (doc.data().count || 0) + existingUsersCount;
+            setRegisteredUsersCount(totalCount);
+          } else {
+            // If the document doesn't exist, just use the count of existing users
+            setRegisteredUsersCount(existingUsersCount);
+          }
+        });
+
+        // Cleanup function
+        return () => unsubscribe();
+      } catch (error) {
+        console.error("Error fetching user count:", error);
+      }
+
+      // Fetch appointments for count
+      const appointmentsRef = collection(firestore, 'pendingAppointments');
+      const snapshot = await getDocs(appointmentsRef);
+      setAppointmentCount(snapshot.size);
     };
 
-    fetchAppointments();
+    fetchData();
   }, []);
 
   const fetchDocument = async (firestore, collectionName, id) => {
@@ -93,6 +139,11 @@ function DashboardAdmin() {
         setPendingAppointments(prev => prev.filter(app => app.id !== id));
         setApprovedAppointments(prev => [...prev, { id, ...updatedAppointmentData }]);
 
+        // Update counts
+        setPendingAppointmentsCount(prev => prev - 1);
+        setApprovedAppointmentsCount(prev => prev + 1);
+        // Total count remains the same
+
         // Optionally, you can show a success message
         alert("Appointment approved successfully!");
       }
@@ -131,6 +182,10 @@ function DashboardAdmin() {
       const updatedPendingAppointments = pendingAppointments.filter(appointment => appointment.id !== id);
       setPendingAppointments(updatedPendingAppointments);
       localStorage.setItem('pendingAppointments', JSON.stringify(updatedPendingAppointments));
+  
+      // Update counts
+      setPendingAppointmentsCount(prev => prev - 1);
+      setTotalAppointmentsCount(prev => prev - 1);
   
       // Optionally pass the rejected data to the UserProfile page
       history.push({
@@ -194,6 +249,10 @@ const handleDone = async (appointment) => {
     );
 
     console.log('Appointment moved to Patient Records successfully');
+
+    // Update counts
+    setApprovedAppointmentsCount(prev => prev - 1);
+    setTotalAppointmentsCount(prev => prev - 1);
 
     // Navigate to PatientsRecord page with the new record data
     history.push({
@@ -358,176 +417,100 @@ const paginatedPendingAppointments = pendingAppointments.slice(
 );
 
   return (
-    <>
-   <div className="container-scroller">
-  <div className="container-fluid page-body-wrapper">
-  <Sidebar/>
-
-    <div className="main-panel">
-      <div className="content-wrapper">
-        <div className="page-header">
-          <h3 className="page-title-nav">
-            <span className="page-title-icon bg-gradient-primary text-white me-2">
-            <i class="bi bi-house-fill menu-icon"></i>
-            </span>{" "}
-            Dashboard
-          </h3>
-          <nav aria-label="breadcrumb">
-            <ul className="breadcrumb">
-              <li className="breadcrumb-item active" aria-current="page">
-                <span />
-                Overview{" "}
-                <i className="mdi mdi-alert-circle-outline icon-sm text-primary align-middle" />
-              </li>
-            </ul>
-          </nav>
-        </div>
-        <div className="row">
-          <div className="col-md-4 stretch-card grid-margin">
-            <div className="card bg-gradient-danger card-img-holder text-white">
-              <div className="card-body">
-              <img src={Circle} class="card-img-absolute" alt="circle-image" />
-                <h4 className="font-weight-normal mb-3">
-                  Medical Staff{" "}
-                  <i class="bi bi-person mdi-24px float-end"></i>
-                </h4>
-                <h2 className="mb-5">10</h2>
-              </div>
-            </div>
+    <div className="dashboard-container">
+      <Sidebar />
+      <div className="main-content">
+        <div className="content-wrapper">
+          <div className="page-header">
+            <h3 className="page-title-nav">
+              <span className="page-title-icon bg-gradient-primary text-white me-2">
+                <i className="bi bi-house-fill menu-icon"></i>
+              </span>{" "}
+              Dashboard
+            </h3>
+            <nav aria-label="breadcrumb">
+              <ul className="breadcrumb">
+                <li className="breadcrumb-item active" aria-current="page">
+                  <span />
+                  Overview{" "}
+                  <i className="mdi mdi-alert-circle-outline icon-sm text-primary align-middle" />
+                </li>
+              </ul>
+            </nav>
           </div>
-          <div className="col-md-4 stretch-card grid-margin">
-            <div className="card bg-gradient-info card-img-holder text-white">
-              <div className="card-body">
-              <img src={Circle} class="card-img-absolute" alt="circle-image" />
-                <h4 className="font-weight-normal mb-3">
-                  Patients{" "}
-                  {/* <i className="mdi mdi-bookmark-outline mdi-24px float-end" /> */}
-                  <i class="bi bi-postcard-heart-fill mdi-24px float-end"></i>
-                </h4>
-                <h2 className="mb-5">50</h2>
-              </div>
-            </div>
-          </div>
-
-          <div className="col-md-4 stretch-card grid-margin">
-            <div className="card bg-gradient-success card-img-holder text-white">
-              <div className="card-body">
-              <img src={Circle} class="card-img-absolute" alt="circle-image" />
-                <h4 className="font-weight-normal mb-3">
-                  Appointment{" "}
-                  {/* <i className="mdi mdi-diamond mdi-24px float-end" /> */}
-                  <i class="bi bi-clipboard2-check mdi-24px float-end"></i>
-                </h4>
-                <h2 className="mb-5">5</h2>
-              </div>
-            </div>
-          </div>
-        </div>
-       
-        <div className="row">
-          <div className="col-12 grid-margin">
-            <div className="card">
-              <div className="card-body">
-                <h4 className="card-title">Approved Appointment</h4>
-                <div className="table-responsive">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th style={{width: '5%'}}>#</th>
-                        <th style={{width: '15%'}}>Name</th>
-                        <th style={{width: '20%'}}>Email</th>
-                        <th style={{width: '5%'}}>Age</th>
-                        <th style={{width: '15%'}}>Type of Appointment</th>
-                        <th style={{width: '10%'}}>Date</th>
-                        <th style={{width: '10%'}}>Time</th>
-                        <th style={{width: '10%'}}>Message</th>
-                        <th style={{width: '25%'}}>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {paginatedApprovedAppointments.map((appointment, index) => (
-                        <tr key={appointment.id}>
-                          <td>{index + 1}</td>
-                          <td>{appointment.name || 'N/A'}</td>
-                          <td>{appointment.email || 'N/A'}</td>
-                          <td>{appointment.age || 'N/A'}</td>
-                          <td>{appointment.appointmentType || 'N/A'}</td>
-                          <td>{appointment.date || 'N/A'}</td>
-                          <td>{appointment.time || 'N/A'}</td>
-                          <td>
-                            {appointment.message ? (
-                              <button 
-                                className="btn btn-link p-0"
-                                onClick={() => handleMessageClick(appointment.message)}
-                              >
-                                <i className="bi bi-eye" style={{ fontSize: '1.2em', color: '#007bff' }}></i>
-                              </button>
-                            ) : 'N/A'}
-                          </td>
-                          <td>
-                            <div className="d-flex flex-row align-items-center">
-                              <button className='btn btn-success btn-sm me-2' onClick={() => handleDone(appointment)}>Done</button>
-                              <button className='btn btn-info btn-sm me-2' onClick={() => handleImport(appointment)}>
-                                <i className="bi bi-file-earmark-arrow-up"></i> Import
-                              </button>
-                              {appointment.importedFile && (
-                                <small className="text-muted">{appointment.importedFile.name}</small>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+          <div className="row">
+            <div className="col-md-4 stretch-card grid-margin">
+              <div className="card bg-gradient-danger card-img-holder text-white">
+                <div className="card-body">
+                <img src={Circle} class="card-img-absolute" alt="circle-image" />
+                  <h4 className="font-weight-normal mb-3">
+                    Medical Staff{" "}
+                    <i class="bi bi-person mdi-24px float-end"></i>
+                  </h4>
+                  <h2 className="mb-5">10</h2>
                 </div>
-                <ReactPaginate
-                  previousLabel={'<'}
-                  nextLabel={'>'}
-                  breakLabel={'...'}
-                  pageCount={Math.ceil(approvedAppointments.length / itemsPerPage)}
-                  marginPagesDisplayed={2}
-                  pageRangeDisplayed={5}
-                  onPageChange={handleApprovedPageClick}
-                  containerClassName={'pagination justify-content-center'}
-                  pageClassName={'page-item'}
-                  pageLinkClassName={'page-link'}
-                  previousClassName={'page-item'}
-                  previousLinkClassName={'page-link'}
-                  nextClassName={'page-item'}
-                  nextLinkClassName={'page-link'}
-                  breakClassName={'page-item'}
-                  breakLinkClassName={'page-link'}
-                  activeClassName={'active'}
-                />
+              </div>
+            </div>
+            <div className="col-md-4 stretch-card grid-margin">
+              <div className="card bg-gradient-info card-img-holder text-white">
+                <div className="card-body">
+                  <img src={Circle} className="card-img-absolute" alt="circle-image" />
+                  <h4 className="font-weight-normal mb-3">
+                    Registered Users on the System{" "}
+                    <i className="bi bi-postcard-heart-fill mdi-24px float-end"></i>
+                  </h4>
+                  <h2 className="mb-5">{registeredUsersCount}</h2>
+                </div>
+              </div>
+            </div>
+
+            <div className="col-md-4 stretch-card grid-margin">
+              <div className="card bg-gradient-success card-img-holder text-white">
+                <div className="card-body">
+                <img src={Circle} className="card-img-absolute" alt="circle-image" />
+                  <h4 className="font-weight-normal mb-3">
+                    Total Appointments{" "}
+                    <i className="bi bi-clipboard2-check mdi-24px float-end"></i>
+                  </h4>
+                  {loading ? (
+                    <p>Loading...</p>
+                  ) : error ? (
+                    <p>{error}</p>
+                  ) : (
+                    <>
+                      <h2 className="mb-5">{totalAppointmentsCount}</h2>
+                      <h6 className="card-text">Pending: {pendingAppointmentsCount}</h6>
+                      <h6 className="card-text">Approved: {approvedAppointmentsCount}</h6>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="row">
-          <div className="col-12 grid-margin">
-            <div className="card">
-              <div className="card-body">
-                <h4 className="card-title">For Approval of Appointment</h4>
-                <div className="table-responsive">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th style={{width: '5%'}}>#</th>
-                        <th style={{width: '15%'}}>Name</th>
-                        <th style={{width: '20%'}}>Email</th>
-                        <th style={{width: '5%'}}>Age</th>
-                        <th style={{width: '15%'}}>Type of Appointment</th>
-                        <th style={{width: '10%'}}>Date</th>
-                        <th style={{width: '10%'}}>Time</th>
-                        <th style={{width: '10%'}}>Message</th>
-                        <th style={{width: '25%'}}>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {paginatedPendingAppointments.map((appointment, index) => (
-                        <React.Fragment key={appointment.id}>
-                          <tr>
+         
+          <div className="row">
+            <div className="col-12 grid-margin">
+              <div className="card">
+                <div className="card-body">
+                  <h4 className="card-title">Approved Appointment</h4>
+                  <div className="table-responsive">
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th style={{width: '5%'}}>#</th>
+                          <th style={{width: '15%'}}>Name</th>
+                          <th style={{width: '20%'}}>Email</th>
+                          <th style={{width: '5%'}}>Age</th>
+                          <th style={{width: '15%'}}>Type of Appointment</th>
+                          <th style={{width: '10%'}}>Date</th>
+                          <th style={{width: '10%'}}>Time</th>
+                          <th style={{width: '10%'}}>Message</th>
+                          <th style={{width: '25%'}}>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {paginatedApprovedAppointments.map((appointment, index) => (
+                          <tr key={appointment.id}>
                             <td>{index + 1}</td>
                             <td>{appointment.name || 'N/A'}</td>
                             <td>{appointment.email || 'N/A'}</td>
@@ -547,73 +530,151 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                             </td>
                             <td>
                               <div className="d-flex flex-row align-items-center">
-                                <button className='btn btn-outline-success btn-sm me-2' onClick={() => handleApprove(appointment.id)}>Approve</button>
-                                <button className='btn btn-outline-danger btn-sm me-2' onClick={() => handleReject(appointment.id)}>Reject</button>
-                                <button className='btn btn-outline-info btn-sm me-2' onClick={() => handleRemark(appointment.id)}>Remark</button>
+                                <button className='btn btn-success btn-sm me-2' onClick={() => handleDone(appointment)}>Done</button>
+                                <button className='btn btn-info btn-sm me-2' onClick={() => handleImport(appointment)}>
+                                  <i className="bi bi-file-earmark-arrow-up"></i> Import
+                                </button>
+                                {appointment.importedFile && (
+                                  <small className="text-muted">{appointment.importedFile.name}</small>
+                                )}
                               </div>
                             </td>
                           </tr>
-                          {openRemarkId === appointment.id && (
-                            <tr>
-                              <td colSpan="9">
-                                <div className="remark-popup">
-                                  <textarea
-                                    className="form-control mb-2"
-                                    value={remarkText}
-                                    onChange={(e) => setRemarkText(e.target.value)}
-                                    placeholder="Enter your remark here..."
-                                    rows="3"
-                                  />
-                                  <button className="btn btn-primary" onClick={() => handleRemarkSubmit(appointment.id)}>Submit Remark</button>
-                                </div>
-                              </td>
-                            </tr>
-                          )}
-                        </React.Fragment>
-                      ))}
-                    </tbody>
-                  </table>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <ReactPaginate
+                    previousLabel={'<'}
+                    nextLabel={'>'}
+                    breakLabel={'...'}
+                    pageCount={Math.ceil(approvedAppointments.length / itemsPerPage)}
+                    marginPagesDisplayed={2}
+                    pageRangeDisplayed={5}
+                    onPageChange={handleApprovedPageClick}
+                    containerClassName={'pagination justify-content-center'}
+                    pageClassName={'page-item'}
+                    pageLinkClassName={'page-link'}
+                    previousClassName={'page-item'}
+                    previousLinkClassName={'page-link'}
+                    nextClassName={'page-item'}
+                    nextLinkClassName={'page-link'}
+                    breakClassName={'page-item'}
+                    breakLinkClassName={'page-link'}
+                    activeClassName={'active'}
+                  />
                 </div>
-                <ReactPaginate
-                  previousLabel={'<'}
-                  nextLabel={'>'}
-                  breakLabel={'...'}
-                  pageCount={Math.ceil(pendingAppointments.length / itemsPerPage)}
-                  marginPagesDisplayed={2}
-                  pageRangeDisplayed={5}
-                  onPageChange={handlePendingPageClick}
-                  containerClassName={'pagination justify-content-center'}
-                  pageClassName={'page-item'}
-                  pageLinkClassName={'page-link'}
-                  previousClassName={'page-item'}
-                  previousLinkClassName={'page-link'}
-                  nextClassName={'page-item'}
-                  nextLinkClassName={'page-link'}
-                  breakClassName={'page-item'}
-                  breakLinkClassName={'page-link'}
-                  activeClassName={'active'}
-                />
               </div>
             </div>
           </div>
-        </div>
 
-        {selectedMessage && (
-          <div className="message-popup">
-            <div className="message-popup-content">
-              <h5>Message</h5>
-              <p>{selectedMessage}</p>
-              <button className="btn btn-primary" onClick={closeMessagePopup}>Close</button>
+          <div className="row">
+            <div className="col-12 grid-margin">
+              <div className="card">
+                <div className="card-body">
+                  <h4 className="card-title">For Approval of Appointment</h4>
+                  <div className="table-responsive">
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th style={{width: '5%'}}>#</th>
+                          <th style={{width: '15%'}}>Name</th>
+                          <th style={{width: '20%'}}>Email</th>
+                          <th style={{width: '5%'}}>Age</th>
+                          <th style={{width: '15%'}}>Type of Appointment</th>
+                          <th style={{width: '10%'}}>Date</th>
+                          <th style={{width: '10%'}}>Time</th>
+                          <th style={{width: '10%'}}>Message</th>
+                          <th style={{width: '25%'}}>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {paginatedPendingAppointments.map((appointment, index) => (
+                          <React.Fragment key={appointment.id}>
+                            <tr>
+                              <td>{index + 1}</td>
+                              <td>{appointment.name || 'N/A'}</td>
+                              <td>{appointment.email || 'N/A'}</td>
+                              <td>{appointment.age || 'N/A'}</td>
+                              <td>{appointment.appointmentType || 'N/A'}</td>
+                              <td>{appointment.date || 'N/A'}</td>
+                              <td>{appointment.time || 'N/A'}</td>
+                              <td>
+                                {appointment.message ? (
+                                  <button 
+                                    className="btn btn-link p-0"
+                                    onClick={() => handleMessageClick(appointment.message)}
+                                  >
+                                    <i className="bi bi-eye" style={{ fontSize: '1.2em', color: '#007bff' }}></i>
+                                  </button>
+                                ) : 'N/A'}
+                              </td>
+                              <td>
+                                <div className="d-flex flex-row align-items-center">
+                                  <button className='btn btn-outline-success btn-sm me-2' onClick={() => handleApprove(appointment.id)}>Approve</button>
+                                  <button className='btn btn-outline-danger btn-sm me-2' onClick={() => handleReject(appointment.id)}>Reject</button>
+                                  <button className='btn btn-outline-info btn-sm me-2' onClick={() => handleRemark(appointment.id)}>Remark</button>
+                                </div>
+                              </td>
+                            </tr>
+                            {openRemarkId === appointment.id && (
+                              <tr>
+                                <td colSpan="9">
+                                  <div className="remark-popup">
+                                    <textarea
+                                      className="form-control mb-2"
+                                      value={remarkText}
+                                      onChange={(e) => setRemarkText(e.target.value)}
+                                      placeholder="Enter your remark here..."
+                                      rows="3"
+                                    />
+                                    <button className="btn btn-primary" onClick={() => handleRemarkSubmit(appointment.id)}>Submit Remark</button>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <ReactPaginate
+                    previousLabel={'<'}
+                    nextLabel={'>'}
+                    breakLabel={'...'}
+                    pageCount={Math.ceil(pendingAppointments.length / itemsPerPage)}
+                    marginPagesDisplayed={2}
+                    pageRangeDisplayed={5}
+                    onPageChange={handlePendingPageClick}
+                    containerClassName={'pagination justify-content-center'}
+                    pageClassName={'page-item'}
+                    pageLinkClassName={'page-link'}
+                    previousClassName={'page-item'}
+                    previousLinkClassName={'page-link'}
+                    nextClassName={'page-item'}
+                    nextLinkClassName={'page-link'}
+                    breakClassName={'page-item'}
+                    breakLinkClassName={'page-link'}
+                    activeClassName={'active'}
+                  />
+                </div>
+              </div>
             </div>
           </div>
-        )}
 
-</div>
+          {selectedMessage && (
+            <div className="message-popup">
+              <div className="message-popup-content">
+                <h5>Message</h5>
+                <p>{selectedMessage}</p>
+                <button className="btn btn-primary" onClick={closeMessagePopup}>Close</button>
+              </div>
+            </div>
+          )}
 
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-</>
   );
 }
 
