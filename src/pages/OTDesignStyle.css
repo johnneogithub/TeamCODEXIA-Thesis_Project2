@@ -104,17 +104,17 @@ header {
 }
 
 .source-text {
-  font-size: 0.9rem;
+  font-size: 1rem;
   opacity: 0.8;
+  color: #000000; 
 }
 
-.source-text a {
-  color: #fff;
-  text-decoration: underline;
+.text-black {
+  color: black;
+  font-size: 0.9rem;
 }
-
 .disclaimer-card {
-  background-color: #e8eaf6;
+  background-color: #000000;
   border-radius: 8px;
 }
 

@@ -30,25 +30,42 @@ function LoginForm() {
       .then((userCredential) => {
         const user = userCredential.user;
         console.log("User logged in:", user);
-
+  
+        // Check if the user's email is verified
+        if (!user.emailVerified) {
+          alert("Please verify your email before logging in.");
+          console.log("Email not verified.");
+          return;
+        }
+  
         // Call loginAsUser to set the user in the global auth state
         loginAsUser(user);
-
+  
         // Store the remembered email if checkbox is checked
         if (rememberMe) {
           localStorage.setItem("rememberedEmail", email);
         } else {
           localStorage.removeItem("rememberedEmail");
         }
-
+  
         // Redirect to home page after successful login
         history.push("/home");
       })
       .catch((error) => {
-        console.error("Login error:", error.code, error.message);
-        alert(`Login failed: ${error.message}`);
+        // Handle specific Firebase error codes
+        if (error.code === 'auth/user-not-found') {
+          console.error("No account found for this email.");
+          alert("No account found. Please register first or check your email for verification.");
+        } else if (error.code === 'auth/wrong-password') {
+          console.error("Incorrect password.");
+          alert("Incorrect password. Please try again.");
+        } else {
+          console.error("Login error:", error.code, error.message);
+          alert(`Login failed: ${error.message}`);
+        }
       });
   };
+  
 
   return (
     <div className="login-container">

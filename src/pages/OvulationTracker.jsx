@@ -95,9 +95,11 @@ const OvulationTracker = () => {
                   <>
                     <p className="result-text mb-2">{`Ovulation Date: ${predictedDay}`}</p>
                     <p className="result-text mb-4">{`${calculateDaysBetween(lastMenstrualPeriod, predictedDay)} days until ovulation`}</p>
+                    
+                    {/* Conditionally render the source link only when there's a prediction */}
                     <div className="source-text">
-                      <small>
-                        Source: <a href="https://scholar.smu.edu/datasciencereview/vol1/iss1/2/" target="_blank" rel="noopener noreferrer" className="text-white">Forecasting Ovulation for Family Planning</a>
+                      <small className='source-link-color'>
+                        Source: <a href="https://scholar.smu.edu/datasciencereview/vol1/iss1/2/" target="_blank" rel="noopener noreferrer" className="text-black">Forecasting Ovulation for Family Planning</a>
                       </small>
                     </div>
                   </>
@@ -112,10 +114,10 @@ const OvulationTracker = () => {
         <div className="disclaimer-card bg-light rounded-lg shadow-sm p-4 mt-5">
           <h4 className="mb-3">Disclaimer</h4>
           <p className="mb-0">As per professional advice, this tracker is not recommended for women having irregular menstruation.</p>
-        </div>
+        </div>  
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default OvulationTracker;
