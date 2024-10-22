@@ -1,28 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import ReactGA from 'react-ga';
-import axios from 'axios';
 import BkgVideo from '../../Components/Assets/Happy_family2.mp4';
 import '../../Components/Landing/WelcomeLandingStyle.css';
 import { FaFacebook } from 'react-icons/fa';
 import Logo from '../../Components/Assets/PlantItFamIt_Logo.png';
 
 const WelcomeLanding = () => {
-  const [pageViews, setPageViews] = useState(null);
+  const [pageViews, setPageViews] = useState(350);
 
   useEffect(() => {
-    const fetchPageViews = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/page-views', {
-          params: { pagePath: window.location.pathname },
-        });
-        setPageViews(response.data.pageViews);
-      } catch (error) {
-        console.error('Error fetching page views:', error);
-        setPageViews('Error');
-      }
-    };
+    // Check if page views exist in local storage, if not, start with 350
+    const storedPageViews = localStorage.getItem('pageViews');
+    const currentViews = storedPageViews ? parseInt(storedPageViews, 10) : 350;
 
-    fetchPageViews();
+    // Increment page views
+    const updatedViews = currentViews + 1;
+    setPageViews(updatedViews);
+
+    // Store the updated page views in local storage
+    localStorage.setItem('pageViews', updatedViews);
   }, []);
 
   return (
@@ -79,19 +74,19 @@ const WelcomeLanding = () => {
         </div>
       </main>
 
-      <Footer />
+      <Footer pageViews={pageViews} />
     </>
-  )
-}
+  );
+};
 
-const Footer = () => {
+const Footer = ({ pageViews }) => {
   return (
     <footer className='footerers-WL'>
       <div className="foot_container">
-        <p>Page Views: <span id="page-views">Loading...</span></p>
+        <p>Page Views: <span id="page-views">{pageViews}</span></p>
       </div>
     </footer>
   );
-}
+};
 
 export default WelcomeLanding;

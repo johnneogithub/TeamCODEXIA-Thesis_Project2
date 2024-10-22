@@ -115,124 +115,126 @@ function PregnancyWheelLMP() {
     
 
     return (
-        <div className="pregnancy-wheel-container">
+        <div className="dashboard-container">
             <Sidebar />
-            <div className="wrapper1-pregnancy">
-                <h1><FaBaby className="icon" /> Pregnancy Wheel</h1>
-                <div className="pregnancy-wheel-content">
-                    <div className="input-column">
-                        <div className="input-section">
-                            <h2><FaCalendarAlt className="icon" /> Ultrasound Date</h2>
-                            <div className="input-row">
-                                <button className="date-picker-btn" onClick={() => {setShowUsCalendar(!showUsCalendar); setShowLmpCalendar(false);}}>
-                                    <FaCalendarAlt /> Select Date
-                                </button>
-                                <Modal isOpen={showUsCalendar} onRequestClose={() => setShowUsCalendar(false)} style={customStyles}>
-                                    <div className="custom-datepicker-header">
-                                        <h3>Select Ultrasound Date</h3>
-                                        <button onClick={() => setShowUsCalendar(false)} className="close-modal-btn">
-                                            <FaTimes />
-                                        </button>
+            <div className="main-content">
+                <div className="content-wrapper">
+                    <h1><FaBaby className="icon" /> Pregnancy Wheel</h1>
+                    <div className="pregnancy-wheel-content">
+                        <div className="input-column">
+                            <div className="input-section">
+                                <h2><FaCalendarAlt className="icon" /> Ultrasound Date</h2>
+                                <div className="input-row">
+                                    <button className="date-picker-btn" onClick={() => {setShowUsCalendar(!showUsCalendar); setShowLmpCalendar(false);}}>
+                                        <FaCalendarAlt /> Select Date
+                                    </button>
+                                    <Modal isOpen={showUsCalendar} onRequestClose={() => setShowUsCalendar(false)} style={customStyles}>
+                                        <div className="custom-datepicker-header">
+                                            <h3>Select Ultrasound Date</h3>
+                                            <button onClick={() => setShowUsCalendar(false)} className="close-modal-btn">
+                                                <FaTimes />
+                                            </button>
+                                        </div>
+                                        <DatePicker
+                                            selected={USDate}
+                                            onChange={(date) => {setUSDate(date); setShowUsCalendar(false);}}
+                                            inline
+                                            monthsShown={1}
+                                            showYearDropdown
+                                            dateFormatCalendar="MMMM"
+                                            yearDropdownItemNumber={15}
+                                            scrollableYearDropdown
+                                        />
+                                    </Modal>
+                                    <div className="input-group">
+                                        <label htmlFor="us-weeks">Weeks:</label>
+                                        <input id="us-weeks" className="input-field" type="number" value={USweeks} onChange={e => setUSweeks(e.target.value)} />
                                     </div>
-                                    <DatePicker
-                                        selected={USDate}
-                                        onChange={(date) => {setUSDate(date); setShowUsCalendar(false);}}
-                                        inline
-                                        monthsShown={1}
-                                        showYearDropdown
-                                        dateFormatCalendar="MMMM"
-                                        yearDropdownItemNumber={15}
-                                        scrollableYearDropdown
-                                    />
-                                </Modal>
-                                <div className="input-group">
-                                    <label htmlFor="us-weeks">Weeks:</label>
-                                    <input id="us-weeks" className="input-field" type="number" value={USweeks} onChange={e => setUSweeks(e.target.value)} />
-                                </div>
-                                <div className="input-group">
-                                    <label htmlFor="us-days">Days:</label>
-                                    <input id="us-days" className="input-field" type="number" value={USdays} onChange={e => setUSdays(e.target.value)} />
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div className="input-section">
-                            <h2><FaFemale className="icon" /> Last Menstrual Period</h2>
-                            <div className="input-row">
-                                <button className="date-picker-btn" onClick={() => {setShowLmpCalendar(!showLmpCalendar); setShowUsCalendar(false);}}>
-                                    <FaCalendarAlt /> Select Date
-                                </button>
-                                <Modal isOpen={showLmpCalendar} onRequestClose={() => setShowLmpCalendar(false)} style={customStyles}>
-                                    <div className="custom-datepicker-header">
-                                        <h3>Select LMP Date</h3>
-                                        <button onClick={() => setShowLmpCalendar(false)} className="close-modal-btn">
-                                            <FaTimes />
-                                        </button>
+                                    <div className="input-group">
+                                        <label htmlFor="us-days">Days:</label>
+                                        <input id="us-days" className="input-field" type="number" value={USdays} onChange={e => setUSdays(e.target.value)} />
                                     </div>
-                                    <DatePicker
-                                        selected={LMP}
-                                        onChange={(date) => {setLMP(date); setShowLmpCalendar(false);}}
-                                        inline
-                                        monthsShown={1}
-                                        showYearDropdown
-                                        dateFormatCalendar="MMMM"
-                                        yearDropdownItemNumber={15}
-                                        scrollableYearDropdown
-                                    />
-                                </Modal>
-                                <span className="date-display">{moment(LMP).format('MMMM Do YYYY')}</span>
+                                </div>
+                            </div>
+                            
+                            <div className="input-section">
+                                <h2><FaFemale className="icon" /> Last Menstrual Period</h2>
+                                <div className="input-row">
+                                    <button className="date-picker-btn" onClick={() => {setShowLmpCalendar(!showLmpCalendar); setShowUsCalendar(false);}}>
+                                        <FaCalendarAlt /> Select Date
+                                    </button>
+                                    <Modal isOpen={showLmpCalendar} onRequestClose={() => setShowLmpCalendar(false)} style={customStyles}>
+                                        <div className="custom-datepicker-header">
+                                            <h3>Select LMP Date</h3>
+                                            <button onClick={() => setShowLmpCalendar(false)} className="close-modal-btn">
+                                                <FaTimes />
+                                            </button>
+                                        </div>
+                                        <DatePicker
+                                            selected={LMP}
+                                            onChange={(date) => {setLMP(date); setShowLmpCalendar(false);}}
+                                            inline
+                                            monthsShown={1}
+                                            showYearDropdown
+                                            dateFormatCalendar="MMMM"
+                                            yearDropdownItemNumber={15}
+                                            scrollableYearDropdown
+                                        />
+                                    </Modal>
+                                    <span className="date-display">{moment(LMP).format('MMMM Do YYYY')}</span>
+                                </div>
+                            </div>
+
+                            <div className="input-section">
+                                <h2><FaClock className="icon" /> Cycle Length: {cycle} days</h2>
+                                <div className="slider-container">
+                                    <input type="range" min="20" max="45" value={cycle} onChange={e => setCycle(e.target.value)} />
+                                    <div className="slider-labels">
+                                        <span>20</span>
+                                        <span>45</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="input-section">
+                                <h2><FaHeartbeat className="icon" /> Estimated Gestational Age: {EGA}</h2>
+                                <div className="input-row">
+                                    <div className="input-group">
+                                        <label htmlFor="ega-weeks">Weeks:</label>
+                                        <input id="ega-weeks" className="input-field" type="number" value={EGAweeks} onChange={e => setEGAweeks(e.target.value)} />
+                                    </div>
+                                    <div className="input-group">
+                                        <label htmlFor="ega-days">Days:</label>
+                                        <input id="ega-days" className="input-field" type="number" value={EGAdays} onChange={e => setEGAdays(e.target.value)} />
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="input-section">
-                            <h2><FaClock className="icon" /> Cycle Length: {cycle} days</h2>
-                            <div className="slider-container">
-                                <input type="range" min="20" max="45" value={cycle} onChange={e => setCycle(e.target.value)} />
-                                <div className="slider-labels">
-                                    <span>20</span>
-                                    <span>45</span>
+                        <div className="results-column">
+                            <div className="input-section">
+                                <h2><FaClock className="icon" /> Important Dates</h2>
+                                <div className="dates-grid">
+                                    <div className="date-item">
+                                        <h3><FaHeartbeat className="icon" /> Conception Date:</h3>
+                                        <span className="date-display">{conceptionDate && conceptionDate.toDateString()}</span>
+                                    </div>
+                                    <div className="date-item">
+                                        <h3><FaArrowRight className="icon" /> 2nd Trimester Starts:</h3>
+                                        <span className="date-display">{secondTrimester && secondTrimester.toDateString()}</span>
+                                    </div>
+                                    <div className="date-item">
+                                        <h3><FaArrowRight className="icon" /> 3rd Trimester Starts:</h3>
+                                        <span className="date-display">{thirdTrimester && thirdTrimester.toDateString()}</span>
+                                    </div>
+                                    <div className="date-item">
+                                        <h3><FaBaby className="icon" /> Estimated Due Date:</h3>
+                                        <span className="date-display">{dueDate && dueDate.toDateString()}</span>
+                                    </div>
                                 </div>
                             </div>
+                            <button className="resetBtn" onClick={reset}>Reset</button>
                         </div>
-
-                        <div className="input-section">
-                            <h2><FaHeartbeat className="icon" /> Estimated Gestational Age: {EGA}</h2>
-                            <div className="input-row">
-                                <div className="input-group">
-                                    <label htmlFor="ega-weeks">Weeks:</label>
-                                    <input id="ega-weeks" className="input-field" type="number" value={EGAweeks} onChange={e => setEGAweeks(e.target.value)} />
-                                </div>
-                                <div className="input-group">
-                                    <label htmlFor="ega-days">Days:</label>
-                                    <input id="ega-days" className="input-field" type="number" value={EGAdays} onChange={e => setEGAdays(e.target.value)} />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="results-column">
-                        <div className="input-section">
-                            <h2><FaClock className="icon" /> Important Dates</h2>
-                            <div className="dates-grid">
-                                <div className="date-item">
-                                    <h3><FaHeartbeat className="icon" /> Conception Date:</h3>
-                                    <span className="date-display">{conceptionDate && conceptionDate.toDateString()}</span>
-                                </div>
-                                <div className="date-item">
-                                    <h3><FaArrowRight className="icon" /> 2nd Trimester Starts:</h3>
-                                    <span className="date-display">{secondTrimester && secondTrimester.toDateString()}</span>
-                                </div>
-                                <div className="date-item">
-                                    <h3><FaArrowRight className="icon" /> 3rd Trimester Starts:</h3>
-                                    <span className="date-display">{thirdTrimester && thirdTrimester.toDateString()}</span>
-                                </div>
-                                <div className="date-item">
-                                    <h3><FaBaby className="icon" /> Estimated Due Date:</h3>
-                                    <span className="date-display">{dueDate && dueDate.toDateString()}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <button className="resetBtn" onClick={reset}>Reset</button>
                     </div>
                 </div>
             </div>

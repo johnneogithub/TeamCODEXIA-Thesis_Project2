@@ -26,7 +26,7 @@ const OvulationTracker = () => {
     e.preventDefault();
   
     try {
-      const response = await fetch('http://178.128.219.25/predict', {
+      const response = await fetch('https://planitfamitovulationtracker.online/predict', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -897,11 +897,11 @@ right: 30.1rem;
 }
 .footer-content-register {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   padding: 1rem;
-  margin-top: 7rem;
+  /* margin-top: 7rem; */
 }
 .bg-fotregister {
   background-color: #8b1a98;

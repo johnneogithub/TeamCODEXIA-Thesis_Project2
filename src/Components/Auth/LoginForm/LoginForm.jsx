@@ -68,19 +68,21 @@ function LoginForm() {
                 </div>
 
                 <div data-mdb-input-init className="form-outline mb-4">
+                <label className="form-label" htmlFor="form3Example3">Email address</label>
                   <input type="email" id="form3Example3" className="form-control form-control-lg"
                     placeholder="Enter a valid email address" 
                     value={email} 
                     onChange={(e) => setEmail(e.target.value)} />
-                  <label className="form-label" htmlFor="form3Example3">Email address</label>
+                  
                 </div>
 
                 <div data-mdb-input-init className="form-outline mb-3">
+                <label className="form-label" htmlFor="form3Example4">Password</label>
                   <input type="password" id="form3Example4" className="form-control form-control-lg"
                     placeholder="Enter password"  
                     value={password} 
                     onChange={(e) => setPassword(e.target.value)} />
-                  <label className="form-label" htmlFor="form3Example4">Password</label>
+                 
                 </div>
 
                 <div className="d-flex justify-content-between align-items-center">
