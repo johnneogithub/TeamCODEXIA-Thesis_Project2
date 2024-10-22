@@ -17,10 +17,12 @@ const Footer = () => {
           <div className="col-lg-3 col-md-6 mb-4">
             <h3 className="footer-heading">Explore</h3>
             <ul className="footer-links">
-              <li><Link to="/Home">Home</Link></li>
-              <li><Link to="/Articles">Articles</Link></li>
-              <li><Link to="/Chatbot">PlanIt Assistant</Link></li>
-              <li><Link to="/CheckHealth">St. Margaret Lying In Clinic</Link></li>
+
+              <li><a href="/Home">Home</a></li>
+              <li><a href="/Articles">Articles</a></li>
+              <li><a href="/Chatbot">PlanIt Assistant</a></li>
+              <li><a href="/StMargaretLyingInClinic">St. Margaret Lying In Clinic</a></li>
+
             </ul>
           </div>
           <div className="col-lg-3 col-md-6 mb-4">
