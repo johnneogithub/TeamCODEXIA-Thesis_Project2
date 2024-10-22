@@ -3,7 +3,6 @@ import DatePicker from "react-datepicker";
 import Modal from 'react-modal';
 import "react-datepicker/dist/react-datepicker.css";
 import moment from 'moment';
-import Calendar from 'react-calendar';
 import "./PregnancyWheelLMPStyle.css";
 import Sidebar from '../Global/Sidebar';
 import { FaCalendarAlt, FaBaby, FaClock, FaArrowRight, FaFemale, FaHeartbeat, FaTimes } from 'react-icons/fa';
