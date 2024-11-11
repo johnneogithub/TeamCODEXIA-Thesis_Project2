@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, FacebookAuthProvider, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getFunctions } from "firebase/functions";
 
@@ -60,3 +60,20 @@ export const GoogleAuth = async () => {
 
 // Export Firebase services
 export { auth, crud, storage, functions };
+
+export async function checkUserProfileCompletion(uid) {
+  if (!uid) {
+    console.error("User ID (uid) is undefined. Cannot check profile completion.");
+    return false; // Assuming profile is incomplete if uid is undefined
+  }
+
+  try {
+    const db = getFirestore();
+    const userRef = doc(db, 'users', uid);
+    const userSnapshot = await getDoc(userRef);
+    return userSnapshot.exists() && userSnapshot.data().isProfileComplete;
+  } catch (error) {
+    console.error("Error checking profile completion:", error);
+    return false;
+  }
+}

@@ -69,10 +69,6 @@ function UserProfile() {
     }
   }, [location]);
   
-  
-  
-  
-
   const resetState = () => {
     setUser(null);
     setAppointmentData(null);
@@ -103,10 +99,6 @@ function UserProfile() {
     });
     return unsubscribe;
   };
-  
-  
-  
-  
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -139,13 +131,11 @@ function UserProfile() {
       await updateProfilePicture(downloadURL);
     } catch (error) {
       console.error("Error uploading file:", error);
-      // Handle the error and show a user-friendly message
       if (error.code === 'storage/unauthorized') {
         alert("You don't have permission to upload files. Please contact support.");
       } else {
         alert("An error occurred while uploading the file. Please try again later.");
       }
-      // Reset the preview picture
       setPreviewPic('');
     }
   };
@@ -169,7 +159,6 @@ function UserProfile() {
         setPreviewPic('');
         console.log("Profile picture updated successfully:", url);
       } else {
-
         await setDoc(userRef, {
           profilePicture: url,
           appointmentData: appointmentData || null, 
@@ -186,8 +175,6 @@ function UserProfile() {
     }
   };
   
-
-
   const fetchProfilePicture = async (userId) => {
     try {
       const userRef = doc(crud, `users/${userId}`);
@@ -231,19 +218,23 @@ function UserProfile() {
     }));
   };
 
+  // Updated handleSave function with profile completion status update
   const handleSave = async () => {
     if (!user) return;
 
     try {
       const userRef = doc(crud, `users/${user.uid}`);
-      await updateDoc(userRef, personalDetails);
+      
+      // Update the user's details and set `isProfileComplete` to true
+      await updateDoc(userRef, { ...personalDetails, isProfileComplete: true });
+      
       setShowModal(false); 
+      console.log("User profile saved and marked as complete.");
     } catch (error) {
       console.error("Error updating personal details: ", error);
     }
   };
 
-  // Add this function to safely capitalize the first letter
   const capitalizeFirstLetter = (string) => {
     return string && typeof string === 'string' ? string.charAt(0).toUpperCase() + string.slice(1) : '';
   };

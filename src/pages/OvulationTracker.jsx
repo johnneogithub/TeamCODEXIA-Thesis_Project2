@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../pages/OTDesignStyle.css';
+import './OTDesignStyle.css';
 
 const OvulationTracker = () => {
   const [lastMenstrualPeriod, setLastMenstrualPeriod] = useState('');

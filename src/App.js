@@ -5,8 +5,10 @@ import { AuthProvider } from './AuthContext';
 import ProtectedRoute from './ProtectedRoute'; // Admin protected route
 import UserProtectedRoute from './UserProtectedRoute'; // User protected route
 import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-// Import components
+
+// Import Components
 import AdminLogin from './Components/Admin/AdminLogin/AdminLogin.jsx';
 import Dashboard from './Components/Admin/DashboardAdmin';
 import PatientsRecord from './Components/Admin/PatientsRecord';
@@ -15,15 +17,15 @@ import Error404 from './Components/Global/Error404.jsx';
 import LoginForm from './Components/Auth/LoginForm/LoginForm.jsx';
 import RegistrationForm from './Components/Auth/RegistrationForm/RegistrationForm.jsx';
 import PasswordResetForm from './Components/Auth/LoginForm/PasswordResetForm.jsx';
-import Home from './pages/Home.jsx';
-import Clinic from './pages/CheckHealth';
-import FillUpAppointment from './pages/FillUpAppointment';
-import Articles from './pages/Articles';
+import Home from './Pages/Home.jsx';
+import Clinic from './Pages/CheckHealth.jsx';
+import FillUpAppointment from './Pages/FillUpAppointment.jsx';
+import Articles from './Pages/Articles.jsx';
 import PregnancyWheel from './Components/Admin/PregnancyWheelLMP.jsx';
-import Chatbot from './pages/Chatbot.jsx';
-import UserProfile from './pages/UserProfile';
-import OvulationTracker from './pages/OvulationTracker.jsx';
-import AboutUs from './pages/Aboutus.jsx';
+import Chatbot from './Pages/Chatbot.jsx';
+import UserProfile from './Pages/UserProfile.jsx';
+import OvulationTracker from './Pages/OvulationTracker.jsx';
+import AboutUs from './Pages/Aboutus.jsx';
 
 function App() {
   return (
@@ -35,6 +37,8 @@ function App() {
           <Route path='/Welcome' component={WelcomeLanding} exact />
           <Route path='/Login' component={LoginForm} exact />
           <Route path='/Register' component={RegistrationForm} exact />
+          <Route path='/Register/TermsAndConditions' component={RegistrationForm} exact />
+          <Route path='/Register/DataPrivacyAct' component={RegistrationForm} exact />
           <Route path='/Resetyourpassword' component={PasswordResetForm} exact />
           <Route path="/StMargaretLyingInClinic" component={Clinic} exact />
 

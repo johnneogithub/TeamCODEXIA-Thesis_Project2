@@ -1,4 +1,4 @@
-import '../../pages/HomeStyle.css';
+import '../../Pages/HomeStyle.css';
 import { Link, useHistory } from 'react-router-dom';
 import humber from '../Assets/hamburger.png';
 import iconyou from '../Assets/icon_you.png'; // Import the default icon
