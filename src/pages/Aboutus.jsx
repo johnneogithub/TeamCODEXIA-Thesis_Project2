@@ -1,10 +1,10 @@
 import React from 'react';
 import './Aboutus.css';
 import Navbar from '../Components/Global/Navbar_Main';
-import neo from "../images/neo_pic.jpg"
-import dom from "../images/dom_pic.jpg"
-import glor from "../images/glor_pic.jpg"
-import sherwin from "../images/sherwin.jpg"
+import neo from "../Images/neo_pic.jpg"
+import dom from "../Images/dom_pic.jpg"
+import glor from "../Images/glor_pic.jpg"
+import sherwin from "../Images/sherwin.jpg"
 
 const Aboutus = () => {
   const teamMembers = [
