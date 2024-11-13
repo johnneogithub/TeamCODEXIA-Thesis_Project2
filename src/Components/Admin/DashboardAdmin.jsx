@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc, setDoc, getDoc, onSnapshot  } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc, setDoc, getDoc, onSnapshot, getDoc as fetchDoc  } from 'firebase/firestore';
 import Sidebar from '../Global/Sidebar';
 import { Link } from 'react-router-dom';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -17,6 +17,12 @@ import 'bootstrap/dist/css/bootstrap.css';
 import "bootstrap-icons/font/bootstrap-icons.css";
 // import "@icon/themify-icons/themify-icons.css"
 // import "unpkg.com/@icon/themify-icons/themify-icons.css"
+
+// Update the import statement for UserProfilePopup
+import UserProfilePopup from './AdminLogin/UserProfilePopup';
+
+// Add this import at the top of the file
+import RemarkPopup from './AdminLogin/RemarkPopup';
 
 
 
@@ -40,6 +46,12 @@ function DashboardAdmin() {
   const [approvedAppointmentsCount, setApprovedAppointmentsCount] = useState(0);
   const [totalAppointmentsCount, setTotalAppointmentsCount] = useState(0);
   const itemsPerPage = 5; // You can adjust this number
+
+  // Add a new state to track the selected user
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  // Replace openRemarkId with selectedAppointment
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -340,16 +352,15 @@ const updateAppointment = async (appointment, fileName, fileURL, fileType) => {
   }
 };
 
-const handleRemark = (id) => {
-  setOpenRemarkId(openRemarkId === id ? null : id);
-  setRemarkText('');
+const handleRemark = (appointment) => {
+  setSelectedAppointment(appointment);
 };
 
-const handleRemarkSubmit = async (id) => {
-  if (remarkText.trim()) {
+const handleRemarkSubmit = async (remarkText) => {
+  if (remarkText.trim() && selectedAppointment) {
     try {
       const firestore = getFirestore();
-      const appointmentRef = doc(firestore, 'pendingAppointments', id);
+      const appointmentRef = doc(firestore, 'pendingAppointments', selectedAppointment.id);
       const remarkTimestamp = new Date().toISOString();
       
       // Get the appointment data before deleting it
@@ -374,12 +385,15 @@ const handleRemarkSubmit = async (id) => {
 
       // Update local state to remove the appointment
       setPendingAppointments(prevAppointments =>
-        prevAppointments.filter(app => app.id !== id)
+        prevAppointments.filter(app => app.id !== selectedAppointment.id)
       );
 
+      // Update counts
+      setPendingAppointmentsCount(prev => prev - 1);
+      setTotalAppointmentsCount(prev => prev - 1);
+
       // Close the remark popup
-      setOpenRemarkId(null);
-      setRemarkText('');
+      setSelectedAppointment(null);
       
       // Optionally, show a success message
       alert("Remark added successfully and appointment removed from pending list!");
@@ -415,6 +429,30 @@ const paginatedPendingAppointments = pendingAppointments.slice(
   currentPendingPage * itemsPerPage,
   (currentPendingPage + 1) * itemsPerPage
 );
+
+  // Modify the handleAppointmentClick function
+  const handleAppointmentClick = async (event, appointment) => {
+    if (event.target.classList.contains('appointment-name')) {
+      try {
+        const firestore = getFirestore();
+        const userRef = doc(firestore, 'users', appointment.userId);
+        const userSnap = await fetchDoc(userRef);
+        
+        if (userSnap.exists()) {
+          setSelectedUser({ id: userSnap.id, ...userSnap.data(), appointment });
+        } else {
+          console.error('User not found');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    }
+  };
+
+  // Add a function to close the popup
+  const closeUserProfilePopup = () => {
+    setSelectedUser(null);
+  };
 
   return (
     <div className="dashboard-container">
@@ -512,7 +550,13 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                         {paginatedApprovedAppointments.map((appointment, index) => (
                           <tr key={appointment.id}>
                             <td>{index + 1}</td>
-                            <td>{appointment.name || 'N/A'}</td>
+                            <td 
+                              className="appointment-name" 
+                              onClick={(e) => handleAppointmentClick(e, appointment)}
+                              style={{cursor: 'pointer', color: 'blue', textDecoration: 'underline'}}
+                            >
+                              {appointment.name || 'N/A'}
+                            </td>
                             <td>{appointment.email || 'N/A'}</td>
                             <td>{appointment.age || 'N/A'}</td>
                             <td>{appointment.appointmentType || 'N/A'}</td>
@@ -590,50 +634,38 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                       </thead>
                       <tbody>
                         {paginatedPendingAppointments.map((appointment, index) => (
-                          <React.Fragment key={appointment.id}>
-                            <tr>
-                              <td>{index + 1}</td>
-                              <td>{appointment.name || 'N/A'}</td>
-                              <td>{appointment.email || 'N/A'}</td>
-                              <td>{appointment.age || 'N/A'}</td>
-                              <td>{appointment.appointmentType || 'N/A'}</td>
-                              <td>{appointment.date || 'N/A'}</td>
-                              <td>{appointment.time || 'N/A'}</td>
-                              <td>
-                                {appointment.message ? (
-                                  <button 
-                                    className="btn btn-link p-0"
-                                    onClick={() => handleMessageClick(appointment.message)}
-                                  >
-                                    <i className="bi bi-eye" style={{ fontSize: '1.2em', color: '#007bff' }}></i>
-                                  </button>
-                                ) : 'N/A'}
-                              </td>
-                              <td>
-                                <div className="d-flex flex-row align-items-center">
-                                  <button className='btn btn-outline-success btn-sm me-2' onClick={() => handleApprove(appointment.id)}>Approve</button>
-                                  <button className='btn btn-outline-danger btn-sm me-2' onClick={() => handleReject(appointment.id)}>Reject</button>
-                                  <button className='btn btn-outline-info btn-sm me-2' onClick={() => handleRemark(appointment.id)}>Remark</button>
-                                </div>
-                              </td>
-                            </tr>
-                            {openRemarkId === appointment.id && (
-                              <tr>
-                                <td colSpan="9">
-                                  <div className="remark-popup">
-                                    <textarea
-                                      className="form-control mb-2"
-                                      value={remarkText}
-                                      onChange={(e) => setRemarkText(e.target.value)}
-                                      placeholder="Enter your remark here..."
-                                      rows="3"
-                                    />
-                                    <button className="btn btn-primary" onClick={() => handleRemarkSubmit(appointment.id)}>Submit Remark</button>
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
-                          </React.Fragment>
+                          <tr key={appointment.id}>
+                            <td>{index + 1}</td>
+                            <td 
+                              className="appointment-name" 
+                              onClick={(e) => handleAppointmentClick(e, appointment)}
+                              style={{cursor: 'pointer', color: 'blue', textDecoration: 'underline'}}
+                            >
+                              {appointment.name || 'N/A'}
+                            </td>
+                            <td>{appointment.email || 'N/A'}</td>
+                            <td>{appointment.age || 'N/A'}</td>
+                            <td>{appointment.appointmentType || 'N/A'}</td>
+                            <td>{appointment.date || 'N/A'}</td>
+                            <td>{appointment.time || 'N/A'}</td>
+                            <td>
+                              {appointment.message ? (
+                                <button 
+                                  className="btn btn-link p-0"
+                                  onClick={() => handleMessageClick(appointment.message)}
+                                >
+                                  <i className="bi bi-eye" style={{ fontSize: '1.2em', color: '#007bff' }}></i>
+                                </button>
+                              ) : 'N/A'}
+                            </td>
+                            <td>
+                              <div className="d-flex flex-row align-items-center">
+                                <button className='btn btn-outline-success btn-sm me-2' onClick={() => handleApprove(appointment.id)}>Approve</button>
+                                <button className='btn btn-outline-danger btn-sm me-2' onClick={() => handleReject(appointment.id)}>Reject</button>
+                                <button className='btn btn-outline-info btn-sm me-2' onClick={() => handleRemark(appointment)}>Remark</button>
+                              </div>
+                            </td>
+                          </tr>
                         ))}
                       </tbody>
                     </table>
@@ -670,6 +702,21 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                 <button className="btn btn-primary" onClick={closeMessagePopup}>Close</button>
               </div>
             </div>
+          )}
+
+          {/* Add the UserProfilePopup component */}
+          {selectedUser && (
+            <UserProfilePopup
+              user={selectedUser}
+              onClose={closeUserProfilePopup}
+            />
+          )}
+
+          {selectedAppointment && (
+            <RemarkPopup
+              onClose={() => setSelectedAppointment(null)}
+              onSubmit={handleRemarkSubmit}
+            />
           )}
 
         </div>

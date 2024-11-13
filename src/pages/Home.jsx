@@ -10,6 +10,7 @@ import { getAuth } from "firebase/auth"; // Import directly if not exported from
 
 function Home() {
   const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkProfileCompletion = async () => {
@@ -17,16 +18,22 @@ function Home() {
         const auth = getAuth();
         const user = auth.currentUser;
 
-        if (!user || !user.uid) {
-          console.error("User is not authenticated or UID is undefined.");
+        if (!user) {
+          console.log("No user logged in");
+          setIsLoading(false);
           return;
         }
 
-        // Check if the profile is complete
+        console.log("Checking profile completion for user:", user.uid);
         const isProfileComplete = await checkUserProfileCompletion(user.uid);
-        setShowModal(!isProfileComplete); // Only show modal if profile is incomplete
+        console.log("Profile complete:", isProfileComplete);
+        setShowModal(!isProfileComplete);
       } catch (error) {
         console.error("Error in profile completion check:", error);
+        // In case of error, we don't show the modal
+        setShowModal(false);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -36,6 +43,10 @@ function Home() {
   const handleCloseModal = () => {
     setShowModal(false);
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>; // Or your loading component
+  }
 
   return (
     <>

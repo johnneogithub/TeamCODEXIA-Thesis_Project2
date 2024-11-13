@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, FacebookAuthProvider, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getFunctions } from "firebase/functions";
 
@@ -61,19 +61,50 @@ export const GoogleAuth = async () => {
 // Export Firebase services
 export { auth, crud, storage, functions };
 
-export async function checkUserProfileCompletion(uid) {
-  if (!uid) {
-    console.error("User ID (uid) is undefined. Cannot check profile completion.");
-    return false; // Assuming profile is incomplete if uid is undefined
-  }
-
+export const checkUserProfileCompletion = async (userId) => {
   try {
-    const db = getFirestore();
-    const userRef = doc(db, 'users', uid);
-    const userSnapshot = await getDoc(userRef);
-    return userSnapshot.exists() && userSnapshot.data().isProfileComplete;
+    console.log("Checking profile completion for user:", userId);
+    const userDocRef = doc(crud, "users", userId);
+    const userDoc = await getDoc(userDocRef);
+    
+    if (!userDoc.exists()) {
+      console.log("User document does not exist");
+      return false;
+    }
+
+    const userData = userDoc.data();
+    console.log("User data:", userData);
+
+    // Check for required profile fields
+    const requiredFields = [
+      'firstName',
+      'lastName',
+      'birthDate',
+      'gender',
+      'civilStatus',
+      'address'
+    ];
+
+    const isComplete = requiredFields.every(field => {
+      const fieldValue = userData[field];
+      const isFieldComplete = fieldValue !== undefined && fieldValue !== null && fieldValue !== '';
+      console.log(`Field ${field}: ${isFieldComplete ? 'Complete' : 'Incomplete'}`);
+      return isFieldComplete;
+    });
+
+    console.log("Profile completion status:", isComplete);
+
+    // Always update the document with a boolean value
+    const updateData = {
+      isProfileComplete: Boolean(isComplete)
+    };
+    console.log("Updating document with:", updateData);
+
+    await updateDoc(userDocRef, updateData);
+
+    return isComplete;
   } catch (error) {
     console.error("Error checking profile completion:", error);
     return false;
   }
-}
+};
