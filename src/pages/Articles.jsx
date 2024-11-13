@@ -63,6 +63,43 @@ const Articles = () => {
             title="Practicing Safe Sex"
             link="https://health.clevelandclinic.org/safe-sex"
           />
+          <ArticleCard 
+            image={SX2}
+            category="UTIs "
+            title="Why You Get UTIs After Sex — and How To Prevent Them"
+            link="https://health.clevelandclinic.org/uti-after-sex"
+          />
+               <ArticleCard 
+            image={SX2}
+            category="Ovulate"
+            title="When do I ovulate, how do I know, and what does it feel like?"
+            link="https://www.medicalnewstoday.com/articles/150870#how-to-track-it"
+          />
+               <ArticleCard 
+            image={SX2}
+            category="Vaginal Discharge"
+            title="What do different types of vaginal discharge mean?"
+            link="https://www.medicalnewstoday.com/articles/150870"
+          />
+               <ArticleCard 
+            image={SX2}
+            category="Periods"
+            title="Talking about periods at home"
+            link="https://www.unicef.org/parenting/health/talking-about-periods-at-home?gad_source=1&gclid=CjwKCAjwg-24BhB_EiwA1ZOx8tWARSUDDBfu3MrGl--dXQWhpmZz_Tt12cukNSofLRdzYgE163ONkhoCZQIQAvD_BwE"
+          />
+               <ArticleCard 
+            image={SX2}
+            category="Late Ovulation And Pregnancy"
+            title="Monthly calendar with date circled and the word ovulation
+Late Ovulation And Pregnancy"
+            link="https://triofertility.com/late-ovulation-and-pregnancy/#:~:text=Late%20ovulation%20is%20ovulation%20that,in%20your%20baby%2Dmaking%20plans"
+          />
+               <ArticleCard 
+            image={SX2}
+            category="Birth Control"
+            title="Birth control and family planning"
+            link="https://medlineplus.gov/ency/article/001946.htm"
+          />  
         </div>
       </main>
       

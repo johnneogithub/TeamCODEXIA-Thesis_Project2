@@ -30,11 +30,18 @@ function UserProfile() {
   const [remarkTimestamp, setRemarkTimestamp] = useState(null);
   const [message, setMessage] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [birthdate, setBirthdate] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedDetails, setEditedDetails] = useState({});
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         setUser(user);
+        setPersonalDetails(prev => ({
+          ...prev,
+          email: user?.email || ''
+        }));
 
         const storedData = localStorage.getItem(`appointmentData_${user.uid}`);
         if (storedData && storedData !== "undefined") {
@@ -69,6 +76,26 @@ function UserProfile() {
     }
   }, [location]);
   
+  useEffect(() => {
+    let ageInterval;
+    
+    if (birthdate) {
+      // Update age immediately
+      updateAge();
+      
+      // Check for age updates every day at midnight
+      ageInterval = setInterval(() => {
+        updateAge();
+      }, 86400000); // 24 hours in milliseconds
+    }
+
+    return () => {
+      if (ageInterval) {
+        clearInterval(ageInterval);
+      }
+    };
+  }, [birthdate]);
+
   const resetState = () => {
     setUser(null);
     setAppointmentData(null);
@@ -99,6 +126,10 @@ function UserProfile() {
     });
     return unsubscribe;
   };
+  
+  
+  
+  
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -131,11 +162,13 @@ function UserProfile() {
       await updateProfilePicture(downloadURL);
     } catch (error) {
       console.error("Error uploading file:", error);
+      // Handle the error and show a user-friendly message
       if (error.code === 'storage/unauthorized') {
         alert("You don't have permission to upload files. Please contact support.");
       } else {
         alert("An error occurred while uploading the file. Please try again later.");
       }
+      // Reset the preview picture
       setPreviewPic('');
     }
   };
@@ -159,6 +192,7 @@ function UserProfile() {
         setPreviewPic('');
         console.log("Profile picture updated successfully:", url);
       } else {
+
         await setDoc(userRef, {
           profilePicture: url,
           appointmentData: appointmentData || null, 
@@ -175,6 +209,8 @@ function UserProfile() {
     }
   };
   
+
+
   const fetchProfilePicture = async (userId) => {
     try {
       const userRef = doc(crud, `users/${userId}`);
@@ -194,49 +230,122 @@ function UserProfile() {
     try {
       const userRef = doc(crud, `users/${userId}`);
       const docSnap = await getDoc(userRef);
+      
       if (docSnap.exists()) {
         const data = docSnap.data();
-        setPersonalDetails({
-          name: data.name || '',
+        
+        // Store birthdate in state for real-time updates
+        if (data.birthdate) {
+          setBirthdate(data.birthdate);
+        }
+
+        setPersonalDetails(prev => ({
+          ...prev,
+          name: `${data.firstName || ''} ${data.middleName || ''} ${data.lastName || ''}`.trim(),
+          firstName: data.firstName || '',
+          middleName: data.middleName || '',
+          lastName: data.lastName || '',
           location: data.location || '',
           phone: data.phone || '',
-          email: data.email || '',
-          age: data.age || '',
+          email: auth.currentUser?.email || prev.email || '',
           gender: data.gender || '',
-        });
+        }));
+      } else {
+        setPersonalDetails(prev => ({
+          ...prev,
+          email: auth.currentUser?.email || '',
+          name: auth.currentUser?.displayName || ''
+        }));
       }
     } catch (error) {
       console.error("Error fetching personal details: ", error);
     }
   };
 
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditedDetails({
+      ...personalDetails,
+      firstName: personalDetails.firstName || '',
+      middleName: personalDetails.middleName || '',
+      lastName: personalDetails.lastName || '',
+      age: personalDetails.age || '',
+    });
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setPersonalDetails(prevDetails => ({
-      ...prevDetails,
+    setEditedDetails(prev => ({
+      ...prev,
       [name]: value
     }));
   };
 
-  // Updated handleSave function with profile completion status update
   const handleSave = async () => {
     if (!user) return;
 
     try {
       const userRef = doc(crud, `users/${user.uid}`);
       
-      // Update the user's details and set `isProfileComplete` to true
-      await updateDoc(userRef, { ...personalDetails, isProfileComplete: true });
+      // Create the data to be saved
+      const dataToSave = {
+        firstName: editedDetails.firstName,
+        middleName: editedDetails.middleName,
+        lastName: editedDetails.lastName,
+        location: editedDetails.location,
+        phone: editedDetails.phone,
+        email: editedDetails.email,
+        gender: editedDetails.gender,
+        age: editedDetails.age,
+      };
+
+      // Update Firestore
+      await updateDoc(userRef, dataToSave);
+
+      // Update local state
+      setPersonalDetails({
+        ...dataToSave,
+        name: `${dataToSave.firstName} ${dataToSave.middleName} ${dataToSave.lastName}`.trim(),
+      });
       
-      setShowModal(false); 
-      console.log("User profile saved and marked as complete.");
+      setIsEditing(false);
+
+      // Check if all required fields are filled
+      const isProfileComplete = Object.values(dataToSave).every(value => value && value.trim() !== '');
+      await updateDoc(userRef, { isProfileComplete });
+
     } catch (error) {
       console.error("Error updating personal details: ", error);
+      alert("Failed to update profile. Please try again.");
     }
   };
 
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditedDetails({});
+  };
+
+  // Add this function to safely capitalize the first letter
   const capitalizeFirstLetter = (string) => {
     return string && typeof string === 'string' ? string.charAt(0).toUpperCase() + string.slice(1) : '';
+  };
+
+  const updateAge = () => {
+    if (!birthdate) return;
+
+    const birthDate = new Date(birthdate);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    setPersonalDetails(prev => ({
+      ...prev,
+      age: `${age} years old`
+    }));
   };
 
   return (
@@ -302,23 +411,127 @@ function UserProfile() {
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-center mb-4">
                   <h4 className="card-title m-0">Personal Details</h4>
-                  <button className="btn btn-outline-primary btn-sm" onClick={() => setShowModal(true)}>
-                    <FaEdit /> Edit
-                  </button>
+                  {!isEditing && (
+                    <button className="btn btn-outline-primary btn-sm" onClick={handleEdit}>
+                      <FaEdit /> Edit
+                    </button>
+                  )}
                 </div>
                 <div className="row">
-                  {Object.entries(personalDetails).map(([key, value]) => (
-                    <div className="col-md-6 mb-3" key={key}>
+                  {isEditing ? (
+                    <>
+                      <div className="col-md-4 mb-3">
+                        <div className="detail-item">
+                          <FaUser className="detail-icon" />
+                          <div className="ms-3">
+                            <h6 className="mb-0 text-muted">First Name</h6>
+                            <input
+                              type="text"
+                              className="form-control"
+                              name="firstName"
+                              value={editedDetails.firstName || ''}
+                              onChange={handleChange}
+                              placeholder="Enter first name"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-md-4 mb-3">
+                        <div className="detail-item">
+                          <FaUser className="detail-icon" />
+                          <div className="ms-3">
+                            <h6 className="mb-0 text-muted">Middle Name</h6>
+                            <input
+                              type="text"
+                              className="form-control"
+                              name="middleName"
+                              value={editedDetails.middleName || ''}
+                              onChange={handleChange}
+                              placeholder="Enter middle name"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-md-4 mb-3">
+                        <div className="detail-item">
+                          <FaUser className="detail-icon" />
+                          <div className="ms-3">
+                            <h6 className="mb-0 text-muted">Last Name</h6>
+                            <input
+                              type="text"
+                              className="form-control"
+                              name="lastName"
+                              value={editedDetails.lastName || ''}
+                              onChange={handleChange}
+                              placeholder="Enter last name"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="col-md-6 mb-3">
                       <div className="detail-item d-flex align-items-center">
-                        {getIcon(key)}
+                        <FaUser className="detail-icon" />
                         <div className="ms-3">
-                          <h6 className="mb-0 text-muted">{capitalizeFirstLetter(key)}</h6>
-                          <p className="mb-0 fw-bold">{value || 'Not provided'}</p>
+                          <h6 className="mb-0 text-muted">Name</h6>
+                          <p className="mb-0 fw-bold">{personalDetails.name || 'Not provided'}</p>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )}
+                  {/* Render other fields */}
+                  {Object.entries(isEditing ? editedDetails : personalDetails)
+                    .filter(([key]) => !['name', 'firstName', 'middleName', 'lastName', 'age'].includes(key))
+                    .map(([key, value]) => (
+                      <div className="col-md-6 mb-3" key={key}>
+                        <div className="detail-item d-flex align-items-center">
+                          {getIcon(key)}
+                          <div className="ms-3">
+                            <h6 className="mb-0 text-muted">{capitalizeFirstLetter(key)}</h6>
+                            {isEditing ? (
+                              <input
+                                type="text"
+                                className="form-control"
+                                name={key}
+                                value={value}
+                                onChange={handleChange}
+                              />
+                            ) : (
+                              <p className="mb-0 fw-bold">{value || 'Not provided'}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  {/* Add single age field */}
+                  <div className="col-md-6 mb-3">
+                    <div className="detail-item d-flex align-items-center">
+                      <FaCalendarAlt className="detail-icon" />
+                      <div className="ms-3">
+                        <h6 className="mb-0 text-muted">Age</h6>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="age"
+                            value={editedDetails.age || ''}
+                            onChange={handleChange}
+                            placeholder="Enter age"
+                          />
+                        ) : (
+                          <p className="mb-0 fw-bold">{personalDetails.age || 'Not provided'}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
+                {isEditing && (
+                  <div className="mt-3">
+                    <button className="btn btn-primary me-2" onClick={handleSave}>Save</button>
+                    <button className="btn btn-secondary" onClick={handleCancel}>Cancel</button>
+                  </div>
+                )}
               </div>
             </div>
             
@@ -364,39 +577,6 @@ function UserProfile() {
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Modal for editing personal details */}
-      <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} tabIndex="-1">
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Edit Personal Details</h5>
-              <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
-            </div>
-            <div className="modal-body">
-              <form>
-                {Object.entries(personalDetails).map(([key, value]) => (
-                  <div className="mb-3" key={key}>
-                    <label htmlFor={key} className="form-label">{capitalizeFirstLetter(key)}</label>
-                    <input
-                      type={key === 'email' ? 'email' : 'text'}
-                      className="form-control"
-                      id={key}
-                      name={key}
-                      value={value || ''}
-                      onChange={handleChange}
-                    />
-                  </div>
-                ))}
-              </form>
-            </div>
-            <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-              <button type="button" className="btn btn-primary" onClick={handleSave}>Save</button>
             </div>
           </div>
         </div>

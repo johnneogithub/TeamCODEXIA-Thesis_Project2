@@ -954,3 +954,122 @@ right: 30.1rem;
     padding: 1rem;
   }
 }
+
+/* DatePicker Custom Styles */
+.date-picker-container {
+  position: relative;
+}
+
+.date-picker-wrapper {
+  position: relative;
+}
+
+.custom-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.calendar-icon {
+  position: absolute;
+  right: 10px;
+  color: #6c757d;
+  pointer-events: none;
+}
+
+.custom-calendar {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  font-family: inherit;
+}
+
+.custom-calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+  border-radius: 8px 8px 0 0;
+}
+
+.custom-calendar-header button {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  color: #495057;
+}
+
+.custom-calendar-header button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.custom-calendar-header button:hover:not(:disabled) {
+  background-color: #e9ecef;
+}
+
+.year-dropdown,
+.month-dropdown {
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin: 0 5px;
+  cursor: pointer;
+  background-color: white;
+}
+
+.react-datepicker {
+  font-family: inherit !important;
+}
+
+.react-datepicker__day {
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.react-datepicker__day:hover {
+  background-color: #e9ecef;
+}
+
+.react-datepicker__day--selected {
+  background-color: #007bff !important;
+  color: white !important;
+}
+
+.react-datepicker__day--keyboard-selected {
+  background-color: rgba(0, 123, 255, 0.5) !important;
+}
+
+.react-datepicker__day--disabled {
+  color: #ccc !important;
+  cursor: not-allowed !important;
+}
+
+.custom-popper {
+  z-index: 1000;
+}
+
+.react-datepicker__input-container input {
+  width: 100%;
+  padding-right: 35px;
+}
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+@media (max-width: 576px) {
+  .text-center.text-lg-start.mt-4.pt-2 {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .text-center.text-lg-start.mt-4.pt-2 p {
+    margin-top: 1rem;
+  }
+}

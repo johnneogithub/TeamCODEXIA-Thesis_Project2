@@ -1,8 +1,9 @@
 // RegistrationForm.jsx
 import React, { useState, useEffect } from "react";
+import { addYears, subYears } from 'date-fns';
 
 // Firebase Auth and Firestore
-import { getFirestore, doc, runTransaction } from "firebase/firestore";
+import { getFirestore, doc, runTransaction, setDoc } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, fetchSignInMethodsForEmail, sendEmailVerification } from "firebase/auth";
 
 // React Router and Date Picker
@@ -115,12 +116,6 @@ import { FaFacebookF, FaEnvelope } from "react-icons/fa";
             return;
         }
 
-        const age = calculateAge(birthdate);
-        if (age < 20) {
-            alert("You must be 20 years or older to register.");
-            return;
-        }
-
         if (password !== confirmPassword) {
             alert("Passwords don't match!");
             return;
@@ -144,6 +139,22 @@ import { FaFacebookF, FaEnvelope } from "react-icons/fa";
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
+            // Calculate age before saving to Firestore
+            const age = calculateAge(birthdate);
+
+            // Save user details to Firestore
+            const userRef = doc(firestore, 'users', user.uid);
+            await setDoc(userRef, {
+                firstName: firstName,
+                middleInitial: middleInitial,
+                lastName: lastName,
+                email: email,
+                birthdate: birthdate.toISOString(),
+                age: age, // Add the calculated age
+                createdAt: new Date().toISOString(),
+                // Add any other relevant fields
+            });
+
             await sendEmailVerification(user);
             alert("A verification email has been sent. Please verify your email before logging in.");
 
@@ -164,6 +175,7 @@ import { FaFacebookF, FaEnvelope } from "react-icons/fa";
             }, 2000);
         } catch (error) {
             console.error("Error registering user:", error.message);
+            alert("Error during registration: " + error.message);
         }
     };
 
@@ -205,7 +217,7 @@ import { FaFacebookF, FaEnvelope } from "react-icons/fa";
                     onChange={(e) => setEmail(e.target.value)} />
                 </div>
 
-                {/* Name Fields in One Row */}
+  
                 <div className="d-flex justify-content-between mb-3">
                   <div className="form-outline me-2">
                     <label className="form-label">First Name</label>
@@ -236,10 +248,71 @@ import { FaFacebookF, FaEnvelope } from "react-icons/fa";
                   <DatePicker
                     selected={birthdate}
                     onChange={(date) => setBirthdate(date)}
-                    dateFormat="yyyy-MM-dd"
+                    dateFormat="MMMM d, yyyy"
                     className="form-control form-control-lg"
                     placeholderText="Select your birthdate"
+                    showYearDropdown
+                    scrollableYearDropdown
+                    yearDropdownItemNumber={200}
+                    maxDate={addYears(new Date(), 50)}
+                    minDate={new Date(1900, 0, 1)}
+                    dropdownMode="select"
+                    isClearable
+                    showMonthDropdown
+                    peekNextMonth
+                    onKeyDown={(e) => e.preventDefault()}
+                    renderCustomHeader={({
+                      date,
+                      changeYear,
+                      changeMonth,
+                      decreaseMonth,
+                      increaseMonth,
+                      prevMonthButtonDisabled,
+                      nextMonthButtonDisabled,
+                    }) => (
+                      <div className="custom-calendar-header">
+                        <button onClick={decreaseMonth} disabled={prevMonthButtonDisabled}>
+                          {"<"}
+                        </button>
+                        <select
+                          value={date.getFullYear()}
+                          onChange={({ target: { value } }) => changeYear(value)}
+                          className="year-dropdown"
+                        >
+                          {Array.from(
+                            { length: 175 }, // 125 years past + 50 years future
+                            (_, i) => new Date().getFullYear() + 50 - i
+                          ).map((year) => (
+                            <option key={year} value={year}>
+                              {year}
+                            </option>
+                          ))}
+                        </select>
+                        <select
+                          value={date.getMonth()}
+                          onChange={({ target: { value } }) => changeMonth(value)}
+                          className="month-dropdown"
+                        >
+                          {[
+                            "January", "February", "March", "April", "May", "June",
+                            "July", "August", "September", "October", "November", "December"
+                          ].map((month, i) => (
+                            <option key={month} value={i}>
+                              {month}
+                            </option>
+                          ))}
+                        </select>
+                        <button onClick={increaseMonth} disabled={nextMonthButtonDisabled}>
+                          {">"}
+                        </button>
+                      </div>
+                    )}
                   />
+                  {birthdate && (
+                    <small className="text-muted">
+                      Age: {calculateAge(birthdate)}
+                    </small>
+                  )}
                 </div>
 
                 {/* Password */}
@@ -260,30 +333,33 @@ import { FaFacebookF, FaEnvelope } from "react-icons/fa";
                     onChange={(e) => setConfirmPassword(e.target.value)} />
                 </div>
 
-                {/* Terms and Conditions Agreement */}
-                <div className="form-check mb-3">
-                  <input
-                    type="checkbox"
-                    checked={agreedToTerms}
-                    className="form-check-input me-2"
-                    onChange={handleTermsCheckboxChange}  // Attach the toggle handler
-                  />
-                  <label>
-                    <a href="#" onClick={openTermsModal}>Terms and Conditions</a>
-                  </label>
-                </div>
-
-                {/* Data Privacy Act Agreement */}
-                <div className="form-check mb-3">
-                  <input
-                    type="checkbox"
-                    checked={agreedToPrivacy}
-                    className="form-check-input me-2"
-                    onChange={handlePrivacyCheckboxChange}  // Attach the toggle handler
-                  />
-                  <label>
-                    <a href="#" onClick={openPrivacyModal}>Data Privacy Act of 2012</a>
-                  </label>
+                <div className="row mb-3">
+                  <div className="col-md-6">
+                    <div className="form-check">
+                      <input
+                        type="checkbox"
+                        checked={agreedToTerms}
+                        className="form-check-input me-2"
+                        onChange={handleTermsCheckboxChange}
+                      />
+                      <label>
+                        <a href="#" onClick={openTermsModal}>Terms and Conditions</a>
+                      </label>
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="form-check">
+                      <input
+                        type="checkbox"
+                        checked={agreedToPrivacy}
+                        className="form-check-input me-2"
+                        onChange={handlePrivacyCheckboxChange}
+                      />
+                      <label>
+                        <a href="#" onClick={openPrivacyModal}>Data Privacy Act of 2012</a>
+                      </label>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="text-center text-lg-start mt-4 pt-2">
