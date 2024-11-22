@@ -39,7 +39,7 @@ const Type = () => {
         left: 0,  
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.4)', // Semi-transparent overlay in the brand color
+        backgroundColor: 'rgba(0, 0, 0, 0.4)', 
       }}></div>
       <div className="container" style={{ position: 'relative', zIndex: 1 }}>
         <h1 className="display-3 mb-3 font-weight-bold" style={{ color: 'white' }}>
@@ -99,11 +99,13 @@ const Type = () => {
           <div className="col-md-4 mb-4">
             <div className="card h-100 shadow hover-shadow transition">
               <div className="card-body text-center">
-                <h5 className="card-title"><i className="bi bi-heart-pulse me-2"></i> Maternity Care</h5>
+                <h5 className="card-title"><i className="bi bi-heart-pulse me-2"></i> Maternity Care Package</h5>
                 <ul className="list-unstyled">
-                  <li><i className="bi bi-check2-circle me-2"></i>MATERNITY PACKAGE (RM/OB)</li>
-                  <li><i className="bi bi-check2-circle me-2"></i>NSD PACKAGE (RM/OB)</li>
-                  <li><i className="bi bi-check2-circle me-2"></i>PRENATAL CONSULTATION</li>
+                  <li><i className="bi bi-check2-circle me-2"></i>DELIVERY ROOM</li>
+                  <li><i className="bi bi-check2-circle me-2"></i>ROOM RATE</li>
+                  <li><i className="bi bi-check2-circle me-2"></i>DRUGS, MEDS & SUPPLIES</li>
+                  <li><i className="bi bi-check2-circle me-2"></i>ASSISTANT FEE</li>
+                  <li><i className="bi bi-check2-circle me-2"></i>PROFESSIONAL FEE</li>
                 </ul>
               </div>
             </div>
@@ -111,11 +113,12 @@ const Type = () => {
           <div className="col-md-4 mb-4">
             <div className="card h-100 shadow hover-shadow transition">
               <div className="card-body text-center">
-                <h5 className="card-title"><i className="bi bi-stars me-2"></i> Newborn Care</h5>
+                <h5 className="card-title"><i className="bi bi-stars me-2"></i> Newborn Care Package</h5>
                 <ul className="list-unstyled">
-                  <li>NEWBORN CARE PACKAGE (RM/OB)</li>
-                  <li>NEWBORN SCREENING</li>
-                  <li>NEWBORN HEARING SCREENING</li>
+                  <li><i className="bi bi-check2-circle me-2"></i>NEWBORN CARE PACKAGE (RM/OB)</li>
+                  <li><i className="bi bi-check2-circle me-2"></i>NEWBORN SCREENING</li>
+                  <li><i className="bi bi-check2-circle me-2"></i>NEWBORN HEARING SCREENING</li>
+                  <li><i className="bi bi-check2-circle me-2"></i>PROFFESIONAL FEE</li>
                 </ul>
               </div>
             </div>
@@ -123,11 +126,13 @@ const Type = () => {
           <div className="col-md-4 mb-4">
             <div className="card h-100 shadow hover-shadow transition">
               <div className="card-body text-center">
-                <h5 className="card-title"><i className="bi bi-clipboard2-pulse me-2"></i> Additional Services</h5>
+                <h5 className="card-title"><i className="bi bi-clipboard2-pulse me-2"></i> Normal Spontaneous Delivery </h5>
                 <ul className="list-unstyled">
-                  <li>FAMILY PLANNING CONSULT</li>
-                  <li>PAP-SMEAR</li>
-                  <li>NON-STRESS TEST</li>
+                  <li><i className="bi bi-check2-circle me-2"></i>DELIVERY ROOM</li>
+                  <li><i className="bi bi-check2-circle me-2"></i>ROOM RATE</li>
+                  <li><i className="bi bi-check2-circle me-2"></i>DRUGS, MEDS & SUPPLIES</li>
+                  <li><i className="bi bi-check2-circle me-2"></i>ASSISTANT FEE</li>
+                  <li><i className="bi bi-check2-circle me-2"></i>PROFESSIONAL FEE</li>
                 </ul>
               </div>
             </div>

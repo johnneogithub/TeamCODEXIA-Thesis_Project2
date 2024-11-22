@@ -59,7 +59,7 @@ const OvulationTracker = () => {
               <span className="nav-link active">Ovulation Tracker</span>
             </div>
             <div className="nav-item">
-              <a href="/Chatbot" className="nav-link">PlanIt Assistant</a>
+              <a href="/PlanItAssistant" className="nav-link">PlanIt Assistant</a>
             </div>
             <div className="nav-item">
               <a href="/Home" className="nav-link">Home</a>

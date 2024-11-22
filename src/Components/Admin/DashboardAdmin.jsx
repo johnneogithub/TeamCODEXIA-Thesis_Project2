@@ -15,17 +15,58 @@ import './DashboardAdmin.css';
 import 'bootstrap/dist/js/bootstrap.js';
 import 'bootstrap/dist/css/bootstrap.css';
 import "bootstrap-icons/font/bootstrap-icons.css";
-// import "@icon/themify-icons/themify-icons.css"
-// import "unpkg.com/@icon/themify-icons/themify-icons.css"
 
-// Update the import statement for UserProfilePopup
 import UserProfilePopup from './AdminLogin/UserProfilePopup';
 
-// Add this import at the top of the file
-import RemarkPopup from './AdminLogin/RemarkPopup';
-
-
-
+// Add these styles at the top of the component
+const tableStyles = {
+  card: {
+    borderRadius: '15px',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    marginBottom: '2rem'
+  },
+  cardHeader: {
+    backgroundColor: '#f8f9fa',
+    borderBottom: '1px solid #e9ecef',
+    padding: '1.5rem',
+    borderTopLeftRadius: '15px',
+    borderTopRightRadius: '15px'
+  },
+  cardTitle: {
+    fontSize: '1.25rem',
+    fontWeight: '600',
+    margin: 0,
+    color: '#344767'
+  },
+  table: {
+    borderCollapse: 'separate',
+    borderSpacing: '0 8px'
+  },
+  tableHeader: {
+    backgroundColor: '#f8f9fa',
+    color: '#344767',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    fontSize: '0.75rem',
+    letterSpacing: '0.5px'
+  },
+  tableRow: {
+    backgroundColor: 'white',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+    transition: 'transform 0.2s',
+    '&:hover': {
+      transform: 'translateY(-2px)',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+    }
+  },
+  actionButton: {
+    borderRadius: '20px',
+    padding: '0.375rem 1rem',
+    fontSize: '0.875rem',
+    textTransform: 'none',
+    fontWeight: '500'
+  }
+};
 
 function DashboardAdmin() {
   const location = useLocation();
@@ -33,8 +74,6 @@ function DashboardAdmin() {
 
   const [pendingAppointments, setPendingAppointments] = useState([]);
   const [approvedAppointments, setApprovedAppointments] = useState([]);
-  const [remarkText, setRemarkText] = useState('');
-  const [openRemarkId, setOpenRemarkId] = useState(null);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [currentApprovedPage, setCurrentApprovedPage] = useState(0);
   const [currentPendingPage, setCurrentPendingPage] = useState(0);
@@ -45,19 +84,27 @@ function DashboardAdmin() {
   const [pendingAppointmentsCount, setPendingAppointmentsCount] = useState(0);
   const [approvedAppointmentsCount, setApprovedAppointmentsCount] = useState(0);
   const [totalAppointmentsCount, setTotalAppointmentsCount] = useState(0);
-  const itemsPerPage = 5; // You can adjust this number
+  const itemsPerPage = 5; 
 
-  // Add a new state to track the selected user
+
   const [selectedUser, setSelectedUser] = useState(null);
 
-  // Replace openRemarkId with selectedAppointment
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
+
+  const [selectedServicesForView, setSelectedServicesForView] = useState(null);
+
+  const [showApproveModal, setShowApproveModal] = useState(false);
+  const [pendingApprovalId, setPendingApprovalId] = useState(null);
+  const [approvalRemark, setApprovalRemark] = useState('');
+  const [includeRemark, setIncludeRemark] = useState(false);
+
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [pendingRejectId, setPendingRejectId] = useState(null);
+  const [rejectRemark, setRejectRemark] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       const firestore = getFirestore();
       
-      // Fetch existing appointments
       try {
         const pendingSnapshot = await getDocs(collection(firestore, 'pendingAppointments'));
         const pendingData = pendingSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -117,29 +164,35 @@ function DashboardAdmin() {
     return docSnap;
   };
   
-  const handleApprove = async (id) => {
+  const handleApprove = (id) => {
+    setPendingApprovalId(id);
+    setShowApproveModal(true);
+  };
+
+  const handleFinalApprove = async () => {
     try {
       const firestore = getFirestore();
-      const pendingDocRef = doc(firestore, 'pendingAppointments', id);
+      const pendingDocRef = doc(firestore, 'pendingAppointments', pendingApprovalId);
       const pendingDocSnap = await getDoc(pendingDocRef);
       
       if (pendingDocSnap.exists()) {
         const appointmentData = pendingDocSnap.data();
         
-        // Update the status to 'approved'
+        // Update the status and add remark if included
         const updatedAppointmentData = {
           ...appointmentData,
           status: 'approved',
-          isApproved: true
+          isApproved: true,
+          ...(includeRemark && approvalRemark ? { remark: approvalRemark } : {})
         };
         
         // Move to approved appointments
-        await setDoc(doc(firestore, 'approvedAppointments', id), updatedAppointmentData);
+        await setDoc(doc(firestore, 'approvedAppointments', pendingApprovalId), updatedAppointmentData);
         
         // Remove from pending appointments
         await deleteDoc(pendingDocRef);
         
-        // Update the user's document with the approved status
+        // Update the user's document
         if (appointmentData.userId) {
           const userRef = doc(firestore, 'users', appointmentData.userId);
           await updateDoc(userRef, {
@@ -148,15 +201,19 @@ function DashboardAdmin() {
         }
         
         // Update local state
-        setPendingAppointments(prev => prev.filter(app => app.id !== id));
-        setApprovedAppointments(prev => [...prev, { id, ...updatedAppointmentData }]);
+        setPendingAppointments(prev => prev.filter(app => app.id !== pendingApprovalId));
+        setApprovedAppointments(prev => [...prev, { id: pendingApprovalId, ...updatedAppointmentData }]);
 
         // Update counts
         setPendingAppointmentsCount(prev => prev - 1);
         setApprovedAppointmentsCount(prev => prev + 1);
-        // Total count remains the same
 
-        // Optionally, you can show a success message
+        // Reset states and close modal
+        setShowApproveModal(false);
+        setPendingApprovalId(null);
+        setApprovalRemark('');
+        setIncludeRemark(false);
+
         alert("Appointment approved successfully!");
       }
     } catch (error) {
@@ -166,46 +223,61 @@ function DashboardAdmin() {
   };
   
 
-  const handleReject = async (id) => {
+  const handleReject = (id) => {
+    setPendingRejectId(id);
+    setShowRejectModal(true);
+  };
+
+  const handleFinalReject = async () => {
     try {
-      const firestore = getFirestore();
-      
-      // Fetch the appointment details
-      const pendingDocRef = doc(firestore, 'pendingAppointments', id);
-      const pendingDocSnap = await getDoc(pendingDocRef);
-  
-      if (!pendingDocSnap.exists()) {
-        console.error(`Document with ID ${id} does not exist in 'pendingAppointments' collection`);
+      if (!rejectRemark.trim()) {
+        alert("Please provide a remark for the rejection.");
         return;
       }
-  
-      const appointmentToReject = pendingDocSnap.data();
-      
-      // Add the rejection to the user's document (or wherever you're storing the user's data)
-      const userDocRef = doc(firestore, 'users', appointmentToReject.userId); // Assuming the user ID is part of the appointment data
-      await updateDoc(userDocRef, {
-        appointmentData: { ...appointmentToReject, status: 'rejected' },
-      });
-  
-      // Remove the appointment from pending appointments
-      await deleteDoc(pendingDocRef);
-  
-      // Update local state and localStorage
-      const updatedPendingAppointments = pendingAppointments.filter(appointment => appointment.id !== id);
-      setPendingAppointments(updatedPendingAppointments);
-      localStorage.setItem('pendingAppointments', JSON.stringify(updatedPendingAppointments));
-  
-      // Update counts
-      setPendingAppointmentsCount(prev => prev - 1);
-      setTotalAppointmentsCount(prev => prev - 1);
-  
-      // Optionally pass the rejected data to the UserProfile page
-      history.push({
-        // pathname: '/UserProfile',
-        state: { appointmentData: appointmentToReject, action: 'reject' }
-      });
+
+      const firestore = getFirestore();
+      const pendingDocRef = doc(firestore, 'pendingAppointments', pendingRejectId);
+      const pendingDocSnap = await getDoc(pendingDocRef);
+
+      if (pendingDocSnap.exists()) {
+        const appointmentData = pendingDocSnap.data();
+        
+        // Update the appointment data with rejection status and remark
+        const updatedAppointmentData = {
+          ...appointmentData,
+          status: 'rejected',
+          remark: rejectRemark,
+          rejectedAt: new Date().toISOString()
+        };
+
+        // Update the user's document with the rejected status
+        if (appointmentData.userId) {
+          const userRef = doc(firestore, 'users', appointmentData.userId);
+          await updateDoc(userRef, {
+            'appointmentData': updatedAppointmentData
+          });
+        }
+
+        // Remove from pending appointments
+        await deleteDoc(pendingDocRef);
+
+        // Update local state
+        setPendingAppointments(prev => prev.filter(app => app.id !== pendingRejectId));
+
+        // Update counts
+        setPendingAppointmentsCount(prev => prev - 1);
+        setTotalAppointmentsCount(prev => prev - 1);
+
+        // Reset states and close modal
+        setShowRejectModal(false);
+        setPendingRejectId(null);
+        setRejectRemark('');
+
+        alert("Appointment rejected successfully!");
+      }
     } catch (error) {
       console.error("Error rejecting appointment: ", error);
+      alert("An error occurred while rejecting the appointment. Please try again.");
     }
   };
   
@@ -234,17 +306,26 @@ const handleDone = async (appointment) => {
       return;
     }
 
-    // Attempt to delete the document
-    await deleteDoc(appointmentRef);
+    // Get the current appointment data including the importedFile
+    const currentAppointmentData = appointmentDoc.data();
 
+    // Create the appointment data with all required fields
     const appointmentWithFile = {
-      ...appointment,
-      importedFile: appointment.importedFile ? {
-        name: appointment.importedFile.name,
-        url: appointment.importedFile.url,
-        type: appointment.importedFile.type
-      } : null,
-      completedAt: new Date().toISOString() 
+      id: appointment.id,
+      name: appointment.name || currentAppointmentData.name,
+      email: appointment.email || currentAppointmentData.email,
+      age: appointment.age || currentAppointmentData.age,
+      date: appointment.date || currentAppointmentData.date,
+      time: appointment.time || currentAppointmentData.time,
+      selectedPricingType: appointment.selectedPricingType || currentAppointmentData.selectedPricingType,
+      selectedServices: appointment.selectedServices || currentAppointmentData.selectedServices || [],
+      message: appointment.message || currentAppointmentData.message,
+      importedFile: currentAppointmentData.importedFile || null,
+      userId: appointment.userId,
+      completedAt: new Date().toISOString(),
+      status: 'completed',
+      totalAmount: appointment.totalAmount || currentAppointmentData.totalAmount,
+      remark: currentAppointmentData.remark || null
     };
 
     // Remove any undefined fields
@@ -252,8 +333,19 @@ const handleDone = async (appointment) => {
       appointmentWithFile[key] === undefined && delete appointmentWithFile[key]
     );
 
-    // Attempt to add the document to patientsRecords
-    await setDoc(doc(firestore, 'patientsRecords', appointment.id), appointmentWithFile);
+    // Update both patientsRecords and the user's document
+    await Promise.all([
+      // Add to patientsRecords
+      setDoc(doc(firestore, 'patientsRecords', appointment.id), appointmentWithFile),
+      
+      // Update user's document with the completed appointment data
+      updateDoc(doc(firestore, 'users', appointment.userId), {
+        'appointmentData': appointmentWithFile
+      })
+    ]);
+
+    // Delete from approvedAppointments
+    await deleteDoc(appointmentRef);
 
     // Update local state
     setApprovedAppointments(prevAppointments => 
@@ -268,8 +360,10 @@ const handleDone = async (appointment) => {
 
     // Navigate to PatientsRecord page with the new record data
     history.push({
+      // pathname: '/PatientsRecord',
       state: { newRecord: appointmentWithFile }
     });
+
   } catch (error) {
     console.error("Error handling done action: ", error);
     if (error.code === 'permission-denied') {
@@ -352,58 +446,6 @@ const updateAppointment = async (appointment, fileName, fileURL, fileType) => {
   }
 };
 
-const handleRemark = (appointment) => {
-  setSelectedAppointment(appointment);
-};
-
-const handleRemarkSubmit = async (remarkText) => {
-  if (remarkText.trim() && selectedAppointment) {
-    try {
-      const firestore = getFirestore();
-      const appointmentRef = doc(firestore, 'pendingAppointments', selectedAppointment.id);
-      const remarkTimestamp = new Date().toISOString();
-      
-      // Get the appointment data before deleting it
-      const appointmentSnap = await getDoc(appointmentRef);
-      const appointmentData = appointmentSnap.data();
-      
-      // Delete the appointment from pendingAppointments
-      await deleteDoc(appointmentRef);
-      
-      // Update the user's document with the remark and move the appointment data
-      if (appointmentData && appointmentData.userId) {
-        const userRef = doc(firestore, 'users', appointmentData.userId);
-        await updateDoc(userRef, {
-          'appointmentData': {
-            ...appointmentData,
-            status: 'remarked',
-            remark: remarkText,
-            remarkTimestamp: remarkTimestamp
-          }
-        });
-      }
-
-      // Update local state to remove the appointment
-      setPendingAppointments(prevAppointments =>
-        prevAppointments.filter(app => app.id !== selectedAppointment.id)
-      );
-
-      // Update counts
-      setPendingAppointmentsCount(prev => prev - 1);
-      setTotalAppointmentsCount(prev => prev - 1);
-
-      // Close the remark popup
-      setSelectedAppointment(null);
-      
-      // Optionally, show a success message
-      alert("Remark added successfully and appointment removed from pending list!");
-    } catch (error) {
-      console.error("Error adding remark: ", error);
-      alert("An error occurred while adding the remark. Please try again.");
-    }
-  }
-};
-
 const handleMessageClick = (message) => {
   setSelectedMessage(message);
 };
@@ -452,6 +494,10 @@ const paginatedPendingAppointments = pendingAppointments.slice(
   // Add a function to close the popup
   const closeUserProfilePopup = () => {
     setSelectedUser(null);
+  };
+
+  const handleServicesClick = (appointment) => {
+    setSelectedServicesForView(appointment);
   };
 
   return (
@@ -528,27 +574,30 @@ const paginatedPendingAppointments = pendingAppointments.slice(
          
           <div className="row">
             <div className="col-12 grid-margin">
-              <div className="card">
+              <div className="card" style={tableStyles.card}>
+                <div style={tableStyles.cardHeader}>
+                  <h4 style={tableStyles.cardTitle}>Approved Appointments</h4>
+                </div>
                 <div className="card-body">
-                  <h4 className="card-title">Approved Appointment</h4>
                   <div className="table-responsive">
-                    <table className="table">
+                    <table className="table" style={tableStyles.table}>
                       <thead>
                         <tr>
-                          <th style={{width: '5%'}}>#</th>
-                          <th style={{width: '15%'}}>Name</th>
-                          <th style={{width: '20%'}}>Email</th>
-                          <th style={{width: '5%'}}>Age</th>
-                          <th style={{width: '15%'}}>Type of Appointment</th>
-                          <th style={{width: '10%'}}>Date</th>
-                          <th style={{width: '10%'}}>Time</th>
-                          <th style={{width: '10%'}}>Message</th>
-                          <th style={{width: '25%'}}>Action</th>
+                          <th style={{...tableStyles.tableHeader, width: '5%'}}>#</th>
+                          <th style={{...tableStyles.tableHeader, width: '15%'}}>Name</th>
+                          <th style={{...tableStyles.tableHeader, width: '15%'}}>Email</th>
+                          <th style={{...tableStyles.tableHeader, width: '5%'}}>Age</th>
+                          <th style={{...tableStyles.tableHeader, width: '10%'}}>Date</th>
+                          <th style={{...tableStyles.tableHeader, width: '10%'}}>Time</th>
+                          <th style={{...tableStyles.tableHeader, width: '10%'}}>Select Pricing Type</th>
+                          <th style={{...tableStyles.tableHeader, width: '10%'}}>Services</th>
+                          <th style={{...tableStyles.tableHeader, width: '10%'}}>Message</th>
+                          <th style={{...tableStyles.tableHeader, width: '20%'}}>Action</th>
                         </tr>
                       </thead>
                       <tbody>
                         {paginatedApprovedAppointments.map((appointment, index) => (
-                          <tr key={appointment.id}>
+                          <tr key={appointment.id} style={tableStyles.tableRow}>
                             <td>{index + 1}</td>
                             <td 
                               className="appointment-name" 
@@ -559,9 +608,44 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                             </td>
                             <td>{appointment.email || 'N/A'}</td>
                             <td>{appointment.age || 'N/A'}</td>
-                            <td>{appointment.appointmentType || 'N/A'}</td>
                             <td>{appointment.date || 'N/A'}</td>
                             <td>{appointment.time || 'N/A'}</td>
+                            <td>
+                              <div className="pricing-type-info">
+                                <div className="selected-pricing-type">
+                                  {appointment.selectedPricingType ? (
+                                    <>
+                                      <div className="pricing-label">Selected:</div>
+                                      <span className="pricing-badge selected">
+                                        <i className="bi bi-check-circle-fill me-1"></i>
+                                        {appointment.selectedPricingType === 'withoutPH' && 'Without PhilHealth'}
+                                        {appointment.selectedPricingType === 'PHBenefit' && 'PhilHealth Benefit'}
+                                        {appointment.selectedPricingType === 'withPH' && 'With PhilHealth'}
+                                      </span>
+                                      {appointment.totalAmount && (
+                                        <div className="pricing-amount">
+                                          <small className="text-muted">
+                                            Amount: ₱{appointment.totalAmount[appointment.selectedPricingType]?.toLocaleString()}
+                                          </small>
+                                        </div>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <span className="pricing-badge no-selection">
+                                      No Selection Made
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <button 
+                                className="btn btn-link p-0"
+                                onClick={() => handleServicesClick(appointment)}
+                              >
+                                View ({appointment.selectedServices?.length || 0})
+                              </button>
+                            </td>
                             <td>
                               {appointment.message ? (
                                 <button 
@@ -573,14 +657,32 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                               ) : 'N/A'}
                             </td>
                             <td>
-                              <div className="d-flex flex-row align-items-center">
-                                <button className='btn btn-success btn-sm me-2' onClick={() => handleDone(appointment)}>Done</button>
-                                <button className='btn btn-info btn-sm me-2' onClick={() => handleImport(appointment)}>
-                                  <i className="bi bi-file-earmark-arrow-up"></i> Import
+                              <div className="d-flex flex-row align-items-center gap-2">
+                                <button 
+                                  className='btn btn-sm me-2' 
+                                  style={{
+                                    ...tableStyles.actionButton,
+                                    backgroundColor: '#2dce89',
+                                    color: 'white',
+                                    border: 'none'
+                                  }}
+                                  onClick={() => handleDone(appointment)}
+                                >
+                                  Done
                                 </button>
-                                {appointment.importedFile && (
-                                  <small className="text-muted">{appointment.importedFile.name}</small>
-                                )}
+                                <button 
+                                  className='btn btn-sm'
+                                  style={{
+                                    ...tableStyles.actionButton,
+                                    backgroundColor: '#11cdef',
+                                    color: 'white',
+                                    border: 'none'
+                                  }}
+                                  onClick={() => handleImport(appointment)}
+                                >
+                                  <i className="bi bi-file-earmark-arrow-up me-1"></i>
+                                  Import
+                                </button>
                               </div>
                             </td>
                           </tr>
@@ -596,15 +698,15 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                     marginPagesDisplayed={2}
                     pageRangeDisplayed={5}
                     onPageChange={handleApprovedPageClick}
-                    containerClassName={'pagination justify-content-center'}
-                    pageClassName={'page-item'}
-                    pageLinkClassName={'page-link'}
-                    previousClassName={'page-item'}
-                    previousLinkClassName={'page-link'}
-                    nextClassName={'page-item'}
-                    nextLinkClassName={'page-link'}
-                    breakClassName={'page-item'}
-                    breakLinkClassName={'page-link'}
+                    containerClassName={'pagination justify-content-center mt-4'}
+                    pageClassName={'page-item mx-1'}
+                    pageLinkClassName={'page-link rounded-circle'}
+                    previousClassName={'page-item mx-1'}
+                    previousLinkClassName={'page-link rounded-circle'}
+                    nextClassName={'page-item mx-1'}
+                    nextLinkClassName={'page-link rounded-circle'}
+                    breakClassName={'page-item mx-1'}
+                    breakLinkClassName={'page-link rounded-circle'}
                     activeClassName={'active'}
                   />
                 </div>
@@ -623,13 +725,14 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                         <tr>
                           <th style={{width: '5%'}}>#</th>
                           <th style={{width: '15%'}}>Name</th>
-                          <th style={{width: '20%'}}>Email</th>
+                          <th style={{width: '15%'}}>Email</th>
                           <th style={{width: '5%'}}>Age</th>
-                          <th style={{width: '15%'}}>Type of Appointment</th>
                           <th style={{width: '10%'}}>Date</th>
                           <th style={{width: '10%'}}>Time</th>
+                          <th style={{width: '10%'}}>Select Pricing Type</th>
+                          <th style={{width: '10%'}}>Services</th>
                           <th style={{width: '10%'}}>Message</th>
-                          <th style={{width: '25%'}}>Action</th>
+                          <th style={{width: '20%'}}>Action</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -645,9 +748,44 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                             </td>
                             <td>{appointment.email || 'N/A'}</td>
                             <td>{appointment.age || 'N/A'}</td>
-                            <td>{appointment.appointmentType || 'N/A'}</td>
                             <td>{appointment.date || 'N/A'}</td>
                             <td>{appointment.time || 'N/A'}</td>
+                            <td>
+                              <div className="pricing-type-info">
+                                <div className="selected-pricing-type">
+                                  {appointment.selectedPricingType ? (
+                                    <>
+                                      <div className="pricing-label">Selected:</div>
+                                      <span className="pricing-badge selected">
+                                        <i className="bi bi-check-circle-fill me-1"></i>
+                                        {appointment.selectedPricingType === 'withoutPH' && 'Without PhilHealth'}
+                                        {appointment.selectedPricingType === 'PHBenefit' && 'PhilHealth Benefit'}
+                                        {appointment.selectedPricingType === 'withPH' && 'With PhilHealth'}
+                                      </span>
+                                      {appointment.totalAmount && (
+                                        <div className="pricing-amount">
+                                          <small className="text-muted">
+                                            Amount: ₱{appointment.totalAmount[appointment.selectedPricingType]?.toLocaleString()}
+                                          </small>
+                                        </div>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <span className="pricing-badge no-selection">
+                                      No Selection Made
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <button 
+                                className="btn btn-link p-0"
+                                onClick={() => handleServicesClick(appointment)}
+                              >
+                                View ({appointment.selectedServices?.length || 0})
+                              </button>
+                            </td>
                             <td>
                               {appointment.message ? (
                                 <button 
@@ -659,10 +797,31 @@ const paginatedPendingAppointments = pendingAppointments.slice(
                               ) : 'N/A'}
                             </td>
                             <td>
-                              <div className="d-flex flex-row align-items-center">
-                                <button className='btn btn-outline-success btn-sm me-2' onClick={() => handleApprove(appointment.id)}>Approve</button>
-                                <button className='btn btn-outline-danger btn-sm me-2' onClick={() => handleReject(appointment.id)}>Reject</button>
-                                <button className='btn btn-outline-info btn-sm me-2' onClick={() => handleRemark(appointment)}>Remark</button>
+                              <div className="d-flex flex-row align-items-center gap-2">
+                                <button 
+                                  className='btn btn-sm me-2'
+                                  style={{
+                                    ...tableStyles.actionButton,
+                                    backgroundColor: '#2dce89',
+                                    color: 'white',
+                                    border: 'none'
+                                  }}
+                                  onClick={() => handleApprove(appointment.id)}
+                                >
+                                  Approve
+                                </button>
+                                <button 
+                                  className='btn btn-sm'
+                                  style={{
+                                    ...tableStyles.actionButton,
+                                    backgroundColor: '#dc3545',
+                                    color: 'white',
+                                    border: 'none'
+                                  }}
+                                  onClick={() => handleReject(appointment.id)}
+                                >
+                                  Reject
+                                </button>
                               </div>
                             </td>
                           </tr>
@@ -712,17 +871,244 @@ const paginatedPendingAppointments = pendingAppointments.slice(
             />
           )}
 
-          {selectedAppointment && (
-            <RemarkPopup
-              onClose={() => setSelectedAppointment(null)}
-              onSubmit={handleRemarkSubmit}
-            />
+          {selectedServicesForView && (
+            <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
+              <div className="modal-dialog modal-lg">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Selected Services</h5>
+                    <div className="pricing-type-label">
+                      <div className="selected-type">
+                        Selected Pricing Type: 
+                        <span className="pricing-badge selected ms-2">
+                          <i className="bi bi-check-circle-fill me-1"></i>
+                          {selectedServicesForView.selectedPricingType === 'withoutPH' && 'Without PhilHealth'}
+                          {selectedServicesForView.selectedPricingType === 'PHBenefit' && 'PhilHealth Benefit'}
+                          {selectedServicesForView.selectedPricingType === 'withPH' && 'With PhilHealth'}
+                        </span>
+                      </div>
+                    </div>
+                    <button 
+                      type="button" 
+                      className="btn-close" 
+                      onClick={() => setSelectedServicesForView(null)}
+                    ></button>
+                  </div>
+                  <div className="modal-body">
+                    <div className="pricing-summary mb-3">
+                      <h6>Pricing Type: <span className="pricing-badge">{formatPricingType(selectedServicesForView.selectedPricingType)}</span></h6>
+                      {selectedServicesForView.totalAmount && (
+                        <div className="pricing-details mt-2">
+                          <div className="row">
+                            <div className="col-md-4">
+                              <small className="text-muted">Without PhilHealth:</small>
+                              <div>₱{selectedServicesForView.totalAmount.withoutPH?.toLocaleString()}</div>
+                            </div>
+                            <div className="col-md-4">
+                              <small className="text-muted">PhilHealth Benefit:</small>
+                              <div>₱{selectedServicesForView.totalAmount.PHBenefit?.toLocaleString()}</div>
+                            </div>
+                            <div className="col-md-4">
+                              <small className="text-muted">With PhilHealth:</small>
+                              <div>₱{selectedServicesForView.totalAmount.withPH?.toLocaleString()}</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {selectedServicesForView.selectedServices?.map((service, index) => (
+                      <div key={index} className="service-item p-3 border rounded mb-2">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <h6 className="mb-0">{service.name}</h6>
+                          <span className="badge bg-primary">
+                            ₱{service[selectedServicesForView.selectedPricingType]?.toLocaleString()}
+                          </span>
+                        </div>
+                        {service.isPackage && service.components && (
+                          <div className="mt-2">
+                            <small className="text-muted">Package Components:</small>
+                            <ul className="list-unstyled ms-3">
+                              {service.components.map((component, idx) => (
+                                <li key={idx} className="d-flex justify-content-between">
+                                  <span>{component.name}</span>
+                                  <span>₱{component[selectedServicesForView.selectedPricingType]?.toLocaleString()}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    <div className="total-amount p-2 bg-light rounded">
+                      <strong>Total Amount: </strong>
+                      <span>₱{calculateTotal(
+                        selectedServicesForView.selectedServices,
+                        selectedServicesForView.selectedPricingType
+                      )}</span>
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary" 
+                      onClick={() => setSelectedServicesForView(null)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showApproveModal && (
+            <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
+              <div className="modal-dialog">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Approve Appointment</h5>
+                    <button 
+                      type="button" 
+                      className="btn-close" 
+                      onClick={() => {
+                        setShowApproveModal(false);
+                        setPendingApprovalId(null);
+                        setApprovalRemark('');
+                        setIncludeRemark(false);
+                      }}
+                    ></button>
+                  </div>
+                  <div className="modal-body">
+                    <p>Would you like to include a remark with this approval?</p>
+                    <div className="form-check mb-3">
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        id="includeRemark"
+                        checked={includeRemark}
+                        onChange={(e) => setIncludeRemark(e.target.checked)}
+                      />
+                      <label className="form-check-label" htmlFor="includeRemark">
+                        Include Remark
+                      </label>
+                    </div>
+                    {includeRemark && (
+                      <div className="mb-3">
+                        <label className="form-label">Remark:</label>
+                        <textarea
+                          className="form-control"
+                          rows="3"
+                          value={approvalRemark}
+                          onChange={(e) => setApprovalRemark(e.target.value)}
+                          placeholder="Enter your remark here..."
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="modal-footer">
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary" 
+                      onClick={() => {
+                        setShowApproveModal(false);
+                        setPendingApprovalId(null);
+                        setApprovalRemark('');
+                        setIncludeRemark(false);
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="button" 
+                      className="btn btn-success" 
+                      onClick={handleFinalApprove}
+                    >
+                      Approve
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showRejectModal && (
+            <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
+              <div className="modal-dialog">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Reject Appointment</h5>
+                    <button 
+                      type="button" 
+                      className="btn-close" 
+                      onClick={() => {
+                        setShowRejectModal(false);
+                        setPendingRejectId(null);
+                        setRejectRemark('');
+                      }}
+                    ></button>
+                  </div>
+                  <div className="modal-body">
+                    <div className="mb-3">
+                      <label className="form-label">Please provide a reason for rejection:</label>
+                      <textarea
+                        className="form-control"
+                        rows="3"
+                        value={rejectRemark}
+                        onChange={(e) => setRejectRemark(e.target.value)}
+                        placeholder="Enter rejection reason here..."
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary" 
+                      onClick={() => {
+                        setShowRejectModal(false);
+                        setPendingRejectId(null);
+                        setRejectRemark('');
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="button" 
+                      className="btn btn-danger" 
+                      onClick={handleFinalReject}
+                      disabled={!rejectRemark.trim()}
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
 
         </div>
       </div>
     </div>
   );
+}
+
+// Add these helper functions before the export statement
+function formatPricingType(type) {
+  switch (type) {
+    case 'withoutPH':
+      return 'Without PhilHealth';
+    case 'PHBenefit':
+      return 'PhilHealth Benefit';
+    case 'withPH':
+      return 'With PhilHealth';
+    default:
+      return 'Select Pricing Type';
+  }
+}
+
+function calculateTotal(services, pricingType) {
+  if (!services || !pricingType) return 0;
+  return services.reduce((total, service) => total + (service[pricingType] || 0), 0).toLocaleString();
 }
 
 export default DashboardAdmin;

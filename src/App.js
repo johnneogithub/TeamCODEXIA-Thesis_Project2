@@ -22,7 +22,7 @@ import Clinic from './Pages/CheckHealth.jsx';
 import FillUpAppointment from './Pages/FillUpAppointment.jsx';
 import Articles from './Pages/Articles.jsx';
 import PregnancyWheel from './Components/Admin/PregnancyWheelLMP.jsx';
-import Chatbot from './Pages/Chatbot.jsx';
+import PlanItAssistant from './Pages/PlanItAssistant.jsx'
 import UserProfile from './Pages/UserProfile.jsx';
 import OvulationTracker from './Pages/OvulationTracker.jsx';
 import AboutUs from './Pages/Aboutus.jsx';
@@ -46,7 +46,7 @@ function App() {
           <UserProtectedRoute path='/Aboutus' component={AboutUs} exact />
           <UserProtectedRoute path='/Home' component={Home} exact />
           <UserProtectedRoute path='/Articles' component={Articles} exact />
-          <UserProtectedRoute path='/Chatbot' component={Chatbot} exact />
+          <UserProtectedRoute path='/PlanItAssistant' component={PlanItAssistant} exact />
           <UserProtectedRoute path='/UserProfile' component={UserProfile} exact />
           <UserProtectedRoute path='/FillUpAppointment' component={FillUpAppointment} exact />
           <UserProtectedRoute path='/OvulationTracker' component={OvulationTracker} exact />

@@ -15,89 +15,68 @@ const ProfileWarningModal = ({ show, onClose }) => {
       if (!currentUser) return;
       
       const userRef = doc(db, 'users', currentUser.uid);
-      const userSnapshot = await getDoc(userRef);
-  
-      if (userSnapshot.exists()) {
-        const data = userSnapshot.data();
-        
-        // Check if all required fields are filled
-        const profileComplete = Boolean(
-          data.name?.trim() && 
-          data.phone?.trim() && 
-          data.age && 
-          data.gender?.trim() && 
-          data.location?.trim()
-        );
-
-        setIsProfileComplete(profileComplete);
-
-        // If profile is complete, close the modal and update Firestore
-        if (profileComplete) {
-          onClose();
-          if (data.isProfileComplete !== profileComplete) {
-            await updateDoc(userRef, {
-              isProfileComplete: profileComplete
-            });
+      
+      // Set up real-time listener for profile changes
+      const unsubscribe = onSnapshot(userRef, (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const data = docSnapshot.data();
+          
+          // First check if isProfileComplete flag is true
+          if (data.isProfileComplete === true) {
+            setIsProfileComplete(true);
+            onClose();
+            return;
           }
-          return;
-        }
-  
-        // Only calculate days left if profile is incomplete
-        if (!profileComplete && data.registrationDate && typeof data.registrationDate.toDate === 'function') {
-          const registrationDate = data.registrationDate.toDate();
-          const currentDate = new Date();
-          const diffTime = Math.abs(currentDate - registrationDate);
-          const diffDays = 14 - Math.floor(diffTime / (1000 * 60 * 60 * 24));
-          setDaysLeft(Math.max(0, diffDays));
-        }
-      }
-    };
-  
-    if (currentUser) {
-      // Initial check
-      checkProfileStatus();
-
-      // Set up real-time listener
-      const unsubscribe = onSnapshot(doc(db, 'users', currentUser.uid), (doc) => {
-        if (doc.exists()) {
-          const data = doc.data();
-          const complete = Boolean(
-            data.name?.trim() && 
+          
+          // If not, check all required fields
+          const profileComplete = Boolean(
+            data.firstName?.trim() && 
+            data.lastName?.trim() &&
             data.phone?.trim() && 
             data.age && 
             data.gender?.trim() && 
             data.location?.trim()
           );
+
+          setIsProfileComplete(profileComplete);
           
-          setIsProfileComplete(complete);
-          if (complete) {
+          // If profile is complete, update the flag and close modal
+          if (profileComplete) {
+            updateDoc(userRef, {
+              isProfileComplete: true
+            }).catch(console.error);
             onClose();
+          } else if (data.registrationDate && typeof data.registrationDate.toDate === 'function') {
+            const registrationDate = data.registrationDate.toDate();
+            const currentDate = new Date();
+            const diffTime = Math.abs(currentDate - registrationDate);
+            const diffDays = 14 - Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            setDaysLeft(Math.max(0, diffDays));
           }
         }
       });
 
       return () => unsubscribe();
+    };
+
+    if (currentUser) {
+      checkProfileStatus();
     }
   }, [currentUser, onClose, db]);
-  
-  // Don't render the modal if profile is complete
-  if (isProfileComplete) {
-    return null;
-  }
 
-  // Only render if show is true and profile is incomplete
-  if (!show) {
+  // Don't render if profile is complete or show is false
+  if (isProfileComplete || !show) {
     return null;
   }
 
   return (
     <>
-      <div className="modal-backdrop show" onClick={onClose}></div>
+      <div className="modal-backdrop-warning show" onClick={onClose}></div>
       <div className="profile-warning-modal show" tabIndex="-1" role="dialog">
-        <div className="modal-dialog" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">
+        <div className="modal-dialog-warning" role="document">
+          <div className="modal-content-warning">
+            <div className="modal-header-warning">
+              <h5 className="modal-title-warning">
                 <i className="fas fa-exclamation-circle warning-icon"></i>
                 Complete Your Profile
               </h5>
@@ -105,7 +84,7 @@ const ProfileWarningModal = ({ show, onClose }) => {
                 <i className="fas fa-times"></i>
               </button>
             </div>
-            <div className="modal-body">
+            <div className="modal-body-warning">
               <div className="warning-message">
                 <div className="days-counter">
                   <span className="days-number">{daysLeft}</span>
@@ -117,7 +96,7 @@ const ProfileWarningModal = ({ show, onClose }) => {
                 </p>
               </div>
             </div>
-            <div className="modal-footer">
+            <div className="modal-footer-warning">
               <button 
                 type="button" 
                 className="btn-complete-profile"
