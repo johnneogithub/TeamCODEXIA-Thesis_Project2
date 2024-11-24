@@ -108,3 +108,5 @@ export const checkUserProfileCompletion = async (userId) => {
     return false;
   }
 };
+
+export const db = getFirestore(app);

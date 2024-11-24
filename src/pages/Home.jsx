@@ -61,7 +61,7 @@ function Home() {
             <p className="sub_title">PlanitFamIt is designed to reach every Filipino that seeks a better future for their family, through family planning.</p>
             
             <div className="cta_container">
-              <Link to="/Chatbot" className="cta_button cta_button--primary">PlanIt Assistant</Link>
+              <Link to="/PlanItAssistant" className="cta_button cta_button--primary">PlanIt Assistant</Link>
               <Link to="/Articles" className="cta_button cta_button--secondary">Healthcare Articles</Link>
             </div>
 
